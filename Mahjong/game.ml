@@ -1,5 +1,3 @@
-open Tile
-open Player
 
 (** AF: a record 
     {wall_tiles = [Tile1, Tile2, ... , Tilen]; 
