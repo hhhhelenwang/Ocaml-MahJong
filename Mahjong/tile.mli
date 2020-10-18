@@ -5,7 +5,7 @@
    and discardable status.
 *)
 
-(** The abstract type of values representing tiles. *)
+(** The abstract type of values representing a tile. *)
 type t
 
 (** The type of the kind of a tile. *)
@@ -21,7 +21,7 @@ type id = int
 type discarded = bool
 
 (** Raised when an unknown tile is played. *)
-exception UnkownTile of id
+exception UnknownTile of id
 
 (** The discardable status of a tile *)
 val update_status : discarded -> discarded
