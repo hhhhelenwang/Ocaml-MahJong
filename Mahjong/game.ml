@@ -1,4 +1,3 @@
-
 (** AF: a record 
     {wall_tiles = [Tile1, Tile2, ... , Tilen]; 
     player = [Player1, Player2, Player3, Player];} represents a state of the 
