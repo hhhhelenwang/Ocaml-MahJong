@@ -15,4 +15,4 @@ type id = int
 exception UnknownTile of id
 
 (** The discardable status of a tile *)
-val update_status : t -> t
+val update_status : t -> unit
