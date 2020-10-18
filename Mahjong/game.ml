@@ -11,6 +11,8 @@ type game_state = {
   players : Player.t list;
 }
 
+type t = game_state
+
 (** Random allocation of tiles is inplemented by blahblahblah *)
 let make_game tiles = 
   failwith "TODO"

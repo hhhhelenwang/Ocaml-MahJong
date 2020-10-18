@@ -19,6 +19,6 @@ ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o game.cmo game.ml
 File "game.ml", line 1:
 Error: The implementation game.ml does not match the interface game.cmi:
        The type `t' is required but not provided
-       File "game.mli", line 9, characters 0-6: Expected declaration
+       File "game.mli", line 8, characters 0-6: Expected declaration
 Command exited with code 2.
 # Compilation unsuccessful.
