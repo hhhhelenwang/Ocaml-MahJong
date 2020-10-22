@@ -15,5 +15,12 @@ type t ={
 
   (**tiles that played by this player*)
   discard_pile : Tile.t list;
-
 }
+
+let p_id t = t.id
+
+let state_r t = t.state_r
+
+let state_c t = t.state_c
+
+let discard_tile t tid =

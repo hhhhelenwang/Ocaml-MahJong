@@ -8,7 +8,7 @@ type id = int
 
 
 (**get the id of this player*)
-val id : t -> id
+val p_id : t -> id
 
 (** riichi state of player*)
 val state_r : t -> bool
