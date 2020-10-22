@@ -2,29 +2,41 @@
 # Target: game.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:game.mli, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules game.mli > game.mli.depends # cached
 # Target: tile.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:tile.mli, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules tile.mli > tile.mli.depends # cached
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules tile.mli > tile.mli.depends
 # Target: tile.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:tile.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o tile.cmi tile.mli # cached
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o tile.cmi tile.mli
 # Target: game.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:game.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o game.cmi game.mli # cached
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o game.cmi game.mli
 # Target: game.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:game.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules game.ml > game.ml.depends # cached
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules game.ml > game.ml.depends
 # Target: player.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:player.mli, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules player.mli > player.mli.depends # cached
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules player.mli > player.mli.depends
 # Target: player.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:player.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o player.cmi player.mli # cached
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o player.cmi player.mli
 # Target: game.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o game.cmo game.ml # cached
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o game.cmo game.ml
 # Target: player.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:player.ml, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules player.ml > player.ml.depends # cached
 # Target: player.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:player.cmo, file:player.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o player.cmo player.ml # cached
-# Target: tile.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:tile.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules tile.ml > tile.ml.depends # cached
-# Target: tile.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:tile.cmo, file:tile.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o tile.cmo tile.ml # cached
-# Target: testgame.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:testgame.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules testgame.ml > testgame.ml.depends
-# Target: testgame.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:testgame.cmo, file:testgame.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o testgame.cmo testgame.ml
-# Compilation successful.
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o player.cmo player.ml
++ ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o player.cmo player.ml
+File "player.ml", line 1:
+Error: The implementation player.ml does not match the interface player.cmi:
+       The value `riichi' is required but not provided
+       File "player.mli", line 29, characters 0-21: Expected declaration
+       The value `check_riichi' is required but not provided
+       File "player.mli", line 26, characters 0-27: Expected declaration
+       The value `play_tile' is required but not provided
+       File "player.mli", line 23, characters 0-35: Expected declaration
+       The value `discard_tile' is required but not provided
+       File "player.mli", line 20, characters 0-38: Expected declaration
+       The value `state_c' is required but not provided
+       File "player.mli", line 17, characters 0-23: Expected declaration
+       The value `state_r' is required but not provided
+       File "player.mli", line 14, characters 0-23: Expected declaration
+       The value `id' is required but not provided
+       File "player.mli", line 11, characters 0-16: Expected declaration
+       The type `id' is required but not provided
+       File "player.mli", line 7, characters 0-13: Expected declaration
+Command exited with code 2.
+# Compilation unsuccessful.
