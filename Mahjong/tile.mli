@@ -11,6 +11,8 @@ type t
 (** The type of the id of a tile. *)
 type id = int
 
+type kind = Man | Pin | Sou | Dragon | Wind
+
 (** Raised when an unknown tile is played. *)
 exception UnknownTile of id
 
@@ -22,3 +24,5 @@ val get_id : t -> id
 
 (**display this tile*)
 val dp : t -> unit
+
+val construct : id -> kind -> int -> bool -> t

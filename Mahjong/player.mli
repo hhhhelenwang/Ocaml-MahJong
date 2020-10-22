@@ -24,3 +24,5 @@ val check_riichi: t -> bool
 
 (** change status from normal to riichi *)
 val riichi: t -> unit
+
+val d_list: Tile.t list -> unit

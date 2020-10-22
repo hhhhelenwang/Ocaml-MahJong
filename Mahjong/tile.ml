@@ -23,9 +23,17 @@ let dp_kind t=
   |Man -> print_string "Man   "
   |Pin -> print_string "Pin   "
   |Sou -> print_string "Sou   "
-  |Dragon -> print_string "中   "
-  |Wind -> print_string "东    "
+  |Dragon -> print_string "...   "
+  |Wind -> print_string "...    "
 
 let dp t=
   dp_kind t;
   ()
+
+let construct id kind num b =
+{
+ id=id;
+ kind=kind;
+ number=num;
+ discarded=b; 
+}

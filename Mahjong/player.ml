@@ -40,16 +40,18 @@ let update_pile tid pile =
   List.filter (fun x -> Tile.get_id x <> tid) pile
 
 let discard_tile player tid =
-  let handt = player.hand_tile.dark in
-  let discardt = player.discard_pile in 
-  match check_tile handt tid with
+  match (check_tile handt tid) with
   | None -> false
-  | Some h -> Tile.update_status h;
+  | Some h -> begin 
+    let handt = player.hand_tile.dark in
+    let discardt = player.discard_pile in 
+    Tile.update_status h;
     t.hand_tile.dark <- update_pile tid handt;
     t.discard_pile <- update_pile tid discardt; 
     true
+    end
 
-let rec d_list (list:Tile.t list)=
+let rec d_list list=
    match list with 
       | [] -> ()
       | h :: t ->  let h=(Tile.dp h) in d_list t 
