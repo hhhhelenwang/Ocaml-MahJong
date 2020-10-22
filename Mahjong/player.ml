@@ -1,4 +1,5 @@
-(** *)
+type id =int
+(**type of hand tile *)
 type handt={
   mutable light: Tile.t list;
   mutable dark: Tile.t list;
@@ -61,3 +62,9 @@ let display_I t =
   let dt = hand.dark in
   d_list lt;
   d_list dt
+
+let riichi t=
+  failwith "hah"
+
+let check_riichi t=
+  failwith "hah"
