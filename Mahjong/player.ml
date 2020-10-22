@@ -23,4 +23,10 @@ let state_r t = t.state_r
 
 let state_c t = t.state_c
 
+let rec check_tile list tid = 
+  match list with
+  |[] -> false
+  |h::t -> if (tid = Tile.get_id h) then true
+            else check_tile t tid
+
 let discard_tile t tid =

@@ -15,3 +15,5 @@ type tile = {
 type t = tile
 
 let update_status tile = tile.discarded <- true
+
+let get_id t = t.id
