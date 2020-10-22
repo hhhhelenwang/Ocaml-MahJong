@@ -45,6 +45,21 @@ let discard_tile player tid =
   match check_tile handt tid with
   | None -> false
   | Some h -> Tile.update_status h;
-    player.hand_tile.dark <- update_pile tid handt;
-    player.discard_pile <- update_pile tid discardt; 
+    t.hand_tile.dark <- update_pile tid handt;
+    t.discard_pile <- update_pile tid discardt; 
     true
+
+      let rec d_list (list:Tile.t list)=
+      match list with 
+        | [] -> ()
+                      | h :: t -> 
+let h=(Tile.dp h) in
+d_list t 
+
+
+  let display_I t =
+  let hand = t.hand_tile in 
+    let lt = hand.light in
+d_list lt; 
+(* d_list dt *)
+
