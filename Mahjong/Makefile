@@ -1,4 +1,4 @@
-MODULES=game player tile
+MODULES=game player tile testgame
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
