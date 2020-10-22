@@ -49,17 +49,13 @@ let discard_tile player tid =
     t.discard_pile <- update_pile tid discardt; 
     true
 
-      let rec d_list (list:Tile.t list)=
-      match list with 
-        | [] -> ()
-                      | h :: t -> 
-let h=(Tile.dp h) in
-d_list t 
+let rec d_list (list:Tile.t list)=
+   match list with 
+      | [] -> ()
+      | h :: t ->  let h=(Tile.dp h) in d_list t 
 
-
-  let display_I t =
+let display_I t =
   let hand = t.hand_tile in 
-    let lt = hand.light in
-d_list lt; 
+  let lt = hand.light in d_list lt; 
 (* d_list dt *)
 

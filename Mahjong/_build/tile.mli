@@ -16,3 +16,9 @@ exception UnknownTile of id
 
 (** The discardable status of a tile *)
 val update_status : t -> unit
+
+(**get id of this tile *)
+val get_id : t -> id
+
+(**display this tile*)
+val dp : t -> unit

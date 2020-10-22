@@ -41,13 +41,26 @@ let discard_tile_test
   name >:: (fun _ ->
       assert_equal expected_output (discard_tile player tid))
 
-let player_tests = 
-  let player1 = {id = 1; state_r = false; state_c = false;
-                 hand_tile = {light = []; dark = [];}; discard_pile = []} in
-  let tid1 = {id = 1; kind = Man; number = 1; discarded = false}in 
+(* let player1 = {id = 1; state_r = false; state_c = false;
+                 hand_tile = {light = []; dark = [];}; discard_pile = []} *)
+let (tile1 : Tile.t) = {id = 1; kind = Man; number = 1; discarded = false}
+
+(* let player_tests = 
   [
     discard_tile_test "discard one tile" player1 tid1 true;
-  ]
+  ] *)
+
+let (tile2 : Tile.t) = {
+  id = 2; kind = Sou; number = 3; discarded = false}
+let t_list1 = [tile1; tile2]
+
+let x = Player.d_list t_list1
+
+
+
+
+
+
 
 let suite =
   "test suite for Mahjong"  >::: List.flatten [
