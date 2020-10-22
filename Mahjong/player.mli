@@ -17,7 +17,7 @@ val state_r : t -> bool
 val state_c : t -> bool
 
 (** play a tile with id in t, return exception UnknownTile if id is invalid*)
-val play_tile: t -> Tile.id -> unit
+val discard_tile: t -> Tile.id -> unit
 
 (** riichi check if the player can riichi *)
 val check_riichi: t -> bool
