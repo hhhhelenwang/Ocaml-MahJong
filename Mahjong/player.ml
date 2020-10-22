@@ -37,14 +37,14 @@ let rec check_tile list tid =
     else check_tile t tid
 
 let update_pile tid pile = 
-  List.filter (fun x -> x <> tid) pile
+  List.filter (fun x -> Tile.get_id x <> tid) pile
 
-let discard_tile t tid =
-  let handt = t.hand_tile.dark in
-  let discardt = t.discard_pile in 
+let discard_tile player tid =
+  let handt = player.hand_tile.dark in
+  let discardt = player.discard_pile in 
   match check_tile handt tid with
   | None -> false
   | Some h -> Tile.update_status h;
-    t.hand_tile.dark <- update_pile tid handt;
-    t.discard_pile <- update_pile tid discardt; 
+    player.hand_tile.dark <- update_pile tid handt;
+    player.discard_pile <- update_pile tid discardt; 
     true
