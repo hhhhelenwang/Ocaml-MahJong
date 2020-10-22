@@ -48,3 +48,16 @@ let discard_tile t tid =
     t.hand_tile.dark <- update_pile tid handt;
     t.discard_pile <- update_pile tid discardt; 
     true
+
+let rec d_list list=
+  match list with 
+  |[] -> unit
+  |h::t -> Tile.dp h; d_list t 
+
+
+let display_I t =
+  let hand = t.hand_tile in 
+  let lt = hand.light in
+  let dt = hand.dark in
+  d_list lt; d_list dt
+  
