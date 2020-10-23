@@ -22,20 +22,20 @@ let get_id t = t.id
 
 let dp_kind t=
   match t.kind with
-  |Man -> print_string "Man   "
-  |Pin -> print_string "Pin   "
-  |Sou -> print_string "Sou   "
-  |Dragon -> print_string "...   "
-  |Wind -> print_string "...    "
+  | Man -> print_string "Man   "
+  | Pin -> print_string "Pin   "
+  | Sou -> print_string "Sou   "
+  | Dragon -> print_string "...   "
+  | Wind -> print_string "...    "
 
 let dp t=
   dp_kind t;
   ()
 
 let construct id kind num b =
-{
- id=id;
- kind=kind;
- number=num;
- discarded=b; 
-}
+  {
+    id = id;
+    kind = kind;
+    number = num;
+    discarded = b; 
+  }
