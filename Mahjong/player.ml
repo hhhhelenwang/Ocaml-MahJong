@@ -68,3 +68,19 @@ let riichi t=
 
 let check_riichi t=
   failwith "hah"
+
+(** [init_player id richii chii light dark discard] is the constructor of 
+    player type*)
+let init_player id richii chii light dark discard =
+  let handt = 
+    {
+      light = light;
+      dark = dark;
+    } in
+  {
+    id = id;
+    state_r = richii;
+    state_c = chii;
+    hand_tile = handt;
+    discard_pile = discard;
+  }

@@ -25,4 +25,9 @@ val check_riichi: t -> bool
 (** change status from normal to riichi *)
 val riichi: t -> unit
 
+(** display the tiles of current player*)
 val d_list: Tile.t list -> unit
+
+(** constructor for a player*)
+val init_player: int -> bool -> bool -> Tile.t list -> Tile.t list -> 
+  Tile.t list -> t
