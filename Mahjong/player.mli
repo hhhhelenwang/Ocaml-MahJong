@@ -1,11 +1,9 @@
 (** The abstract type of values representing player. *)
 type t
 
-
 (** p_id is the identifier of different player.
     Different player should have different id*)
 type id = int
-
 
 (**get the id of this player*)
 val p_id : t -> id

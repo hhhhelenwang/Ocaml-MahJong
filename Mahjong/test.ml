@@ -42,28 +42,28 @@ let discard_tile_test
       assert_equal expected_output (discard_tile player tid))
 
 (* let player1 = {id = 1; state_r = false; state_c = false;
-                 hand_tile = {light = []; dark = [];}; discard_pile = []} *)
+               hand_tile = {light = []; dark = [];}; discard_pile = []} *)
+
 let tile1 = Tile.construct 1 Man 1 true
-
-(* let player_tests = 
-  [
-    discard_tile_test "discard one tile" player1 tid1 true;
-  ] *)
-
 let tile2 = Tile.construct 2 Sou 3 false
+
 let t_list1 = [tile1; tile2]
 
-let x = Player.d_list t_list1
+let player1 = Player.init_player 1 false false t_list1 t_list1 t_list1
 
+let player_tests = 
+  [
+    discard_tile_test "discard one tile" player1 1 true;
+    discard_tile_test "discard one tile" player1 3 false;
 
+  ]
 
-
-
+(* let x = Player.d_list t_list1 *)
 
 
 let suite =
   "test suite for Mahjong"  >::: List.flatten [
-    (* player_tests; *)
+    player_tests;
   ]
 
 let _ = run_test_tt_main suite
