@@ -50,3 +50,33 @@ let construct id kind num b =
     number = num;
     discarded = b; 
   }
+
+(**check if it is Nine-one tile *)
+let ck_n_o t=
+  match t.kind with
+  | Dragon | Wind-> true
+  | Man | Pin | Sou -> begin
+      let n=t.number in
+      if (n=1 || n=9) then true
+      else false
+    end
+
+(** *)
+let ck_adj t1 t2 =
+  match t1.kind with
+  |Dragon |Wind -> 0
+  |Man |Pin | Sou ->
+    begin
+      if (t1.kind=t2.kind)then begin
+        let k = t2.number-t1.number in
+        if (k=1 ||k = -1 ) then k
+        else 0
+      end
+      else 0
+    end 
+let ck_eq t1 t2=
+  if (t1.kind=t2.kind)then begin 
+    if (t1.number=t2.number) then true
+    else false
+  end
+  else false
