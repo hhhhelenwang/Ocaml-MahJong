@@ -16,21 +16,32 @@ type tile = {
 
 type t = tile
 
+(**make tile discarded *)
 let update_status tile = tile.discarded <- true
 
 let get_id t = t.id
 
-let dp_kind t=
-  match t.kind with
-  | Man -> print_string "Man   "
-  | Pin -> print_string "Pin   "
-  | Sou -> print_string "Sou   "
-  | Dragon -> print_string "...   "
-  | Wind -> print_string "...    "
+
 
 let dp t=
-  dp_kind t;
-  ()
+  let n= t.number in
+  match t.kind with
+  | Man -> print_string "   Man "; print_int n
+  | Pin -> print_string "   Pin "; print_int n
+  | Sou -> print_string "   Sou "; print_int n
+  | Wind-> begin match n with
+      |1 -> print_string "   East"
+      |2 -> print_string "   South"
+      |3 -> print_string "   West"
+      |4 -> print_string "   North"
+      |_ -> print_string "   Not right"
+    end
+  | Dragon -> begin match n with
+      |1 -> print_string "   Red_Dragon"
+      |2 -> print_string "   Green_Dragon"
+      |3 -> print_string "   White_Draon"
+      |_ -> print_string "   Not right"
+    end
 
 let construct id kind num b =
   {
