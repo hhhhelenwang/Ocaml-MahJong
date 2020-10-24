@@ -1,6 +1,5 @@
 (** 
    Representation of dynamic tile data.
-
    This module is a representation of each tile, including the kinds, ids, 
    and discardable status.
 *)

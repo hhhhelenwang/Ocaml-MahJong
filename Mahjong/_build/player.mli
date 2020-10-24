@@ -1,11 +1,9 @@
 (** The abstract type of values representing player. *)
 type t
 
-
 (** p_id is the identifier of different player.
     Different player should have different id*)
 type id = int
-
 
 (**get the id of this player*)
 val p_id : t -> id
@@ -25,4 +23,9 @@ val check_riichi: t -> bool
 (** change status from normal to riichi *)
 val riichi: t -> unit
 
+(** display the tiles of current player*)
 val d_list: Tile.t list -> unit
+
+(** constructor for a player*)
+val init_player: int -> bool -> bool -> Tile.t list -> Tile.t list -> 
+  Tile.t list -> t

@@ -1,0 +1,16 @@
+### Starting build.
+Backtrace:
+                      - Failed to build the target game.byte
+                          - Building game.byte:
+                              - Building game.cmo:
+                                  - Failed to build all of these:
+                                      - Building game.ml:
+                                          - Failed to build all of these:
+                                              - Building game.mly
+                                              - Building game.mll
+                                      - Building game.mli:
+                                          - Building game.mly
+                                      - Building game.mlpack
+                                      - Building game.mli:
+                                          - Building game.mly
+# Compilation unsuccessful.

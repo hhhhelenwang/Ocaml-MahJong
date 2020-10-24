@@ -1,4 +1,3 @@
-### Starting build.
 # Target: test.ml.depends, tags: { package(ANSITerminal), package(ounit2), debug, extension:ml, file:test.ml, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules test.ml > test.ml.depends
 # Target: game.mli.depends, tags: { package(ANSITerminal), package(ounit2), debug, extension:mli, file:game.mli, ocaml, ocamldep, quiet, traverse }
@@ -30,3 +29,4 @@ ocamlfind ocamlc -c -g -package ounit2 -package ANSITerminal -o tile.cmo tile.ml
 # Target: test.byte, tags: { package(ANSITerminal), package(ounit2), byte, debug, dont_link_with, extension:byte, file:test.byte, link, ocaml, program, quiet, traverse }
 ocamlfind ocamlc -linkpkg -g -package ounit2 -package ANSITerminal tile.cmo player.cmo game.cmo test.cmo -o test.byte
 # Compilation successful.
+>>>>>>> ms1-player
