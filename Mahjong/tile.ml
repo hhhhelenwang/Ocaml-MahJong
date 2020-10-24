@@ -21,8 +21,6 @@ let update_status tile = tile.discarded <- true
 
 let get_id t = t.id
 
-
-
 let dp t=
   let n= t.number in
   match t.kind with
@@ -80,3 +78,21 @@ let ck_eq t1 t2=
     else false
   end
   else false
+
+(* [filter_kind kind lst ] gives all tiles with specific kind *)
+let filter_kind kind lst =
+  List.filter (fun x -> x.kind == kind) lst
+
+(* [sort_one_kind kind lst] returns the sorted list of one kind. 
+   [compare t1 t2] compares the number between tiles*)
+let sort_one_kind kind lst = 
+  let compare t1 t2 = t1.number - t2.number in
+  List.sort compare (filter_kind kind lst)
+
+let sort lst =
+  let kinds = [Pin; Man; Sou; Wind; Dragon] in 
+  let rec helper acc kinds =
+    match kinds with
+    | [] -> acc
+    | h :: t -> helper (acc @ sort_one_kind h lst) t
+  in helper [] kinds

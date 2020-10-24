@@ -47,9 +47,13 @@ let discard_tile_test
 
 let tile1 = Tile.construct 1 Man 1 true
 let tile2 = Tile.construct 2 Sou 3 false
+let tile3 = Tile.construct 4 Man 2 true
 
 
 let t_list1 = [tile1; tile2]
+let t_list2 = [tile1; tile2; tile3; tile1; tile2]
+
+let sorted_tiles = Player.d_list (Tile.sort t_list2)
 
 let player1 = Player.init_player 1 false false t_list1 t_list1 t_list1
 
