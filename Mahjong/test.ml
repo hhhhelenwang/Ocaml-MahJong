@@ -2,7 +2,6 @@ open OUnit2
 open Player 
 open Tile
 open Game
-open Testgame
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
     they are equivalent set-like lists.  That means checking two things.
@@ -42,7 +41,6 @@ let discard_tile_test
   name >:: (fun _ ->
       assert_equal expected_output (discard_tile player tid))
 
-    hand_tile = {light = []; dark = [];}; discard_pile = []} 
 let tile1 = Tile.construct 1 Man 1 true
 let tile2 = Tile.construct 2 Sou 3 false
 
