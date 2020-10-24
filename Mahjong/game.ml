@@ -1,6 +1,6 @@
 (** AF: a record 
-    {wall_tiles = [| Tile1, Tile2, ... , Tilen |]; 
-    player = [Player1, Player2, Player3, Player];} represents a state of the 
+    {wall_tiles = [Tile1; Tile2; ... ; Tilen ]; 
+    player = [Player1; Player2; Player3; Player4];} represents a state of the 
     game with 
     - wall tiles {Tile1, Tile2, ... , Tilen} and 
     - players {Player1, ... ,Player4}.
@@ -129,3 +129,13 @@ let make_game state =
 (** [next_state] is the game state after a player has made a move *)
 let next_state state = 
   failwith "TODO"
+
+let rec display_all_player players =
+  match players with
+  | [] -> ()
+  | h :: t -> 
+    Player.display_I h;
+    display_all_player t
+
+let display_game state = 
+  display_all_player state.players

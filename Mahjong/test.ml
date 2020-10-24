@@ -33,6 +33,10 @@ let pp_list pp_elt lst =
     in loop 0 "" lst
   in "[" ^ pp_elts lst ^ "]"
 
+
+(* Start of tests **********************************)
+
+(* Player tests ******************)
 let discard_tile_test
     (name : string)
     (player : Player.t)
@@ -57,6 +61,11 @@ let player_tests =
   ]
 
 let x = Player.d_list t_list1
+
+(* Game tests ******************)
+let init_deck = init_state ()
+let game = Game.make_game init_deck
+
 
 
 let suite =

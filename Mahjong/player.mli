@@ -28,5 +28,4 @@ val d_list: Tile.t list -> unit
 
 (** constructor for a player*)
 val init_player: int -> bool -> bool -> Tile.t list -> Tile.t list -> 
-
   Tile.t list -> t

@@ -18,3 +18,6 @@ val make_game : t -> t
 (** [next_state] is the new state of the game after one player has made a 
     move. *)
 val next_state : t -> t
+
+(** [display_game] displays the current information about the game. *)
+val display_game : t -> unit
