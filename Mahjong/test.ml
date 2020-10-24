@@ -64,9 +64,11 @@ let x = Player.d_list t_list1
 
 (* Game tests ******************)
 let init_deck = init_state ()
-let game = Game.make_game init_deck
+let game1 = Game.make_game init_deck
+let game2 = Game.make_game init_deck
 
-
+let print_result1 = display_game game1
+let print_result2 = display_game game2
 
 let suite =
   "test suite for Mahjong"  >::: List.flatten [

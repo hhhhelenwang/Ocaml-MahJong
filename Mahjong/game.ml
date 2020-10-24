@@ -24,8 +24,8 @@ type t = game_state
    - x + 1 = number on tile
    - e.g. id = 3 = 0 * 0 + 3 => Man 3 *)
 let mps_of_id id =
-  let a = id - 1 / 9 in
-  let x = id mod 9 in
+  let a = (id - 1) / 9 in
+  let x = 1 + (id mod 9) in
   if a = 0 || a = 3 || a = 6 || a = 9 then (Tile.Man, x)
   else if a = 1 || a = 4 || a = 7 || a = 10 then (Tile.Pin, x)
   else (Tile.Sou, x)
@@ -40,7 +40,7 @@ let mps_of_id id =
     - y = 4 => Wind 4 => North Wind 
     - e.g. id = 82 = 0 * 4 + 1 + 81 => Wind 1 => East Wind *)
 let wind_of_id id =
-  let y = id - 81 mod 4 in (Tile.Wind, y)
+  let y = 1 + (id - 81) mod 4 in (Tile.Wind, y)
 
 (* Dragon:
    - id = 124 + c * 3 + z, where id > 124
@@ -48,13 +48,13 @@ let wind_of_id id =
    - z = 1, 2, 3
    - Dragon z *)
 let dragon_of_id id = 
-  let z = id - 124 mod 3 in (Tile.Dragon, z)
+  let z = 1 + (id - 124) mod 3 in (Tile.Dragon, z)
 
 (* [tile_of_num] is a tile calculated from a given [num]. The relation 
    between a tile and a num is described above. *)
 let tile_of_id id = 
   let kind, n = begin
-    if id <= 81 then mps_of_id id
+    if id <= 108 then mps_of_id id
     else if id <= 124 then wind_of_id id
     else dragon_of_id id
   end in
@@ -134,6 +134,7 @@ let rec display_all_player players =
   match players with
   | [] -> ()
   | h :: t -> 
+    print_string "player\n";
     Player.display_I h;
     display_all_player t
 
