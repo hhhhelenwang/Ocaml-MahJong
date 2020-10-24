@@ -8,8 +8,8 @@
 type t
 
 (** [init_state] is the game state before the game starts. No tile is given to
-    players *) 
-val init_state : unit -> t
+    players. Number of tiles and players should be provided *) 
+val init_state : int -> int -> t
 
 (** [make_game tiles] is the initial state of the game. It randomly gives
     each player 13 tiles. *)
