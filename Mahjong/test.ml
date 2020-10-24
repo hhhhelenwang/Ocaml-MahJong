@@ -2,7 +2,10 @@ open OUnit2
 open Player 
 open Tile
 open Game
+     <<<<<<< HEAD
 open Testgame
+     =======
+     >>>>>>> ms1-player
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
     they are equivalent set-like lists.  That means checking two things.
@@ -34,9 +37,32 @@ let pp_list pp_elt lst =
     in loop 0 "" lst
   in "[" ^ pp_elts lst ^ "]"
 
+let discard_tile_test
+    (name : string)
+    (player : Player.t)
+    (tid : Tile.id)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (discard_tile player tid))
+
+(* let player1 = {id = 1; state_r = false; state_c = false;
+                 hand_tile = {light = []; dark = [];}; discard_pile = []} *)
+let tile1 = Tile.construct 1 Man 1 true
+
+(* let player_tests = 
+   [
+    discard_tile_test "discard one tile" player1 tid1 true;
+   ] *)
+
+let tile2 = Tile.construct 2 Sou 3 false
+let t_list1 = [tile1; tile2]
+
+let x = Player.d_list t_list1
 
 let suite =
   "test suite for Mahjong"  >::: List.flatten [
+    (* player_tests; *)
+
   ]
 
 let _ = run_test_tt_main suite

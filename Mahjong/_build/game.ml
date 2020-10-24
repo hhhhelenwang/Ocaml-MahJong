@@ -92,7 +92,6 @@ let shuffle_array a =
 let make_game state = 
   failwith"TODO"
 
-
 (** [next_state] is the game state after a player has made a move *)
 let next_state state = 
   failwith "TODO"
