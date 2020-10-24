@@ -59,25 +59,36 @@ let ck_n_o t=
       else false
     end
 
-(** *)
+(*helper function for Rong***********************************************)
+(** check if two tile is adjacent*)
 let ck_adj t1 t2 =
   match t1.kind with
-  |Dragon |Wind -> 0
+  |Dragon |Wind -> false
   |Man |Pin | Sou ->
     begin
       if (t1.kind=t2.kind)then begin
         let k = t2.number-t1.number in
-        if (k=1 ||k = -1 ) then k
-        else 0
+        if (k=1) then true
+        else false
       end
-      else 0
+      else false
     end 
+(**check if three tile can form a  sequence
+    AF: return true for sequence like  Man 1 Man 2 Man3 
+    RI:  t1 t2 t3 would be in accending order*)
+let ck_seq t1 t2 t3=
+  (ck_adj t1 t2) && (ck_adj t2 t3)
+
+
+(**check if two tile is the same *)
 let ck_eq t1 t2=
   if (t1.kind=t2.kind)then begin 
     if (t1.number=t2.number) then true
     else false
   end
   else false
+
+(*end of helper function for Rong******************************************)
 
 (* [filter_kind kind lst ] gives all tiles with specific kind *)
 let filter_kind kind lst =
