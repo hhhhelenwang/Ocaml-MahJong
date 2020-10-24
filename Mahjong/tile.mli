@@ -24,4 +24,18 @@ val get_id : t -> id
 (**display this tile*)
 val dp : t -> unit
 
+(**init a tile *)
 val construct : id -> kind -> int -> bool -> t
+
+(**check if it is Nine-one tile *)
+val ck_n_o : t -> bool
+
+(**check if two tile are adjasent
+   means that it has potential to be a sequence
+   return 1 if is adjasent and the latter is the after
+   return -1 if is adjasent and later is fower
+   return 0 if not adjasent*)
+val ck_adj : t -> t -> int
+
+(**check if two tile is same kind and same number*)
+val ck_eq : t -> t -> bool

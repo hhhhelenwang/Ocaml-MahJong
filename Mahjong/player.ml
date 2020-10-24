@@ -5,16 +5,17 @@ type handt={
   mutable dark: Tile.t list;
 }
 
-type t ={
+type player = {
+
+  (** id of the player*)
   id : int;
+
   (**State_r tells about state of current player.
-     If the player have already riichi,state_r is true
-     If the player havn't riichi, state_r state *)
+     If the player have already riichi,state_r is true, otherwise false *)
   mutable state_r : bool;
 
   (**State_c tells about state of current player.
-     If the player have done action chii, this state is true
-     If the player have not, this state is false*)
+     If the player have done action chii, this state is true, otherwise false*)
   mutable state_c : bool;
 
   (**the tile player currently have. Number varies from 13 to 14 *)
@@ -24,6 +25,8 @@ type t ={
   (**tiles that played by this player*)
   mutable discard_pile : Tile.t list;
 }
+
+type t = player
 
 let p_id t = t.id
 
@@ -44,11 +47,11 @@ let update_pile tid pile : Tile.t list = (
 let discard_tile player tid =
   let handt = player.hand_tile.dark in
   let discardt = player.discard_pile in 
-  match (check_tile handt tid) with
+  match check_tile handt tid with
   | None -> false
   | Some h -> begin 
       Tile.update_status h;
-      player.hand_tile.dark <- (update_pile tid handt);
+      player.hand_tile.dark <- update_pile tid handt;
       player.discard_pile <- update_pile tid discardt;
       true
     end
@@ -68,3 +71,18 @@ let riichi t=
 
 let check_riichi t=
   failwith "hah"
+
+(** [init_player id richii chii light dark discard] is the constructor of 
+    player type*)
+let init_player id richii chii light dark discard =
+  let handt = 
+    {
+      light = light;
+      dark = dark;
+    } in {
+    id = id;
+    state_r = richii;
+    state_c = chii;
+    hand_tile = handt;
+    discard_pile = discard;
+  }
