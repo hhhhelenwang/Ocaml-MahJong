@@ -42,7 +42,7 @@ let discard_tile_test
   name >:: (fun _ ->
       assert_equal expected_output (discard_tile player tid))
 
-hand_tile = {light = []; dark = [];}; discard_pile = []} 
+    hand_tile = {light = []; dark = [];}; discard_pile = []} 
 let tile1 = Tile.construct 1 Man 1 true
 let tile2 = Tile.construct 2 Sou 3 false
 
