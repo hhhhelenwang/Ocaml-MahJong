@@ -23,6 +23,9 @@ val check_riichi: t -> bool
 (** change status from normal to riichi *)
 val riichi: t -> unit
 
+(**displayer a player's handtile*)
+val display_I : t -> unit
+
 (** display the tiles of current player*)
 val d_list: Tile.t list -> unit
 
