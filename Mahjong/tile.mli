@@ -35,7 +35,7 @@ val ck_n_o : t -> bool
    return 1 if is adjasent and the latter is the after
    return -1 if is adjasent and later is fower
    return 0 if not adjasent*)
-val ck_adj : t -> t -> int
+val ck_adj : t -> t -> bool
 
 (**check if two tile is same kind and same number*)
 val ck_eq : t -> t -> bool
