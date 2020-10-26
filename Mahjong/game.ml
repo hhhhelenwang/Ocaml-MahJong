@@ -134,7 +134,7 @@ let rec display_all_player players =
   match players with
   | [] -> ()
   | h :: t -> 
-    print_string "player\n";
+    print_string "\n player \n";
     Player.display_I h;
     display_all_player t
 

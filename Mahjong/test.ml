@@ -48,21 +48,26 @@ let discard_tile_test
 let tile1 = Tile.construct 1 Man 1 true
 let tile2 = Tile.construct 2 Sou 3 false
 let tile3 = Tile.construct 4 Man 2 true
+let tile4 = Tile.construct 5 Man 7 false
+let tile5 = Tile.construct 6 Wind 2 false
+let tile6 = Tile.construct 7 Dragon 2 false
+let tile7 = Tile.construct 8 Dragon 1 false
 
+let t_list1 = [tile2; tile4]
+let t_list2 = [tile1; tile2; tile1; tile2; tile4; tile5; tile6; tile7]
+let dark1 = [tile1; tile2; tile3; tile4; tile5; tile6; tile7]
 
-let t_list1 = [tile1; tile2]
-let t_list2 = [tile1; tile2; tile3; tile1; tile2]
+let player1 = Player.init_player 1 false false [] dark1 t_list1
 
 let sorted_tiles = Player.d_list (Tile.sort t_list2)
 
-let player1 = Player.init_player 1 false false t_list1 t_list1 t_list1
-
 let player_tests = 
   [
-    discard_tile_test "discard one tile" player1 1 true;
-    discard_tile_test "discard one tile" player1 3 false;
-
+    discard_tile_test "discard one existing tile" player1 2 true;
+    discard_tile_test "discard one not existed tile" player1 3 false;
   ]
+let player_handt = Player.display_I player1
+
 
 let x = Player.d_list t_list1
 
