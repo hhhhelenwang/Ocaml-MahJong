@@ -40,5 +40,10 @@ val ck_adj : t -> t -> bool
 (**check if two tile is same kind and same number*)
 val ck_eq : t -> t -> bool
 
+val ck_seq: t -> t -> t-> bool
+
+(**check if three tile has same kind and number*)
+val ck_ke : t -> t -> t-> bool
+
 (**[sort lst] sorts a list of tiles based on kind and number*)
 val sort : t list -> t list

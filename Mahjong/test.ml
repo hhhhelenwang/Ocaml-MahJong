@@ -59,7 +59,7 @@ let dark1 = [tile1; tile2; tile3; tile4; tile5; tile6; tile7]
 
 let player1 = Player.init_player 1 false false [] dark1 t_list1
 
-let sorted_tiles = Player.d_list (Tile.sort t_list2)
+(* let sorted_tiles = Player.d_list (Tile.sort t_list2) *)
 
 let player_tests = 
   [

@@ -86,3 +86,45 @@ let init_player id richii chii light dark discard =
     hand_tile = handt;
     discard_pile = discard;
   }
+
+let combine t = 
+  let hand = t.hand_tile in 
+  Tile.sort hand.light @ hand.dark
+
+let agari t =
+  let lst= combine t in
+  if (List.length lst <> 14) then false
+  else 
+    failwith ""
+
+
+
+let rec get_ele lst n=
+  match lst with
+  | [] -> []
+  | h :: t -> begin
+      if n = 0 then h
+      else get_ele lst (n-1)
+    end
+
+(* let rec get_element_range lst n l acc = 
+   if l = 0 then acc
+   else get_element_range lst n (l-1) (get_ele lst (n+1)) @ acc
+         failwith "" *)
+
+
+(**case 1: 111 333 555 777 [normal]   3 3 3 3 
+   case 2: 223344 567 789          6 3 3
+   case 6: 234 556677 789          3 6 3
+   case 7: 234 567 778899          3 3 6
+   case 3: 123 333 567 789 [normal]
+   case 4: 333344445555        12
+   case 5: 222333444 [normal]
+*)
+
+let ck_3333 =
+  failwith ""
+
+
+let ck_12  x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12=
+  (Tile.ck_seq  x1 x5 x9)
