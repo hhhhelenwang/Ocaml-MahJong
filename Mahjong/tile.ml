@@ -105,14 +105,76 @@ let filter_kind kind lst =
 
 (* [sort_one_kind kind lst] returns the sorted list of one kind. 
    [compare t1 t2] compares the number between tiles*)
-let sort_one_kind kind lst = 
+let sorted_one_kind kind lst = 
   let compare t1 t2 = t1.number - t2.number in
   List.sort compare (filter_kind kind lst)
+
+(* [sort_one_number num lst] returns a list of tiles with same 
+   number*)
+let sort_one_number num lst = 
+  List.filter (fun x -> x.number == num) lst
 
 let sort lst =
   let kinds = [Pin; Man; Sou; Wind; Dragon] in 
   let rec helper acc kinds =
     match kinds with
     | [] -> acc
-    | h :: t -> helper (acc @ sort_one_kind h lst) t
+    | h :: t -> helper (acc @ sorted_one_kind h lst) t
   in helper [] kinds
+
+
+(* [get_sequence lst t] returns sequence of all possible 3-tile sequence
+   [lst] is a sorted list with same kind as [t] *)
+(* let rec get_sequence lst num acc=  *)
+(* num -2, num -1, num, num +1, num +2 *)
+(* match lst with 
+   | [] -> acc
+   | h :: t -> begin
+    if (h.number > num - 3 && h.number < num + 3) 
+    then get_sequence t num (h::acc)
+    else get_sequence t num acc
+   end *)
+
+(* [get_seq f lst num acc] given a number, find if sequence satisfying f 
+   exists*)
+let rec get_seq f lst num acc = 
+  match lst with
+  | [] -> begin if List.length acc == 3 then acc else [] end
+  | h :: t -> begin
+      if f h num
+      then get_seq f lst num 
+          (List.sort_uniq (fun x y -> x.number - y.number) (h::acc))
+      else get_seq f lst num acc
+    end
+
+(* [seq_all lst num] returns all possible sequence. Return empty list if there 
+   is no sequence *)
+let seq_all lst num = 
+  let compare1 h num = h.number >= num -2 && h.number <= num in
+  let compare2 h num = h.number >= num && h.number <= num + 2 in 
+  let compare3 h num = h.number >= num -1 && h.number <= num + 1 in 
+  let compare = [compare1; compare2; compare3] in
+  let rec helper acc compare =
+    match compare with 
+    | [] -> acc
+    | h :: t -> helper ((get_seq h lst num []) @ acc) t
+  in helper [] compare
+
+(* [chii_legal lst t] checks if user is able to chii *)
+let chii_legal lst t = 
+  let same_kind = sorted_one_kind t.kind lst in
+  let same_num = sort_one_number t.number same_kind in
+  let seq_all = seq_all same_kind t.number in
+  List.length same_num > 2 || List.length seq_all > 0
+
+(* [pong_legal lst t] checks is user is able to pong*)
+let pong lst t = 
+  let same_kind = sorted_one_kind t.kind lst in
+  let same_num = sort_one_number t.number same_kind in
+  List.length same_num > 2
+
+(* [kong_legal lst t checks if user is able to kong] *)
+let kong_legal lst t = 
+  let same_kind = sorted_one_kind t.kind lst in
+  let same_num = sort_one_number t.number same_kind in
+  List.length same_num > 3
