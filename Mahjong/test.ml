@@ -100,8 +100,23 @@ let command_parse_text_exn
       assert_raises expected_exn (fun () -> parse str))
 
 let command_tests = [
+  (* typical cases *)
   command_parse_test {|"discard Man 1" -> Discard (Man, 1)|}
-    "discard Man 1" (Discard (Man, 1))
+    "discard Man 1" (Discard (Man, 1));
+  command_parse_test {|"discard man 1" with spaces -> Discard (Man, 1)|}
+    "      discard       Man 1" (Discard (Man, 1));
+  command_parse_test {|"discard Dragon 1" -> Discard (Man, 1)|}
+    "discard Dragon 1" (Discard (Dragon, 1));
+  command_parse_test {|"Quit" -> Quit|} "quit" Quit;
+
+  (* exn raised *)
+  command_parse_text_exn {|"whatever Man 1" -> Malformed|} 
+    "whatever Man 1" Malformed;
+  command_parse_text_exn {|"Discard Man" -> Malformed|} 
+    "Discard Man" Malformed;
+  command_parse_text_exn {|"Discard something" -> Malformed|} 
+    "Discard something" Malformed;
+  command_parse_text_exn {|"" -> Empty|} "" Empty;
 ]
 
 let suite =

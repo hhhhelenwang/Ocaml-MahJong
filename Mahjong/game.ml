@@ -126,7 +126,7 @@ let make_game state =
   let players = assign 4 shuffled_tiles [] in
   { state with players = players }
 
-(** [next_state] is the game state after a player has made a move *)
+(** [next_state] is the game state after a player has played their turn. *)
 let next_state state = 
   failwith ""
 
