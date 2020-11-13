@@ -12,6 +12,7 @@ type game_state = {
   wall_tiles : Tile.t list;
   (** a list of players *)
   players : Player.t list;
+  current_player_id : Player.id
 }
 
 type t = game_state 
@@ -72,6 +73,7 @@ let init_state () =
   {
     wall_tiles = init_tiles 136 [];
     players = []; (* no players yet *)
+    current_player_id = 1;
   }
 
 (** extracts the nth element from a list *)
@@ -128,6 +130,15 @@ let make_game state =
 
 (** [next_state] is the game state after a player has played their turn. *)
 let next_state state = 
+  (* get the last player
+     get the first of their discarded tile
+     determine if this player can chii
+     deal with chii
+
+     give a tile
+     discard a tile
+
+     update state. *)
   failwith ""
 
 let rec display_all_player players =
