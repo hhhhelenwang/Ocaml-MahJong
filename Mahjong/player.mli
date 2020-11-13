@@ -42,3 +42,15 @@ type combination ={
 }
 
 val get_3 : int -> int -> combination -> combination
+
+type  n_comb={
+  pair:Tile.t list;
+  ke_zi: Tile.t list list;
+  info: (Tile.t*int) list;
+  rest_tile: Tile.t list;
+  seq: Tile.t list list;
+  mutable rong: bool;
+}
+
+val di_gui : n_comb -> bool
+val ini_comb: Tile.t list -> n_comb

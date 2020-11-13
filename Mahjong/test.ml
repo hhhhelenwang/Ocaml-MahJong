@@ -79,9 +79,65 @@ let game2 = Game.make_game init_deck
 let print_result1 = display_game game1
 let print_result2 = display_game game2
 
+
+(** Rong test- *)
+(* tile: id kind num isDiscarded *)
+(* 111222333444 
+   11 22 33 4567 89
+*)
+let t1 = Tile.construct 1 Man 1 false
+let t2 = Tile.construct 1 Man 2 false
+let t3 = Tile.construct 1 Man 3 false
+let t4 = Tile.construct 1 Man 4 false
+let t5 = Tile.construct 1 Man 5 false
+let t6 = Tile.construct 1 Man 6 false
+let t7 = Tile.construct 1 Man 7 false
+let t8 = Tile.construct 1 Man 8 false
+let t9 = Tile.construct 1 Man 9 false
+
+let t11 = Tile.construct 1 Sou 1 false
+let t12 = Tile.construct 1 Sou 2 false
+let t13 = Tile.construct 1 Sou 3 false
+let t14 = Tile.construct 1 Sou 4 false
+let t15 = Tile.construct 1 Sou 5 false
+let t16 = Tile.construct 1 Sou 6 false
+let t17 = Tile.construct 1 Sou 7 false
+let t18 = Tile.construct 1 Sou 8 false
+let t19 = Tile.construct 1 Sou 9 false
+
+
+let ron_l1= [t1;t1;t1; t2;t2;t2; t3;t3;t3; t4;t4;t4; t5;t5]
+let ron_l2= [t1;t2;t3; t7;t8;t9; t11;t12;t13; t17;t18;t19; t5;t5]
+
+
+let ron_l3 = [t1;t1;t2;t2; t3;t3;t4;t5; t6;t7;t8;t8; t11; t11]
+
+let n_comb1 = Player.ini_comb ron_l1
+let n_comb2 = Player.ini_comb ron_l2
+let n_comb3 = Player.ini_comb ron_l3 
+
+let ron_test
+    (name : string)
+    (com : Player.n_comb)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (Player.di_gui com))
+
+let ron_tests = [
+  ron_test "111 222 333 444 55" n_comb1 true;
+  ron_test "123 789 123 789 55" n_comb2 true;
+
+
+
+  ron_test "1122334567 88 " n_comb3 false;
+]
+
+
+
 let suite =
   "test suite for Mahjong"  >::: List.flatten [
     player_tests;
+    ron_tests;
   ]
 
 let _ = run_test_tt_main suite
