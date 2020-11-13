@@ -2,6 +2,7 @@ open OUnit2
 open Player 
 open Tile
 open Game
+open Command
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
     they are equivalent set-like lists.  That means checking two things.
@@ -79,9 +80,34 @@ let game2 = Game.make_game init_deck
 let print_result1 = display_game game1
 let print_result2 = display_game game2
 
+(* Command Compilation Unit Tests *****************)
+(** [command_parse_test] asserts that the parsed command is equal to the 
+    ecpected command. *)
+let command_parse_test
+    (name : string)
+    (str : string)
+    (expected : command) : test = 
+  name >:: (fun _ ->
+      assert_equal expected (parse str))
+
+(** [command_parse_test_exn] asserts that the expected exception is raised 
+    when parsing an abnormal command. *)
+let command_parse_text_exn
+    (name : string)
+    (str : string)
+    (expected_exn) : test =
+  name >:: (fun _ ->
+      assert_raises expected_exn (fun () -> parse str))
+
+let command_tests = [
+  command_parse_test {|"discard Man 1" -> Discard (Man, 1)|}
+    "discard Man 1" (Discard (Man, 1))
+]
+
 let suite =
-  "test suite for Mahjong"  >::: List.flatten [
+  "test suite for Mahjong" >::: List.flatten [
     player_tests;
+    command_tests
   ]
 
 let _ = run_test_tt_main suite

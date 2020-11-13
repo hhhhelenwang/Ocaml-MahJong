@@ -128,7 +128,7 @@ let make_game state =
 
 (** [next_state] is the game state after a player has made a move *)
 let next_state state = 
-  failwith "TODO"
+  failwith ""
 
 let rec display_all_player players =
   match players with
