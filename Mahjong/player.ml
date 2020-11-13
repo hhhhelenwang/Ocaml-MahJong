@@ -93,13 +93,6 @@ let combine t =
   let hand = t.hand_tile in 
   Tile.sort hand.light @ hand.dark
 
-(* [agari t] checks if user can agari or not*)
-(* let agari t =
-   let lst= combine t in
-   if (List.length lst <> 14) then false
-   else 
-    failwith "" *)
-
 (* [get_ele lst n] gets the nth tile in user's combined hand tile *)
 let rec get_ele lst n=
   match lst with
@@ -115,17 +108,14 @@ let rec get_ele_range lst n l acc =
   if l = 0 then acc
   else get_ele_range lst n (l-1) (get_ele lst (n+1)) @ acc
 
-(* check if user is able to chii. *)
-let chii_legal lst tile = 
-  (* let temp_lst = Tile.sort [tile] :: lst in  *)
-  (* let same_kind = Tile.sort_one_kind tile.kind lst in
-     let same_number = Tile.sort_one_number tile.number same_kind in *)
-  (* filter out all with same kind and number *)
-  (* filter out all with sequencial number and same kind *)
-  failwith ""
+let discard_pile tid pile : Tile.t list = (
+  List.filter (fun x -> Tile.get_id x <> tid) pile
+)
 
-(* chii *)
-let chii tile = 
+(* [chii player tile] modifies the hand-tile of the player
+   put tile in 
+*)
+let chii player tile = 
   failwith ""
 
 (* 12 choose 3, 9 choose 3, 6 choose 3, 3
@@ -250,14 +240,15 @@ let rec generate_info h left_acc right_acc=
       else generate_info h (left_acc @ [(tile, count)]) t
     end
 
-(* [ini_info lst acc] *)
+(* [ini_info lst acc] takes in a list [lst] of tiles and return a list [acc] 
+   of tuples [(tile, count)]*)
 let rec ini_info lst acc=
   match lst with
-  |[] -> acc
+  | [] -> acc
   | h :: t -> 
     ini_info t (generate_info h [] acc)
 
-(** [get_info]*)
+(** [get_info] gets the count of a certain tile*)
 let rec get_info h info=
   match info with
   | [] -> 0
@@ -266,6 +257,7 @@ let rec get_info h info=
       else get_info h t
     end
 
+(* [rem_l int lst] remove first [int] elements from [lst] *)
 let rec rem_l int lst=
   if int = 0 then lst 
   else begin
@@ -284,7 +276,7 @@ let rec rem_info_c int h left_acc right_acc =
       else rem_info_c int h (left_acc @ [(tile, count)]) t
     end
 
-(*remove the first sequence from a sorted lst
+(* [rem_li_seq n seq lst left_list] remove the first sequence from a sorted lst
     require: seq must be a sequence *)
 let rec rem_li_seq n seq lst left_list= 
   if n=0 then left_list @ lst
@@ -305,19 +297,12 @@ let rec remove_info_seq int info left_acc =
   else
     match info with
     | [] -> failwith "not right"
-    | (tile, count) :: t -> remove_info_seq (int-1) t (left_acc @ [(tile, count-1)])
+    | (tile, count) :: t -> 
+      remove_info_seq (int-1) t (left_acc @ [(tile, count-1)])
 
 (* [remove_zero_count lst] removes all tuples with count = 0 *)
 let remove_zero_count lst = 
   List.filter (fun (tile, count) -> count <> 0) lst
-
-(* let rec get_seq int lst acc = 
-   if int = 0 then acc
-   else begin
-    match lst with
-    | [] -> failwith "not right"
-    | h :: t -> get_seq (int-1) t (h::acc)
-   end *)
 
 (* [get_first_three int info acc] returns the first three tiles in info list*)
 let rec get_first_three int (info:(Tile.t*int) list) acc = 

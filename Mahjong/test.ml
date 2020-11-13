@@ -65,6 +65,8 @@ let player_tests =
   [
     discard_tile_test "discard one existing tile" player1 2 true;
     discard_tile_test "discard one not existed tile" player1 3 false;
+
+
   ]
 let player_handt = Player.display_I player1
 
@@ -104,7 +106,6 @@ let t16 = Tile.construct 1 Sou 6 false
 let t17 = Tile.construct 1 Sou 7 false
 let t18 = Tile.construct 1 Sou 8 false
 let t19 = Tile.construct 1 Sou 9 false
-
 
 let ron_l1= [t1;t1;t1; t2;t2;t2; t3;t3;t3; t4;t4;t4; t5;t5]
 let ron_l2= [t1;t2;t3; t7;t8;t9; t11;t12;t13; t17;t18;t19; t5;t5]

@@ -53,3 +53,13 @@ val sort : t list -> t list
 
 (** [sort_one_number] returns a list of tiles with same number*)
 (* val sort_one_number : int -> t list -> t list *)
+
+(* check if user is eligible to chii *)
+val chii_legal : t list -> t -> bool
+
+(* for testing purpose *)
+(* val seq_all : t list -> int -> t  list *)
+
+(* return all possible ke and seq *)
+val all_pos : t list -> t -> t list list
+
