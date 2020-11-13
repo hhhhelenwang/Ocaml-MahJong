@@ -32,3 +32,12 @@ val d_list: Tile.t list -> unit
 (** constructor for a player*)
 val init_player: int -> bool -> bool -> Tile.t list -> Tile.t list -> 
   Tile.t list -> t
+
+type combination ={
+  left_list: Tile.t list;
+  right_list: Tile.t list;
+  c_comb: Tile.t list;
+  pos : Tile.t list list;
+  long_list:  Tile.t list list list;
+}
+

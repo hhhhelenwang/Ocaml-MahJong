@@ -47,3 +47,9 @@ val ck_ke : t -> t -> t-> bool
 
 (**[sort lst] sorts a list of tiles based on kind and number*)
 val sort : t list -> t list
+
+(** [sorted_one_kind] returns a list of tiles with same kind*)
+(* val sort_one_kind : kind -> t list -> t list *)
+
+(** [sort_one_number] returns a list of tiles with same number*)
+(* val sort_one_number : int -> t list -> t list *)
