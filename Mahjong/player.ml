@@ -97,8 +97,6 @@ let agari t =
   else 
     failwith ""
 
-
-
 let rec get_ele lst n=
   match lst with
   | [] -> []

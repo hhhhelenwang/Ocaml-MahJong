@@ -65,9 +65,9 @@ let rec init_tiles id acc =
   if id = 0 then acc
   else init_tiles (id - 1) (tile_of_id id :: acc)
 
-(**[init_state] is a game state where 
-   - [wall_tiles] contains all tiles in the game
-   - [players] has each players with an empty list of hand tiles *)
+(** [init_state] is a game state where 
+    - [wall_tiles] contains all tiles in the game
+    - [players] has each players with an empty list of hand tiles *)
 let init_state () = 
   {
     wall_tiles = init_tiles 136 [];

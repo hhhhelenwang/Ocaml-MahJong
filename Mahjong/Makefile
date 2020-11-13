@@ -3,6 +3,7 @@ OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
+MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 
 default: build
@@ -13,6 +14,9 @@ test:
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
+
+play:
+	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 
 zip:
 	zip Mahjong.zip *.ml* *.json _tags Makefile
