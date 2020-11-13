@@ -1,7 +1,7 @@
 
 type command =
   | Discard of (Tile.kind * int)
-  | Chii
+  | Chii of int
   | Ron
   | Quit
 
@@ -32,13 +32,19 @@ let rec parse_tile lst i acc =
         parse_tile t (i + 1) (kind, int_of_string h)
     end
 
+let parse_number lst =
+  match lst with
+  (* this branch should never be reached as it's ruled out in [parse]*)
+  | [] -> 0 
+  | h :: t -> int_of_string h
+
 let parse str =
   let str_lst = String.split_on_char ' ' str in
   let clean_lst = List.filter (fun item -> item <> "") str_lst in
   match clean_lst with
-  | [] -> raise (Empty)
-  | h :: t when (h = "discard" && t <> []) -> Discard (parse_tile t 0 (Man, 0))
-  | h :: t when (h = "chii") -> Chii
-  | h :: t when (h = "ron") -> Ron
-  | h :: t when (h = "quit") -> Quit
-  | h :: t -> raise (Malformed)
+  | [] -> raise Empty
+  | h :: t when h = "discard" && t <> [] -> Discard (parse_tile t 0 (Man, 0))
+  | h :: t when h = "chii" && t <> [] -> Chii (parse_number t)
+  | h :: t when h = "ron" -> Ron
+  | h :: t when h = "quit" -> Quit
+  | h :: t -> raise Malformed

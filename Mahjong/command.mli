@@ -2,7 +2,7 @@
     either [Discard], [Chii], [Ron], or [Quit] and possibly a tile. *)
 type command =
   | Discard of (Tile.kind * int)
-  | Chii
+  | Chii of int
   | Ron
   | Quit
 
