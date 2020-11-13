@@ -41,3 +41,4 @@ type combination ={
   long_list:  Tile.t list list list;
 }
 
+val get_3 : int -> int -> combination -> combination
