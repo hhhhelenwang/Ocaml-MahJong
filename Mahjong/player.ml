@@ -128,8 +128,28 @@ let chii_legal lst tile =
 let chii tile = 
   failwith ""
 
+(* tile 1 $ [[tile2; til3];[tile 4; tile 5]] gives
+   [[tile1; tile2; til3]; [tile1; tile4; til5]] *)
+let ($) x lst = List.map (fun a -> x::a) lst
 
+(* given a list of tiles, get all possible ke (Tile.ck_ke) *)
+let ke lst = 
+  let rec helper n acc add =
+    match lst with
+    | [] -> acc
+    | h :: t -> 
+      begin if n == 0 then helper 3 (acc @ (h :: add)) [] 
+        else helper n acc add end
+  in helper 3 []
 
+let ron lst acc = 
+  (* either in ke or in sequence *)
+  (* get all possible combinations of ke tile list list*)
+  (* check if rest can form sequence *)
+  match lst with 
+  | [] -> acc
+  | 
+    failwith ""
 
 (** *)
 (** for ( 12 ) ways to seperate list, check if the choosen 3 form seq or ke, 
@@ -156,9 +176,7 @@ let chii tile =
     end
    done *)  
 
-(* tile 1 $ [[tile2; til3];[tile 4; tile 5]] gives
-   [[tile1; tile2; til3]; [tile1; tile4; til5]] *)
-let ($) x lst = List.map (fun a -> x::a) lst
+
 
 (* let rec permutation l r = 
    match r with 
@@ -217,7 +235,7 @@ let rec get_3 n1 n2 tup=
    case 3: 123 333 567 789 [normal]
    case 4: 333344445555        12
    case 5: 222333444 [normal]
-   case 8: 
+   case 8: 133 333
    case 9: 56 666 7  x1 x2 x6
    case 10: 123 455556 789
    case 11: 123 234 x1x2x4
