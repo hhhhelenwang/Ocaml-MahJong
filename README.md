@@ -1,7 +1,7 @@
 # Mahjong - CS 3110 Final Project
 
-##Running the Game
-- From the terminal, change directory into the folder 'Mahjong' and type the command
+## Running the Game
+From the terminal, change directory into the folder 'Mahjong' and type the command
 ```
 make play
 ```
