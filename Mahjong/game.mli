@@ -19,5 +19,8 @@ val make_game : t -> t
     move. *)
 val next_state : t -> t
 
+(** [is_in_game] is wheter the game is still going on. *)
+val is_in_game : t -> bool
+
 (** [display_game] displays the current information about the game. *)
 val display_game : t -> unit

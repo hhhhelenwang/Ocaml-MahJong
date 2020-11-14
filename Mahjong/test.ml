@@ -41,7 +41,7 @@ let pp_list pp_elt lst =
 let discard_tile_test
     (name : string)
     (player : Player.t)
-    (tid : Tile.id)
+    (tid : Tile.t option)
     (expected_output : bool) : test =
   name >:: (fun _ ->
       assert_equal expected_output (discard_tile player tid))
@@ -64,8 +64,8 @@ let player1 = Player.init_player 1 false false [] dark1 t_list1
 
 let player_tests = 
   [
-    discard_tile_test "discard one existing tile" player1 2 true;
-    discard_tile_test "discard one not existed tile" player1 3 false;
+    discard_tile_test "discard one existing tile" player1 (Some tile2) true;
+    discard_tile_test "discard one not existed tile" player1 None false;
   ]
 let player_handt = Player.display_I player1
 
@@ -107,6 +107,7 @@ let command_tests = [
     "      discard       Man 1" (Discard (Man, 1));
   command_parse_test {|"discard Dragon 1" -> Discard (Man, 1)|}
     "discard Dragon 1" (Discard (Dragon, 1));
+  command_parse_test {|"chii 1" -> Chii 1|} "chii 1" (Chii 1);
   command_parse_test {|"Quit" -> Quit|} "quit" Quit;
 
   (* exn raised *)

@@ -16,10 +16,19 @@ type tile = {
 
 type t = tile
 
-(**make tile discarded *)
+(** make tile discarded *)
 let update_status tile = tile.discarded <- true
 
 let get_id t = t.id
+
+let rec find_tile kind number lst =
+  match lst with
+  | [] -> None
+  | h :: t when h.kind = kind && h.number = number -> Some h
+  | h :: t -> find_tile kind number t
+
+let remove_tile target lst =
+  List.filter (fun this_tile -> get_id this_tile <> get_id target) lst
 
 let dp t=
   let n= t.number in
@@ -160,7 +169,6 @@ let seq_all lst num =
     | h :: t -> helper ((get_seq h lst num []) @ acc) t
   in helper [] compare
 
-(* [chii_legal lst t] checks if user is able to chii *)
 let chii_legal lst t = 
   let same_kind = sorted_one_kind t.kind lst in
   let same_num = sort_one_number t.number same_kind in
