@@ -13,6 +13,7 @@ let main () =
   print_string ">>";
   match read_line () with
   | "start" -> play_game ()
+  | "quit" -> ANSITerminal.(print_string [cyan] "Bye!")
   | command -> begin
       let message = "You can't start game with" 
                     ^ command 
