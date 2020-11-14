@@ -118,19 +118,6 @@ let sort lst =
     | h :: t -> helper (acc @ sorted_one_kind h lst) t
   in helper [] kinds
 
-
-(* [get_sequence lst t] returns sequence of all possible 3-tile sequence
-   [lst] is a sorted list with same kind as [t] *)
-(* let rec get_sequence lst num acc=  *)
-(* num -2, num -1, num, num +1, num +2 *)
-(* match lst with 
-   | [] -> acc
-   | h :: t -> begin
-    if (h.number > num - 3 && h.number < num + 3) 
-    then get_sequence t num (h::acc)
-    else get_sequence t num acc
-   end *)
-
 (* [get_seq f lst num acc] given a number, find if sequence satisfying f 
    exists*)
 let rec get_seq f lst num acc = 
@@ -154,7 +141,11 @@ let seq_all lst num =
   let rec helper acc compare =
     match compare with 
     | [] -> acc
-    | h :: t -> helper ((get_seq h lst num []) :: acc) t
+    | h :: t -> helper (
+        begin
+          if List.length (get_seq h lst num []) = 0 then acc
+          else (get_seq h lst num []) :: acc
+        end) t
   in helper [] compare
 
 (* get first n element in a list *)

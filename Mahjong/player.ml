@@ -40,7 +40,7 @@ let rec check_tile list tid =
   |h :: t -> if (tid = Tile.get_id h) then Some h
     else check_tile t tid
 
-let update_pile tid pile : Tile.t list = (
+let remove_helper tid pile : Tile.t list = (
   List.filter (fun x -> Tile.get_id x <> tid) pile
 )
 
@@ -51,8 +51,8 @@ let discard_tile player tid =
   | None -> false
   | Some h -> begin 
       Tile.update_status h;
-      player.hand_tile.dark <- update_pile tid handt;
-      player.discard_pile <- update_pile tid discardt;
+      player.hand_tile.dark <- remove_helper tid handt;
+      player.discard_pile <- remove_helper tid discardt;
       true
     end
 
@@ -108,15 +108,34 @@ let rec get_ele_range lst n l acc =
   if l = 0 then acc
   else get_ele_range lst n (l-1) (get_ele lst (n+1)) @ acc
 
-let discard_pile tid pile : Tile.t list = (
-  List.filter (fun x -> Tile.get_id x <> tid) pile
-)
+(* remove [int] number of tiles that are equal to [t] from 
+   a list of tiles [right_acc] *)
+let rec remove_helper tile left_acc right_acc int = 
+  if int = 0 then left_acc @ right_acc
+  else begin
+    match right_acc with
+    | [] -> failwith "wrong input"
+    | h :: t -> begin
+        if Tile.ck_eq h tile then remove_helper tile left_acc t (int -1) 
+        else remove_helper tile (h :: left_acc) t (int - 1)
+      end
+  end
 
-(* [chii player tile] modifies the hand-tile of the player
-   put tile in 
-*)
-let chii player tile = 
-  failwith ""
+(* remove a list of tiles [tlist] from pile *)
+let rec remove_tile tlist pile = 
+  match tlist with
+  | [] -> pile
+  | tile :: t -> remove_tile t (remove_helper tile [] pile 1)
+
+(* given [player] wants to and is eligible to chii tiles [t1] [t2] [t3], 
+   update player's handtile*)
+let chii_update_handtile t1 t2 t3 player = 
+  let hand_tile = player.hand_tile in
+  let dark = hand_tile.dark in 
+  let light = hand_tile.light in
+  hand_tile.dark <- [t1; t2; t3] @ dark;
+  hand_tile.light <-  remove_tile [t1; t2; t3] light;
+  ()
 
 (* 12 choose 3, 9 choose 3, 6 choose 3, 3
    tile 1 $ [[tile2; til3];[tile 4; tile 5]] gives
@@ -225,7 +244,7 @@ let rec get_3 n1 n2 tup =
 type  n_comb={
   pair:Tile.t list;
   ke_zi: Tile.t list list;
-  info: (Tile.t*int) list;
+  info: (Tile.t * int) list;
   rest_tile: Tile.t list;
   seq: Tile.t list list;
   mutable rong: bool;
@@ -312,6 +331,7 @@ let rec get_first_three int (info:(Tile.t*int) list) acc =
     | [] -> failwith "not right"
     | (tile, count) :: t -> get_first_three (int-1) t (acc @ [tile])
   end
+
 
 let check_sequence lst = 
   match lst with
