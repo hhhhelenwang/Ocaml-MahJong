@@ -43,13 +43,13 @@ let string_tile t =
     end
 
 
-(* print out the number and kind of the tile *)
-let dp t =
-  let rec find_tile kind number lst =
-    match lst with
-    | [] -> None
-    | h :: t when h.kind = kind && h.number = number -> Some h
-    | h :: t -> find_tile kind number t
+(* print out the number and kind of the tile
+   let dp t = *)
+let rec find_tile kind number lst=
+  match lst with
+  | [] -> None
+  | h :: t when h.kind = kind && h.number = number -> Some h
+  | h :: t -> find_tile kind number t
 
 let remove_tile target lst =
   List.filter (fun this_tile -> get_id this_tile <> get_id target) lst
