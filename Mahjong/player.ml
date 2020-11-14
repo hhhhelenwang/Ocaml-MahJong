@@ -171,7 +171,8 @@ let rec extract k lst =
 (** [sep_list] produces a list of every possible combinations of handtiles
     lst is list of hand tile
     n is the size of lst
-    listlist is in the form of [lst; (Man1, Sou 2, Sou 3); (Man2, Man 2, Man2)]::[]
+    listlist is in the form of 
+    [lst; (Man1, Sou 2, Sou 3); (Man2, Man 2, Man2)]::[]
 *)
 (* let get_3_list lst n tup_list=
    for i = 0 to n do
@@ -321,18 +322,19 @@ let rec rem_li_seq n seq lst left_list=
           else rem_li_seq n lst t (left_list @ [h])
       end
 
+
+(* [remove_zero_count lst] removes all tuples with count = 0 *)
+let remove_zero_count lst = 
+  List.filter (fun (tile, count) -> count <> 0) lst
+
 (* [remove_info_seq int info left_acc] count-- for first three tuple in info *)
 let rec remove_info_seq int info left_acc = 
-  if int = 0 then left_acc
+  if int = 0 then (remove_zero_count left_acc)
   else
     match info with
     | [] -> failwith "not right"
     | (tile, count) :: t -> 
       remove_info_seq (int-1) t (left_acc @ [(tile, count-1)])
-
-(* [remove_zero_count lst] removes all tuples with count = 0 *)
-let remove_zero_count lst = 
-  List.filter (fun (tile, count) -> count <> 0) lst
 
 (* [get_first_three int info acc] returns the first three tiles in info list*)
 let rec get_first_three int (info:(Tile.t*int) list) acc = 
@@ -343,7 +345,6 @@ let rec get_first_three int (info:(Tile.t*int) list) acc =
     | (tile, count) :: t -> get_first_three (int-1) t (acc @ [tile])
   end
 
-
 let check_sequence lst = 
   match lst with
   | t1 :: t2 :: t3 :: []-> Tile.ck_seq t1 t2 t3
@@ -352,7 +353,8 @@ let check_sequence lst =
 (* let rec di_gui n_comb = 
    if List.length n_comb.rest_tile = 0 
    then begin 
-    if ((2 = List.length n_comb.pair) && (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
+    if ((2 = List.length n_comb.pair) &&
+     (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
     then true else false end
       else 
     match n_comb.rest_tile with
@@ -372,7 +374,8 @@ let check_sequence lst =
             let new_r = rem_l 2 n_comb.rest_tile in
             let new_info = rem_info_c 2 h [] n_comb.info in
             let new_p =[h;h] in
-            if (di_gui {n_comb with rest_tile=new_r; info=new_info;pair= new_p})
+            if (di_gui {n_comb 
+                        with rest_tile=new_r; info=new_info;pair= new_p})
             then true
             else begin
               (* check  sequence*)
@@ -381,7 +384,8 @@ let check_sequence lst =
                 let new_r = rem_l 3 n_comb.rest_tile in
                 let new_info = rem_info_c 3 h [] n_comb.info in
                 let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
-                if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+                if (di_gui {n_comb with rest_tile=new_r; 
+                info=new_info; seq= new_s})
                 then true
                 else false
               else false
@@ -395,7 +399,8 @@ let check_sequence lst =
 (* let rec di_gui n_comb = 
    if List.length n_comb.rest_tile = 0 
    then begin 
-    if ((2 = List.length n_comb.pair) && (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
+    if ((2 = List.length n_comb.pair) && 
+    (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
     then n_comb.rong = true else n_comb.rong = false end
    else 
     match n_comb.rest_tile with
@@ -437,7 +442,8 @@ let check_sequence lst =
 let rec chai_ke n_comb = 
   if List.length n_comb.rest_tile = 0 
   then begin 
-    if ((2 = List.length n_comb.pair) && (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
+    if ((2 = List.length n_comb.pair) &&
+        (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
     then true else false end
   else begin
     match n_comb.rest_tile with
@@ -446,7 +452,9 @@ let rec chai_ke n_comb =
       let new_r = rem_l 3 n_comb.rest_tile in
       let new_info = rem_info_c 3 h [] n_comb.info in
       let new_k = [h;h;h] ::n_comb.ke_zi in 
-      if (get_info h n_comb.info > 2 && chai_ke{n_comb with rest_tile=new_r; info=new_info;ke_zi=new_k }) then true
+      if (get_info h n_comb.info > 2 && 
+          chai_ke{n_comb with rest_tile=new_r; info=new_info;ke_zi=new_k }) 
+      then true
       else 
         chai_que(n_comb)
   end
@@ -458,7 +466,9 @@ and
     let new_r = rem_l 2 n_comb.rest_tile in
     let new_info = rem_info_c 2 h [] n_comb.info in
     let new_p =[h;h] in
-    if (get_info h n_comb.info > 1 && n_comb.pair = [] && chai_ke {n_comb with rest_tile=new_r; info=new_info;pair= new_p}) then true
+    if (get_info h n_comb.info > 1 && n_comb.pair = []
+        && chai_ke {n_comb with rest_tile=new_r; info=new_info;pair= new_p})
+    then true
     else chai_shun(n_comb)
 and  
   chai_shun n_comb = 
@@ -466,9 +476,11 @@ and
   | [] -> failwith "not right"
   | h :: t ->
     let new_r = rem_l 3 n_comb.rest_tile in
-    let new_info = rem_info_c 3 h [] n_comb.info in
+    let new_info = remove_info_seq 3 n_comb.info [] in
     let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
-    if (check_sequence (get_first_three 3 n_comb.info []) && chai_ke {n_comb with rest_tile=new_r; info=new_info; seq= new_s}) then true
+    if (check_sequence (get_first_three 3 n_comb.info []) &&
+        chai_ke {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+    then true
     else false 
 
 
@@ -479,7 +491,8 @@ let rec di_gui n_comb =
 
   if List.length n_comb.rest_tile = 0 
   then begin 
-    if ((2 = List.length n_comb.pair) && (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
+    if ((2 = List.length n_comb.pair) &&
+        (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
     then true else false end
 
   else 
@@ -510,7 +523,8 @@ let rec di_gui n_comb =
               let new_r = rem_li_seq 3 seq n_comb.rest_tile [] in
               let new_info = rem_info_c 3 h [] n_comb.info in
               let new_s = seq :: n_comb.seq in
-              begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+              begin if (di_gui {n_comb with rest_tile=new_r;
+                                            info=new_info; seq= new_s})
                 then true 
                 else false 
               end
@@ -523,7 +537,8 @@ let rec di_gui n_comb =
           let new_r = rem_l 3 n_comb.rest_tile in
           let new_info = rem_info_c 3 h [] n_comb.info in
           let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
-          begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+          begin if (di_gui {n_comb with rest_tile=new_r;
+                                        info=new_info; seq= new_s})
             then true 
             else false
           end
@@ -544,7 +559,8 @@ let rec di_gui n_comb =
             let new_r = rem_l 3 n_comb.rest_tile in
             let new_info = rem_info_c 3 h [] n_comb.info in
             let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
-            begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+            begin if (di_gui {n_comb with rest_tile=new_r;
+                                          info=new_info; seq= new_s})
               then true 
               else false 
             end
@@ -555,7 +571,8 @@ let rec di_gui n_comb =
         let new_r = rem_l 3 n_comb.rest_tile in
         let new_info = rem_info_c 3 h [] n_comb.info in
         let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
-        begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+        begin if (di_gui {n_comb with rest_tile=new_r;
+                                      info=new_info; seq= new_s})
           then true 
           else false 
         end
@@ -564,7 +581,8 @@ let rec di_gui n_comb =
         let new_r = rem_l 3 n_comb.rest_tile in
         let new_info = rem_info_c 3 h [] n_comb.info in
         let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
-        begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+        begin if (di_gui {n_comb with rest_tile=new_r;
+                                      info=new_info; seq= new_s})
           then true 
           else false 
         end
