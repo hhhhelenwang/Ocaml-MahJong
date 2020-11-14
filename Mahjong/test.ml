@@ -66,8 +66,8 @@ let player_tests =
     discard_tile_test "discard one existing tile" player1 2 true;
     discard_tile_test "discard one not existed tile" player1 3 false;
   ]
-let player_handt = Player.display_I player1
-let x = Player.d_list t_list1
+(* let player_handt = Player.display_I player1 *)
+(* let x = Player.d_list t_list1 *)
 
 
 (* Game tests ******************)
@@ -75,10 +75,10 @@ let init_deck = init_state ()
 let game1 = Game.make_game init_deck
 let game2 = Game.make_game init_deck
 
-let print_result1 = display_game game1
-let print_result2 = display_game game2
+(* let print_result1 = display_game game1
+   let print_result2 = display_game game2 *)
 
-(** Rong test- *)
+(** Rong test ******************)
 (* tile: id kind num isDiscarded *)
 let t1 = Tile.construct 1 Man 1 false
 let t2 = Tile.construct 1 Man 2 false
@@ -103,25 +103,48 @@ let t19 = Tile.construct 1 Sou 9 false
 let ron_l1= [t1;t1;t1; t2;t2;t2; t3;t3;t3; t4;t4;t4; t5;t5]
 let ron_l2= [t1;t2;t3; t7;t8;t9; t11;t12;t13; t17;t18;t19; t5;t5]
 let ron_l3 = [t1;t1;t2;t2; t3;t3;t4;t5; t6;t7;t8;t8; t11; t11]
+let ron_l4 = [t1;t1;t1; t2;t2;   t3;t3;t3; t4;t4;t4; t5;t5;t5]
 
 let n_comb1 = Player.ini_comb ron_l1
 let n_comb2 = Player.ini_comb ron_l2
 let n_comb3 = Player.ini_comb ron_l3 
+let n_comb4 = Player.ini_comb ron_l4 
 
 let ron_test
     (name : string)
     (com : Player.n_comb)
     (expected_output : bool) : test =
   name >:: (fun _ ->
-      assert_equal expected_output (Player.di_gui com))
+      assert_equal expected_output (Player.chai_ke com))
 
 let ron_tests = [
   ron_test "111 222 333 444 55" n_comb1 true;
   (* ron_test "123 789 123 789 55" n_comb2 true; *)
-  ron_test "1122334567 88 " n_comb3 false;
+  ron_test "1122334567 88 11 " n_comb3 false;
+  ron_test "111 22 333 444 555 " n_comb4 true;
 ]
 
 (* Tile tests ******************)
+
+let rec display_ll lst = 
+  let _=print_string "[ "  in
+  match lst with 
+  | [] -> print_string "\n"
+  | h :: t -> 
+    let _= Player.d_list h in
+    print_string " ]";
+    display_ll t
+
+let rec lst_to_string r =
+  match r with
+  | [] -> ""
+  | h :: [] -> Tile.string_tile h
+  | h :: t -> Tile.string_tile h ^ ";" ^ (lst_to_string t)
+
+let rec pp_matrix matrix =
+  match matrix with
+  | [] -> ""
+  | h :: t -> "[" ^ (lst_to_string h) ^ "];\n" ^ (pp_matrix t)
 
 let all_pos_test
     (name : string)
@@ -129,14 +152,22 @@ let all_pos_test
     (t : Tile.t)
     (expected_output : Tile.t list list) : test =
   name >:: (fun _ ->
-      assert_equal ~cmp:cmp_set_like_lists expected_output (all_pos lst t))
+      assert_equal expected_output (all_pos lst t)
+        ~printer:(pp_matrix))
 
 let pos_l1 = [t1;t2;t3;t4;t5]
+let pos_l2 = [t1;t2;t2;t2;t3;t4;t5]
 
 let tile_tests = [
-  all_pos_test "Man 12345" pos_l1 t3 [[t1;t2;t3];[t2;t3;t4];[t3;t4;t5]]
-
+  (* all_pos_test "Man 12345" pos_l1 t3 [[t1;t2;t3];[t3;t4;t5];[t2;t3;t4]];
+     all_pos_test "Man 111222345" pos_l2 t2 [[t2;t2;t2];[t1;t2;t3];[t2;t3;t4]] *)
 ]
+
+let print_the_pos= display_ll (all_pos pos_l1 t3)
+let print1 = display_ll (all_pos pos_l2 t2)
+
+let intx= List.length (all_pos pos_l1 t3)
+let _ = print_int intx
 
 let suite =
   "test suite for Mahjong"  >::: List.flatten [

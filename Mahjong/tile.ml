@@ -21,23 +21,46 @@ let update_status tile = tile.discarded <- true
 
 let get_id t = t.id
 
-let dp t=
+let string_tile t = 
+  let num = string_of_int t.number in
+  let n = t.number in 
+  match t.kind with
+  | Man -> "   Man " ^ num
+  | Pin -> "   Pin "^ num
+  | Sou -> "   Sou "^ num
+  | Wind-> begin match n with
+      | 1 -> "   East"^ num
+      | 2 -> "   South"^ num
+      | 3 -> "   West"^ num
+      | 4 -> "   North"^ num
+      |_ -> "   Not right"^ num
+    end
+  | Dragon -> begin match n with
+      | 1 -> "   Red_Dragon"^ num
+      | 2 -> "   Green_Dragon"^ num
+      | 3 -> "   White_Draon"^ num
+      |_ -> "   Not right"^ num
+    end
+
+
+(* print out the number and kind of the tile *)
+let dp t =
   let n= t.number in
   match t.kind with
   | Man -> print_string "   Man "; print_int n
   | Pin -> print_string "   Pin "; print_int n
   | Sou -> print_string "   Sou "; print_int n
   | Wind-> begin match n with
-      |1 -> print_string "   East"
-      |2 -> print_string "   South"
-      |3 -> print_string "   West"
-      |4 -> print_string "   North"
+      | 1 -> print_string "   East"
+      | 2 -> print_string "   South"
+      | 3 -> print_string "   West"
+      | 4 -> print_string "   North"
       |_ -> print_string "   Not right"
     end
   | Dragon -> begin match n with
-      |1 -> print_string "   Red_Dragon"
-      |2 -> print_string "   Green_Dragon"
-      |3 -> print_string "   White_Draon"
+      | 1 -> print_string "   Red_Dragon"
+      | 2 -> print_string "   Green_Dragon"
+      | 3 -> print_string "   White_Draon"
       |_ -> print_string "   Not right"
     end
 
@@ -168,7 +191,10 @@ let pos_ke same_kind t =
 let all_pos lst t =
   let same_kind = sorted_one_kind t.kind (t::lst) in
   let seq_all = seq_all same_kind t.number in
-  (pos_ke same_kind t) :: seq_all 
+  begin 
+    if List.length (pos_ke same_kind t) = 0 then seq_all 
+    else (pos_ke same_kind t) :: seq_all 
+  end
 
 (* [chii_legal lst t] checks if user is able to chii. [lst] is
    player's current dark hand tile, and [t] is the tile we want to

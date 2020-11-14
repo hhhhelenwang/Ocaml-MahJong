@@ -63,3 +63,4 @@ val chii_legal : t list -> t -> bool
 (* return all possible ke and seq *)
 val all_pos : t list -> t -> t list list
 
+val string_tile : t -> string

@@ -54,4 +54,5 @@ type  n_comb={
 
 val di_gui : n_comb -> bool
 val ini_comb: Tile.t list -> n_comb
+val chai_ke :  n_comb -> bool
 val chii_update_handtile : Tile.t -> Tile.t -> Tile.t -> t -> unit

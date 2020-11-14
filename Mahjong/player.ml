@@ -397,17 +397,14 @@ let check_sequence lst =
         let new_info = rem_info_c 3 h [] n_comb.info in
         let new_k = [h;h;h] ::n_comb.ke_zi in
         if (di_gui {n_comb with rest_tile=new_r; info=new_info;ke_zi=new_k }) 
-        then 
-        else ()
-        (* check pair*)
-      else ()
+        then true else 
 
-      if (count_ke > 1 && n_comb.pair <> [] ) then 
+      else if (count_ke > 1 && n_comb.pair <> [] ) then 
         let new_r = rem_l 2 n_comb.rest_tile in
         let new_info = rem_info_c 2 h [] n_comb.info in
         let new_p =[h;h] in
         if (di_gui {n_comb with rest_tile=new_r; info=new_info;pair= new_p})
-        then n_comb.rong = true
+        then true
         else begin
           (* check  sequence*)
           if (check_sequence (get_first_three 3 n_comb.info [])) 
@@ -424,6 +421,45 @@ let check_sequence lst =
    end
    else 
    false *)
+
+
+let rec chai_ke n_comb = 
+  if List.length n_comb.rest_tile = 0 
+  then begin 
+    if ((2 = List.length n_comb.pair) && (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
+    then true else false end
+  else begin
+    match n_comb.rest_tile with
+    | [] -> failwith "not right"
+    | h :: t -> 
+      let new_r = rem_l 3 n_comb.rest_tile in
+      let new_info = rem_info_c 3 h [] n_comb.info in
+      let new_k = [h;h;h] ::n_comb.ke_zi in 
+      if (get_info h n_comb.info > 2 && chai_ke{n_comb with rest_tile=new_r; info=new_info;ke_zi=new_k }) then true
+      else 
+        chai_que(n_comb)
+  end
+and 
+  chai_que n_comb = 
+  match n_comb.rest_tile with
+  | [] -> failwith "not right"
+  | h :: t ->
+    let new_r = rem_l 2 n_comb.rest_tile in
+    let new_info = rem_info_c 2 h [] n_comb.info in
+    let new_p =[h;h] in
+    if (get_info h n_comb.info > 1 && n_comb.pair = [] && chai_ke {n_comb with rest_tile=new_r; info=new_info;pair= new_p}) then true
+    else chai_shun(n_comb)
+and  
+  chai_shun n_comb = 
+  match n_comb.rest_tile with
+  | [] -> failwith "not right"
+  | h :: t ->
+    let new_r = rem_l 3 n_comb.rest_tile in
+    let new_info = rem_info_c 3 h [] n_comb.info in
+    let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
+    if (check_sequence (get_first_three 3 n_comb.info []) && chai_ke {n_comb with rest_tile=new_r; info=new_info; seq= new_s}) then true
+    else false 
+
 
 
 
