@@ -104,13 +104,6 @@ let combine t =
   let hand = t.hand_tile in 
   Tile.sort hand.light @ hand.dark
 
-(* [agari t] checks if user can agari or not*)
-(* let agari t =
-   let lst= combine t in
-   if (List.length lst <> 14) then false
-   else 
-    failwith "" *)
-
 (* [get_ele lst n] gets the nth tile in user's combined hand tile *)
 let rec get_ele lst n=
   match lst with
@@ -126,18 +119,34 @@ let rec get_ele_range lst n l acc =
   if l = 0 then acc
   else get_ele_range lst n (l-1) (get_ele lst (n+1)) @ acc
 
-(* check if user is able to chii. *)
-let chii_legal lst tile = 
-  (* let temp_lst = Tile.sort [tile] :: lst in  *)
-  (* let same_kind = Tile.sort_one_kind tile.kind lst in
-     let same_number = Tile.sort_one_number tile.number same_kind in *)
-  (* filter out all with same kind and number *)
-  (* filter out all with sequencial number and same kind *)
-  failwith ""
+(* remove [int] number of tiles that are equal to [t] from 
+   a list of tiles [right_acc] *)
+let rec remove_helper tile left_acc right_acc int = 
+  if int = 0 then left_acc @ right_acc
+  else begin
+    match right_acc with
+    | [] -> failwith "wrong input"
+    | h :: t -> begin
+        if Tile.ck_eq h tile then remove_helper tile left_acc t (int -1) 
+        else remove_helper tile (h :: left_acc) t (int - 1)
+      end
+  end
 
-(* chii *)
-let chii tile = 
-  failwith ""
+(* remove a list of tiles [tlist] from pile *)
+let rec remove_tile tlist pile = 
+  match tlist with
+  | [] -> pile
+  | tile :: t -> remove_tile t (remove_helper tile [] pile 1)
+
+(* given [player] wants to and is eligible to chii tiles [t1] [t2] [t3], 
+   update player's handtile*)
+let chii_update_handtile t1 t2 t3 player = 
+  let hand_tile = player.hand_tile in
+  let dark = hand_tile.dark in 
+  let light = hand_tile.light in
+  hand_tile.dark <- [t1; t2; t3] @ dark;
+  hand_tile.light <-  remove_tile [t1; t2; t3] light;
+  ()
 
 (* 12 choose 3, 9 choose 3, 6 choose 3, 3
    tile 1 $ [[tile2; til3];[tile 4; tile 5]] gives
@@ -243,6 +252,322 @@ let rec get_3 n1 n2 tup =
 
 
 
+type  n_comb={
+  pair:Tile.t list;
+  ke_zi: Tile.t list list;
+  info: (Tile.t * int) list;
+  rest_tile: Tile.t list;
+  seq: Tile.t list list;
+  mutable rong: bool;
+}
+
+(* find h in acc, if exist >> (h, count+1), if not, append (h,1) on acc *)
+let rec generate_info h left_acc right_acc=
+  match right_acc with 
+  | [] -> left_acc @ [(h,1)]
+  | (tile, count) :: t -> begin
+      if Tile.ck_eq h tile then left_acc @ [tile, count + 1] @ right_acc
+      else generate_info h (left_acc @ [(tile, count)]) t
+    end
+
+(* [ini_info lst acc] takes in a list [lst] of tiles and return a list [acc] 
+   of tuples [(tile, count)]*)
+let rec ini_info lst acc=
+  match lst with
+  | [] -> acc
+  | h :: t -> 
+    ini_info t (generate_info h [] acc)
+
+(** [get_info] gets the count of a certain tile*)
+let rec get_info h info=
+  match info with
+  | [] -> 0
+  | (tile, count) :: t -> begin
+      if Tile.ck_eq h tile then count
+      else get_info h t
+    end
+
+(* [rem_l int lst] remove first [int] elements from [lst] *)
+let rec rem_l int lst=
+  if int = 0 then lst 
+  else begin
+    match lst with
+    | [] -> failwith "not right"
+    | h :: t -> rem_l (int - 1) t
+  end
+
+(* [rem_info_c int h left_acc right_acc] returns a list with 
+   removed [int] counts from tuple curresponding to tiile [h]*)
+let rec rem_info_c int h left_acc right_acc =
+  match right_acc with 
+  | [] -> left_acc
+  | (tile, count) :: t -> begin
+      if Tile.ck_eq h tile then left_acc @ [tile, count - int] @ right_acc
+      else rem_info_c int h (left_acc @ [(tile, count)]) t
+    end
+
+(* [rem_li_seq n seq lst left_list] remove the first sequence from a sorted lst
+    require: seq must be a sequence *)
+let rec rem_li_seq n seq lst left_list= 
+  if n=0 then left_list @ lst
+  else 
+    match lst with
+    | [] ->failwith "Not right input"
+    | h :: t -> 
+      begin match seq with 
+        | [] ->failwith "Not right input"
+        | x :: y -> if (Tile.ck_eq x h)
+          then rem_li_seq (n-1) y t left_list
+          else rem_li_seq n lst t (left_list @ [h])
+      end
+
+(* [remove_info_seq int info left_acc] count-- for first three tuple in info *)
+let rec remove_info_seq int info left_acc = 
+  if int = 0 then left_acc
+  else
+    match info with
+    | [] -> failwith "not right"
+    | (tile, count) :: t -> 
+      remove_info_seq (int-1) t (left_acc @ [(tile, count-1)])
+
+(* [remove_zero_count lst] removes all tuples with count = 0 *)
+let remove_zero_count lst = 
+  List.filter (fun (tile, count) -> count <> 0) lst
+
+(* [get_first_three int info acc] returns the first three tiles in info list*)
+let rec get_first_three int (info:(Tile.t*int) list) acc = 
+  if int = 0 then acc 
+  else begin
+    match info with
+    | [] -> failwith "not right"
+    | (tile, count) :: t -> get_first_three (int-1) t (acc @ [tile])
+  end
+
+
+let check_sequence lst = 
+  match lst with
+  | t1 :: t2 :: t3 :: []-> Tile.ck_seq t1 t2 t3
+  | _ -> failwith "not right input for check sequence"
+
+(* let rec di_gui n_comb = 
+   if List.length n_comb.rest_tile = 0 
+   then begin 
+    if ((2 = List.length n_comb.pair) && (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
+    then true else false end
+      else 
+    match n_comb.rest_tile with
+    | [] -> failwith "not right"
+    | h :: t -> 
+      (* check ke *)
+      let count_ke = get_info h n_comb.info in 
+      if count_ke > 2 then
+        let new_r = rem_l 3 n_comb.rest_tile in
+        let new_info = rem_info_c 3 h [] n_comb.info in
+        let new_k = [h;h;h] ::n_comb.ke_zi in
+        if (di_gui {n_comb with rest_tile=new_r; info=new_info;ke_zi=new_k }) 
+        then true
+        else begin 
+          (* check pair*)
+          if (count_ke > 1 && n_comb.pair <> [] ) then 
+            let new_r = rem_l 2 n_comb.rest_tile in
+            let new_info = rem_info_c 2 h [] n_comb.info in
+            let new_p =[h;h] in
+            if (di_gui {n_comb with rest_tile=new_r; info=new_info;pair= new_p})
+            then true
+            else begin
+              (* check  sequence*)
+              if (check_sequence (get_first_three 3 n_comb.info [])) 
+              then 
+                let new_r = rem_l 3 n_comb.rest_tile in
+                let new_info = rem_info_c 3 h [] n_comb.info in
+                let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
+                if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+                then true
+                else false
+              else false
+            end
+          else false
+        end
+      else 
+        false
+*)
+
+(* let rec di_gui n_comb = 
+   if List.length n_comb.rest_tile = 0 
+   then begin 
+    if ((2 = List.length n_comb.pair) && (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
+    then n_comb.rong = true else n_comb.rong = false end
+   else 
+    match n_comb.rest_tile with
+    | [] -> failwith "not right"
+    | h :: t -> 
+      (* check ke *)
+      let count_ke = get_info h n_comb.info in 
+      if count_ke > 2 then
+        let new_r = rem_l 3 n_comb.rest_tile in
+        let new_info = rem_info_c 3 h [] n_comb.info in
+        let new_k = [h;h;h] ::n_comb.ke_zi in
+        if (di_gui {n_comb with rest_tile=new_r; info=new_info;ke_zi=new_k }) 
+        then 
+        else ()
+        (* check pair*)
+      else ()
+
+      if (count_ke > 1 && n_comb.pair <> [] ) then 
+        let new_r = rem_l 2 n_comb.rest_tile in
+        let new_info = rem_info_c 2 h [] n_comb.info in
+        let new_p =[h;h] in
+        if (di_gui {n_comb with rest_tile=new_r; info=new_info;pair= new_p})
+        then n_comb.rong = true
+        else begin
+          (* check  sequence*)
+          if (check_sequence (get_first_three 3 n_comb.info [])) 
+          then 
+            let new_r = rem_l 3 n_comb.rest_tile in
+            let new_info = rem_info_c 3 h [] n_comb.info in
+            let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
+            if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+            then n_comb.rong = true
+            else n_comb.rong = false
+          else false
+        end
+      else false
+   end
+   else 
+   false *)
+
+
+
+
+let rec di_gui n_comb = 
+
+  if List.length n_comb.rest_tile = 0 
+  then begin 
+    if ((2 = List.length n_comb.pair) && (List.length n_comb.ke_zi + List.length n_comb.seq = 4))
+    then true else false end
+
+  else 
+    match n_comb.rest_tile with
+    | [] -> failwith "not right"
+    | h :: t -> 
+      (* check ke *)
+      let count_ke = get_info h n_comb.info in 
+      if count_ke > 2
+      then begin
+        let new_r = rem_l 3 n_comb.rest_tile in
+        let new_info = rem_info_c 3 h [] n_comb.info in
+        let new_k = [h;h;h] ::n_comb.ke_zi in 
+        if (di_gui {n_comb with rest_tile=new_r; info=new_info;ke_zi=new_k }) 
+        then true 
+        (** pair*)
+        else if (count_ke > 1 && n_comb.pair = [] ) then 
+          let new_r = rem_l 2 n_comb.rest_tile in
+          let new_info = rem_info_c 2 h [] n_comb.info in
+          let new_p =[h;h] in
+          begin
+            if (di_gui {n_comb with rest_tile=new_r; info=new_info;pair= new_p})
+            then true  
+            (*chek sequence*)
+            else if (check_sequence (get_first_three 3 n_comb.info [])) 
+            then 
+              let seq= get_first_three 3 n_comb.info [] in
+              let new_r = rem_li_seq 3 seq n_comb.rest_tile [] in
+              let new_info = rem_info_c 3 h [] n_comb.info in
+              let new_s = seq :: n_comb.seq in
+              begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+                then true 
+                else false 
+              end
+            else false
+          end
+        else
+          (**check sequence*)
+        if (check_sequence (get_first_three 3 n_comb.info [])) 
+        then 
+          let new_r = rem_l 3 n_comb.rest_tile in
+          let new_info = rem_info_c 3 h [] n_comb.info in
+          let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
+          begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+            then true 
+            else false
+          end
+        else false
+      end
+      else
+        (*chek pair*)
+      if (count_ke > 1 && n_comb.pair = [] ) then 
+        let new_r = rem_l 2 n_comb.rest_tile in
+        let new_info = rem_info_c 2 h [] n_comb.info in
+        let new_p =[h;h] in
+        begin
+          if (di_gui {n_comb with rest_tile=new_r; info=new_info;pair= new_p})
+          then true  
+          (*chek sequence*)
+          else if (check_sequence (get_first_three 3 n_comb.info [])) 
+          then 
+            let new_r = rem_l 3 n_comb.rest_tile in
+            let new_info = rem_info_c 3 h [] n_comb.info in
+            let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
+            begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+              then true 
+              else false 
+            end
+          else false
+        end
+      else if (check_sequence (get_first_three 3 n_comb.info [])) 
+      then 
+        let new_r = rem_l 3 n_comb.rest_tile in
+        let new_info = rem_info_c 3 h [] n_comb.info in
+        let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
+        begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+          then true 
+          else false 
+        end
+      else if (check_sequence (get_first_three 3 n_comb.info [])) 
+      then 
+        let new_r = rem_l 3 n_comb.rest_tile in
+        let new_info = rem_info_c 3 h [] n_comb.info in
+        let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
+        begin if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+          then true 
+          else false 
+        end
+      else false
+
+
+(* check pair
+   else if (count_ke > 1 && n_comb.pair <> [] ) then begin
+   let new_r = rem_l 2 n_comb.rest_tile in
+   let new_info = rem_info_c 2 h [] n_comb.info in
+   let new_p =[h;h] in
+   begin
+    if (di_gui {n_comb with rest_tile=new_r; info=new_info;pair= new_p})
+    then true
+    else
+      (* check  sequence*)
+   else if (check_sequence (get_first_three 3 n_comb.info [])) 
+   then begin
+   let new_r = rem_l 3 n_comb.rest_tile in
+   let new_info = rem_info_c 3 h [] n_comb.info in
+   let new_s = (get_first_three 3 n_comb.info []) :: n_comb.seq in
+   if (di_gui {n_comb with rest_tile=new_r; info=new_info; seq= new_s})
+   then true
+   else false
+   end
+   end
+
+   end *)
+
+
+let ini_comb lst ={
+  pair = [];
+  ke_zi = [];
+  info = ini_info lst [];
+  rest_tile = lst;
+  seq = [];
+  rong = false;
+}
+
 
 (**case 1: 111 333 555 777 [normal]   3 3 3 3 
    case 2: 223344 567 789          6 3 3
@@ -255,6 +580,9 @@ let rec get_3 n1 n2 tup =
    case 9: 56 666 7  x1 x2 x6
    case 10: 123 455556 789
    case 11: 123 234 x1x2x4
+   case 12: 123 234 234
+            12223344
+            11 222 333 4   > 123 123 234
 *)
 
 (* let ck_3333 =

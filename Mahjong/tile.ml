@@ -83,10 +83,7 @@ let ck_adj t1 t2 =
       else false
     end 
 
-(**check if three tiles can form a sequence
-    AF: return true for sequence with same kind and sequential number, for 
-    example, Man 1 Man 2 Man3 
-    RI:  t1 t2 t3 would be in accending order*)
+(**check if three tiles can form a sequence *)
 let ck_seq t1 t2 t3=
   (ck_adj t1 t2) && (ck_adj t2 t3)
 
@@ -101,7 +98,6 @@ let ck_eq t1 t2=
 (** check if three tiles are identical
     AF: return true for three identical tiles, for example,
     Man 1 Man 1 Man 1
-    RI:  t1 t2 t3 would have same kind and number
 *)
 let ck_ke t1 t2 t3= 
   ck_eq t1 t2 && ck_eq t2 t3
@@ -131,19 +127,6 @@ let sort lst =
     | h :: t -> helper (acc @ sorted_one_kind h lst) t
   in helper [] kinds
 
-
-(* [get_sequence lst t] returns sequence of all possible 3-tile sequence
-   [lst] is a sorted list with same kind as [t] *)
-(* let rec get_sequence lst num acc=  *)
-(* num -2, num -1, num, num +1, num +2 *)
-(* match lst with 
-   | [] -> acc
-   | h :: t -> begin
-    if (h.number > num - 3 && h.number < num + 3) 
-    then get_sequence t num (h::acc)
-    else get_sequence t num acc
-   end *)
-
 (* [get_seq f lst num acc] given a number, find if sequence satisfying f 
    exists*)
 let rec get_seq f lst num acc = 
@@ -151,13 +134,14 @@ let rec get_seq f lst num acc =
   | [] -> begin if List.length acc == 3 then acc else [] end
   | h :: t -> begin
       if f h num
-      then get_seq f lst num 
+      then get_seq f t num 
           (List.sort_uniq (fun x y -> x.number - y.number) (h::acc))
-      else get_seq f lst num acc
+      else get_seq f t num acc
     end
 
 (* [seq_all lst num] returns all possible sequence. Return empty list if there 
-   is no sequence *)
+   is no sequence 
+   lst is a list with same kind*)
 let seq_all lst num = 
   let compare1 h num = h.number >= num -2 && h.number <= num in
   let compare2 h num = h.number >= num && h.number <= num + 2 in 
@@ -166,11 +150,40 @@ let seq_all lst num =
   let rec helper acc compare =
     match compare with 
     | [] -> acc
-    | h :: t -> helper ((get_seq h lst num []) @ acc) t
+    | h :: t -> helper (
+        begin
+          if List.length (get_seq h lst num []) = 0 then acc
+          else (get_seq h lst num []) :: acc
+        end) t
   in helper [] compare
 
+(* get first n element in a list *)
+let rec get_first_int lst int acc = 
+  if int = 0 then acc else
+    match lst with
+    | [] -> failwith "wrong list, length < 3"
+    | h :: t -> get_first_int t (int-1) (h :: acc)
+
+(* return all possible ke. *)
+let pos_ke same_kind t =
+  let same_num = sort_one_number t.number same_kind in
+  if (List.length same_num > 2) 
+  then get_first_int same_num 3 []
+  else []
+
+(* return possible ke and seq. Given player is legal to chii. 
+   [lst] is player's current dark hand tile, and [t] is the tile 
+   we want to check *)
+let all_pos lst t =
+  let same_kind = sorted_one_kind t.kind (t::lst) in
+  let seq_all = seq_all same_kind t.number in
+  (pos_ke same_kind t) :: seq_all 
+
+(* [chii_legal lst t] checks if user is able to chii. [lst] is
+   player's current dark hand tile, and [t] is the tile we want to
+   check *)
 let chii_legal lst t = 
-  let same_kind = sorted_one_kind t.kind lst in
+  let same_kind = sorted_one_kind t.kind (t::lst) in
   let same_num = sort_one_number t.number same_kind in
   let seq_all = seq_all same_kind t.number in
   List.length same_num > 2 || List.length seq_all > 0

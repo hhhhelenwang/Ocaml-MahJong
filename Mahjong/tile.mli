@@ -66,3 +66,9 @@ val sort : t list -> t list
 
 (** [chii_legal lst t] checks if user is able to chii *)
 val chii_legal : t list -> t -> bool
+
+(* for testing purpose *)
+(* val seq_all : t list -> int -> t  list *)
+
+(* return all possible ke and seq *)
+val all_pos : t list -> t -> t list list
