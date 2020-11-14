@@ -58,14 +58,14 @@ val get_3 : int -> int -> combination -> combination
 
 type  n_comb={
   pair:Tile.t list;
-  ke_zi: Tile.t list list;
+  triplet: Tile.t list list;
   info: (Tile.t*int) list;
   rest_tile: Tile.t list;
   seq: Tile.t list list;
   mutable rong: bool;
 }
 
-val di_gui : n_comb -> bool
+val ron_legal : n_comb -> bool
 val ini_comb: Tile.t list -> n_comb
-val chai_ke :  n_comb -> bool
+val check_triplet :  n_comb -> bool
 val chii_update_handtile : Tile.t -> Tile.t -> Tile.t -> t -> unit

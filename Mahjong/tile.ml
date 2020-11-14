@@ -208,7 +208,7 @@ let all_pos lst t =
 
 (* [chii_legal lst t] checks if user is able to chii. [lst] is
    player's current dark hand tile, and [t] is the tile we want to
-   check *)
+   check.  require lst length > 3*)
 let chii_legal lst t = 
   let same_kind = sorted_one_kind t.kind (t::lst) in
   let same_num = sort_one_number t.number same_kind in

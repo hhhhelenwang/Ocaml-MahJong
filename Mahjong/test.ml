@@ -155,7 +155,7 @@ let ron_test
     (com : Player.n_comb)
     (expected_output : bool) : test =
   name >:: (fun _ ->
-      assert_equal expected_output (Player.chai_ke com))
+      assert_equal expected_output (Player.ron_legal com))
 
 let ron_tests = [
   ron_test "111 222 333 444 55" n_comb1 true;
@@ -195,12 +195,28 @@ let all_pos_test
       assert_equal expected_output (all_pos lst t)
         ~printer:(pp_matrix))
 
+let chii_legal_test
+    (name : string)
+    (lst : Tile.t list)
+    (t : Tile.t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (chii_legal lst t))
+
 let pos_l1 = [t1;t2;t3;t4;t5]
 let pos_l2 = [t1;t2;t2;t2;t3;t4;t5]
 
+
 let tile_tests = [
-  (* all_pos_test "Man 12345" pos_l1 t3 [[t1;t2;t3];[t3;t4;t5];[t2;t3;t4]];
-     all_pos_test "Man 111222345" pos_l2 t2 [[t2;t2;t2];[t1;t2;t3];[t2;t3;t4]] *)
+  (* all_pos_test "Man 12345, Man3" 
+     pos_l1 t3 [[t1;t2;t3];[t3;t4;t5];[t2;t3;t4]];
+     all_pos_test "Man 1 222 345, Man2" 
+     pos_l2 t2 [[t2;t2;t2];[t2;t3;t4];[t1;t2;t3]]; *)
+
+  chii_legal_test "Man 12345, Man3" pos_l1 t3 true;
+  chii_legal_test "Man 12345, Sou1, dif kind" pos_l1 t11 false;
+  chii_legal_test "Man 12345, Man 8, wrong num" pos_l1 t8 false;
+
 ]
 
 let print_the_pos= display_ll (all_pos pos_l1 t3)
@@ -215,7 +231,6 @@ let suite =
     command_tests;
     ron_tests;
     tile_tests;
-
   ]
 
 let _ = run_test_tt_main suite
