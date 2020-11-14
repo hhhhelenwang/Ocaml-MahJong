@@ -1,5 +1,5 @@
-#Running the Game
-- From the terminal, change directory into the folder 'Mahjong' and type the command
+# Running the Game
+From the terminal, change directory into the folder 'Mahjong' and type the command
 ```
 make play
 ```
