@@ -1,17 +1,23 @@
 (** AF: a record 
     {wall_tiles = [Tile1; Tile2; ... ; Tilen ]; 
-    player = [Player1; Player2; Player3; Player4];} represents a state of the 
+    player = [Player1; Player2; Player3; Player4];
+    current_player_id = n;} represents a state of the 
     game with 
     - wall tiles {Tile1, Tile2, ... , Tilen} and 
     - players {Player1, ... ,Player4}.
+    - current player [Player n]
 
-    RI: none. *)
+    RI: [wall_tiles] must be valid tiles initialized by a tile constructor.
+        [players] must contain 4 players. [current_player_id] is 1, 2, 3, or 4. 
+*)
 type game_state = {
   (** [wall_tiles] is the deck of unassigned tiles from which players draw. 
       [wall_tiles] contains all the tiles before the game starts. *)
   wall_tiles : Tile.t list;
   (** a list of players *)
   players : Player.t list;
+  current_player_id : Player.id;
+  in_game : bool
 }
 
 type t = game_state 
@@ -65,17 +71,20 @@ let rec init_tiles id acc =
   if id = 0 then acc
   else init_tiles (id - 1) (tile_of_id id :: acc)
 
-(**[init_state] is a game state where 
-   - [wall_tiles] contains all tiles in the game
-   - [players] has each players with an empty list of hand tiles *)
-let init_state () = 
+(** [init_state] is a game state where 
+    - [wall_tiles] contains all tiles in the game
+    - [players] has each players with an empty list of hand tiles *)
+let init_state () =
   {
     wall_tiles = init_tiles 136 [];
     players = []; (* no players yet *)
+    current_player_id = 1;
+    in_game = true;
   }
 
 (** extracts the nth element from a list *)
-let rec extract not_picked n = function
+let rec extract not_picked n lst = 
+  match lst with
   | [] -> raise Not_found
   | h :: t -> begin
       if n = 0 then (h, not_picked @ t)
@@ -126,9 +135,82 @@ let make_game state =
   let players = assign 4 shuffled_tiles [] in
   { state with players = players }
 
-(** [next_state] is the game state after a player has made a move *)
+let after_chii state current_player last_discarded =
+  if Tile.get_id last_discarded = 0 then state
+  else if Tile.chii_legal (Player.hand_tile_dark current_player) last_discarded
+  then begin
+    print_endline {|Enter command to Chii.|};
+    print_endline ">>";
+    match Command.parse (read_line ()) with
+    | Chii n -> state
+    | Discard (kind, number) -> 
+      print_endline "You can't discard now."; state
+    | Ron -> 
+      print_endline "You can't Ron now. Good luck with the rest of the game!"; 
+      state
+    | Quit -> {state with in_game = false}
+  end
+  else state
+(* TODO: 
+    call chii_legal, 
+    display options for chii, 
+    take user input, chii *)
+
+let after_draw state current_player =
+  let drawed_tile = 
+    match state.wall_tiles with
+    (* the game should end (when num of wall_tiles = 4) before this branch can 
+       be reahced *)
+    | [] -> tile_of_id 0 
+    | h :: t -> h in
+  Player.draw_tile current_player drawed_tile;
+  state
+
+let after_discard state current_player =
+  print_endline {|Enter command to discard a tile. E.g. "discard Man 1"\n|};
+  print_endline ">>";
+  match Command.parse (read_line ()) with
+  | Discard (kind, number) -> state
+  | Chii n -> print_endline "You can't Chii now."; state
+  | Ron -> 
+    print_endline "You can't Ron now. Good luck with the rest of the game!"; 
+    state
+  | Quit -> print_endline "Quitting!"; {state with in_game = false}
+(* let tile_opt = 
+   match Command.parse read_line () with
+   | Discard (kind, number) ->
+   Tile.find_tile kind number Player.hand_tile_dark current_player
+   | Chii n ->  *)
+
+(** [next_state] is the game state after a player has played their turn. 
+     get the last player
+     get the first of their discarded tile
+     determine if this player can chii
+     deal with chii
+
+     give a tile
+     discard a tile
+
+     update state. *)
 let next_state state = 
-  failwith "TODO"
+  let last_plr_id = 
+    if state.current_player_id <= 1 then 4
+    else state.current_player_id - 1 in
+  let this_player = 
+    state.players |> extract [] (state.current_player_id - 1) |> fst in
+  let last_player = 
+    state.players |>  extract [] (last_plr_id - 1)  |> fst in
+  let last_discarded_tile =
+    try last_player |> Player.discard_pile |> extract [] 0 |> fst with
+    | Not_found -> Tile.construct 0 Man 1 false in
+  let after_chii_state = after_chii state this_player last_discarded_tile in
+  let after_draw_state = after_draw after_chii_state this_player in
+  let last_state = after_discard after_draw_state this_player in
+  if List.length last_state.wall_tiles <= 4 then 
+    {last_state with in_game = false}
+  else last_state
+
+let is_in_game state = state.in_game
 
 let rec display_all_player players =
   match players with

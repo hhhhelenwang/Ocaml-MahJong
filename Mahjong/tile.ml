@@ -16,7 +16,7 @@ type tile = {
 
 type t = tile
 
-(**make tile discarded *)
+(** make tile discarded *)
 let update_status tile = tile.discarded <- true
 
 let get_id t = t.id
@@ -45,6 +45,16 @@ let string_tile t =
 
 (* print out the number and kind of the tile *)
 let dp t =
+  let rec find_tile kind number lst =
+    match lst with
+    | [] -> None
+    | h :: t when h.kind = kind && h.number = number -> Some h
+    | h :: t -> find_tile kind number t
+
+let remove_tile target lst =
+  List.filter (fun this_tile -> get_id this_tile <> get_id target) lst
+
+let dp t=
   let n= t.number in
   match t.kind with
   | Man -> print_string "   Man "; print_int n

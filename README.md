@@ -1,11 +1,15 @@
 # Mahjong - CS 3110 Final Project
 
-## How to play
-
-`make` will compile all the ocaml code, `make test` will run all the
-existing tests, `make clean` will clean the build.
-
-Run `make build` will build the entire app to make it production ready. 
+## Running the Game
+From the terminal, change directory into the folder 'Mahjong' and type the command
+```
+make play
+```
+A message should appear in your terminal. Follow the instruction and type
+```
+start
+```
+to play the game.
 
 ## Game Description
 

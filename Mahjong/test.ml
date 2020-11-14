@@ -2,6 +2,7 @@ open OUnit2
 open Player 
 open Tile
 open Game
+open Command
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
     they are equivalent set-like lists.  That means checking two things.
@@ -40,7 +41,7 @@ let pp_list pp_elt lst =
 let discard_tile_test
     (name : string)
     (player : Player.t)
-    (tid : Tile.id)
+    (tid : Tile.t option)
     (expected_output : bool) : test =
   name >:: (fun _ ->
       assert_equal expected_output (discard_tile player tid))
@@ -63,8 +64,8 @@ let player1 = Player.init_player 1 false false [] dark1 t_list1
 
 let player_tests = 
   [
-    discard_tile_test "discard one existing tile" player1 2 true;
-    discard_tile_test "discard one not existed tile" player1 3 false;
+    discard_tile_test "discard one existing tile" player1 (Some tile2) true;
+    discard_tile_test "discard one not existed tile" player1 None false;
   ]
 (* let player_handt = Player.display_I player1 *)
 (* let x = Player.d_list t_list1 *)
@@ -78,7 +79,46 @@ let game2 = Game.make_game init_deck
 (* let print_result1 = display_game game1
    let print_result2 = display_game game2 *)
 
-(** Rong test ******************)
+(* Command Compilation Unit Tests *****************)
+(** [command_parse_test] asserts that the parsed command is equal to the 
+    ecpected command. *)
+let command_parse_test
+    (name : string)
+    (str : string)
+    (expected : command) : test = 
+  name >:: (fun _ ->
+      assert_equal expected (parse str))
+
+(** [command_parse_test_exn] asserts that the expected exception is raised 
+    when parsing an abnormal command. *)
+let command_parse_text_exn
+    (name : string)
+    (str : string)
+    (expected_exn) : test =
+  name >:: (fun _ ->
+      assert_raises expected_exn (fun () -> parse str))
+
+let command_tests = [
+  (* typical cases *)
+  command_parse_test {|"discard Man 1" -> Discard (Man, 1)|}
+    "discard Man 1" (Discard (Man, 1));
+  command_parse_test {|"discard man 1" with spaces -> Discard (Man, 1)|}
+    "      discard       Man 1" (Discard (Man, 1));
+  command_parse_test {|"discard Dragon 1" -> Discard (Man, 1)|}
+    "discard Dragon 1" (Discard (Dragon, 1));
+  command_parse_test {|"chii 1" -> Chii 1|} "chii 1" (Chii 1);
+  command_parse_test {|"Quit" -> Quit|} "quit" Quit;
+
+  (* exn raised *)
+  command_parse_text_exn {|"whatever Man 1" -> Malformed|} 
+    "whatever Man 1" Malformed;
+  command_parse_text_exn {|"Discard Man" -> Malformed|} 
+    "Discard Man" Malformed;
+  command_parse_text_exn {|"Discard something" -> Malformed|} 
+    "Discard something" Malformed;
+  command_parse_text_exn {|"" -> Empty|} "" Empty;
+]
+(** Rong test- *)
 (* tile: id kind num isDiscarded *)
 let t1 = Tile.construct 1 Man 1 false
 let t2 = Tile.construct 1 Man 2 false
@@ -170,10 +210,12 @@ let intx= List.length (all_pos pos_l1 t3)
 let _ = print_int intx
 
 let suite =
-  "test suite for Mahjong"  >::: List.flatten [
+  "test suite for Mahjong" >::: List.flatten [
     player_tests;
+    command_tests;
     ron_tests;
     tile_tests;
+
   ]
 
 let _ = run_test_tt_main suite

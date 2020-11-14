@@ -1,6 +1,8 @@
+
 type id =int
-(**type of hand tile *)
-type handt={
+
+(** type of hand tile *)
+type handt = {
   mutable light: Tile.t list;
   mutable dark: Tile.t list;
 }
@@ -34,25 +36,34 @@ let state_r t = t.state_r
 
 let state_c t = t.state_c
 
-let rec check_tile list tid = 
-  match list with
-  |[] -> None
-  |h :: t -> if (tid = Tile.get_id h) then Some h
-    else check_tile t tid
+let hand_tile_light t = t.hand_tile.light
 
-let remove_helper tid pile : Tile.t list = (
-  List.filter (fun x -> Tile.get_id x <> tid) pile
-)
+let hand_tile_dark t = t.hand_tile.dark
 
-let discard_tile player tid =
+let discard_pile t = t.discard_pile
+
+(* let rec check_tile list tid = 
+   match list with
+   |[] -> None
+   |h :: t -> if (tid = Tile.get_id h) then Some h
+    else check_tile t tid *)
+
+(* let update_pile tile pile : Tile.t list = (
+   List.filter (fun x -> Tile.get_id x <> tid) pile
+   ) *)
+
+let draw_tile player tile =
+  player.hand_tile.dark <- [tile] @ player.hand_tile.dark
+
+let discard_tile player tile_opt =
   let handt = player.hand_tile.dark in
   let discardt = player.discard_pile in 
-  match check_tile handt tid with
+  match tile_opt with
   | None -> false
-  | Some h -> begin 
-      Tile.update_status h;
-      player.hand_tile.dark <- remove_helper tid handt;
-      player.discard_pile <- remove_helper tid discardt;
+  | Some tile -> begin 
+      Tile.update_status tile;
+      player.hand_tile.dark <- Tile.remove_tile tile handt;
+      player.discard_pile <- [tile] @ discardt;
       true
     end
 
