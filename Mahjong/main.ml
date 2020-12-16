@@ -3,6 +3,7 @@ let play_game () =
   let init = Game.init_state () in
   let state = ref (Game.make_game init) in 
   while Game.is_in_game !state do begin
+    print_endline ">>";
     state := Game.next_state !state;
   end done
 
@@ -20,4 +21,5 @@ let main () =
                     ^ {|, please restart the game with "make play" and enter start this time.|} in
       ANSITerminal.(print_string [magenta] message);
     end
+
 let () = main ()

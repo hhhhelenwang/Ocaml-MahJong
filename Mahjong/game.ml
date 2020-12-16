@@ -135,7 +135,7 @@ let make_game state =
   let players = assign 4 shuffled_tiles [] in
   { state with players = players }
 
-let after_chii state current_player last_discarded =
+let rec after_chii state current_player last_discarded =
   if Tile.get_id last_discarded = 0 then state
   else if Tile.chii_legal (Player.hand_tile_dark current_player) last_discarded
   then begin
@@ -144,45 +144,57 @@ let after_chii state current_player last_discarded =
     match Command.parse (read_line ()) with
     | Chii n -> state
     | Discard (kind, number) -> 
-      print_endline "You can't discard now."; state
+      print_endline "You can't discard now."; 
+      after_chii state current_player last_discarded
     | Ron -> 
       print_endline "You can't Ron now. Good luck with the rest of the game!"; 
-      state
+      after_chii state current_player last_discarded
     | Quit -> {state with in_game = false}
   end
   else state
+
+and chii state current_player = 
+  failwith ""
 (* TODO: 
     call chii_legal, 
     display options for chii, 
     take user input, chii *)
 
 let after_draw state current_player =
-  let drawed_tile = 
+  let drawn_tile = 
     match state.wall_tiles with
     (* the game should end (when num of wall_tiles = 4) before this branch can 
        be reahced *)
     | [] -> tile_of_id 0 
     | h :: t -> h in
-  Player.draw_tile current_player drawed_tile;
+  Player.draw_tile current_player drawn_tile;
+  print_endline {|Drawn tile:\n|};
+  Tile.dp drawn_tile;
   state
 
-let after_discard state current_player =
+let rec after_discard state current_player =
   print_endline {|Enter command to discard a tile. E.g. "discard Man 1"\n|};
   print_endline ">>";
   match Command.parse (read_line ()) with
-  | Discard (kind, number) -> state
+  | Discard (kind, number) -> discard_helper state current_player kind number
   | Chii n -> print_endline "You can't Chii now."; state
   | Ron -> 
     print_endline "You can't Ron now. Good luck with the rest of the game!"; 
     state
   | Quit -> print_endline "Quitting!"; {state with in_game = false}
+
+and discard_helper state current_player kind number = 
+  let tile_opt = 
+    Tile.find_tile kind number (Player.hand_tile_dark current_player) in
+  if Player.discard_tile current_player tile_opt then state
+  else after_discard state current_player
 (* let tile_opt = 
    match Command.parse read_line () with
    | Discard (kind, number) ->
    Tile.find_tile kind number Player.hand_tile_dark current_player
    | Chii n ->  *)
 
-(** [next_state] is the game state after a player has played their turn. 
+(** [next_state state] is the game state after a player has played their turn. 
      get the last player
      get the first of their discarded tile
      determine if this player can chii
@@ -220,5 +232,6 @@ let rec display_all_player players =
     Player.display_I h;
     display_all_player t
 
+
 let display_game state = 
-  display_all_player state.players
+  failwith ""
