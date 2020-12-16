@@ -50,22 +50,25 @@ type combination ={
   left_list: Tile.t list;
   right_list: Tile.t list;
   c_comb: Tile.t list;
-  pos : Tile.t list list;
+  pos: Tile.t list list;
   long_list:  Tile.t list list list;
 }
 
-val get_3 : int -> int -> combination -> combination
+(* val get_3 : int -> int -> combination -> combination *)
 
-type  n_comb={
-  pair:Tile.t list;
+type comb = {
+  pair: Tile.t list;
   triplet: Tile.t list list;
-  info: (Tile.t*int) list;
-  rest_tile: Tile.t list;
+  info: (Tile.t * int) list;
   seq: Tile.t list list;
-  mutable rong: bool;
+  mutable ron: bool;
 }
 
-val ron_legal : n_comb -> bool
-val ini_comb: Tile.t list -> n_comb
-val check_triplet :  n_comb -> bool
+(*val ron_legal : n_comb -> bool  *)
+
+val ini_comb: Tile.t list -> comb
+val check_triplet : comb -> bool
 val chii_update_handtile : Tile.t -> Tile.t -> Tile.t -> t -> unit
+
+val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
+val print_info: (Tile.t * int) list -> unit

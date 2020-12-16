@@ -140,34 +140,63 @@ let t17 = Tile.construct 1 Sou 7 false
 let t18 = Tile.construct 1 Sou 8 false
 let t19 = Tile.construct 1 Sou 9 false
 
+let t21 = Tile.construct 1 Dragon 1 false
+let t22 = Tile.construct 1 Dragon 2 false
+let t23 = Tile.construct 1 Dragon 3 false
+
 let ron_l1= [t1;t1;t1; t2;t2;t2; t3;t3;t3; t4;t4;t4; t5;t5]
 let ron_l2= [t1;t2;t3; t7;t8;t9; t11;t12;t13; t17;t18;t19; t5;t5]
 let ron_l3 = [t1;t1;t2;t2; t3;t3;t4;t5; t6;t7;t8;t8; t11; t11]
 let ron_l4 = [t1;t1;t1; t2;t2;   t3;t3;t3; t4;t4;t4; t5;t5;t5]
+let ron_l5 = [t1;t2; t3;t3;t3;t3; t4;t4;t4;t4; t5;t5;t5;t5]
+let ron_l6 = [t21;t21;t21; t22;t22;t22; t15;t16;t16;t16;t17; t23;t23;t23]
+let ron_l7 = [t8;t9; t3;t3;t3;t3; t4;t4;t4;t4; t5;t5;t5;t5]
+let ron_l8 = [t1;t2;t2;t2;t3;t4]
+let ron_l9 = [ t2;t2; t5;t6;t7;t7;t8;t9;]
+let ron_l10 = [t1;t1; t3;t3; t5;t5; t7;t7; t8;t8; t9;t9; t11;t11]
+
 
 let n_comb1 = Player.ini_comb ron_l1
 let n_comb2 = Player.ini_comb ron_l2
 let n_comb3 = Player.ini_comb ron_l3 
-let n_comb4 = Player.ini_comb ron_l4 
+let n_comb4 = Player.ini_comb ron_l4
+let n_comb5 = Player.ini_comb ron_l5
+let n_comb6 = Player.ini_comb ron_l6
+let n_comb7 = Player.ini_comb ron_l7
+let n_comb8 = Player.ini_comb ron_l8
+let n_comb9 = Player.ini_comb ron_l9
+let n_comb10 = Player.ini_comb ron_l10
+
+
+let print_a_info= Player.print_info (Player.ini_info ron_l1 [])
 
 let ron_test
     (name : string)
-    (com : Player.n_comb)
+    (com : Player.comb)
     (expected_output : bool) : test =
   name >:: (fun _ ->
-      assert_equal expected_output (Player.ron_legal com))
+      assert_equal expected_output (Player.check_triplet com) 
+        ~printer: string_of_bool)
 
 let ron_tests = [
   ron_test "111 222 333 444 55" n_comb1 true;
-  (* ron_test "123 789 123 789 55" n_comb2 true; *)
-  ron_test "1122334567 88 11 " n_comb3 false;
+  ron_test "123 789 123 789 55" n_comb2 true;
+  ron_test "1122334567 88 11" n_comb3 false;
   ron_test "111 22 333 444 555 " n_comb4 true;
+  ron_test "333 444 555 345 12" n_comb5 true;
+  ron_test "rrr ggg 56667 www" n_comb6 true;
+  ron_test "333 444 555 345 89" n_comb7 false;
+  ron_test "cannot exhaust 12 234" n_comb8 false;
+  ron_test "<14 tiles 22 567789" n_comb9 false;
+  ron_test "7 pairs" n_comb10 true;
+
+
 ]
 
 (* Tile tests ******************)
 
 let rec display_ll lst = 
-  let _=print_string "[ "  in
+  let _ = print_string "[ "  in
   match lst with 
   | [] -> print_string "\n"
   | h :: t -> 

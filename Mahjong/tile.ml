@@ -33,13 +33,13 @@ let string_tile t =
       | 2 -> "   South"^ num
       | 3 -> "   West"^ num
       | 4 -> "   North"^ num
-      |_ -> "   Not right"^ num
+      | _ -> "   Not right"^ num
     end
   | Dragon -> begin match n with
       | 1 -> "   Red_Dragon"^ num
       | 2 -> "   Green_Dragon"^ num
       | 3 -> "   White_Draon"^ num
-      |_ -> "   Not right"^ num
+      | _ -> "   Not right"^ num
     end
 
 
@@ -186,7 +186,7 @@ let rec get_first_int lst int acc =
   if int = 0 then acc else
     match lst with
     | [] -> failwith "wrong list, length < 3"
-    | h :: t -> get_first_int t (int-1) (h :: acc)
+    | h :: t -> get_first_int t (int - 1) (h :: acc)
 
 (* return all possible ke. *)
 let pos_ke same_kind t =
