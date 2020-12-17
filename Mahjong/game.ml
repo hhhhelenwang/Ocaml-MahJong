@@ -144,12 +144,14 @@ let rec after_chii state current_player last_discarded =
   if Tile.get_id last_discarded = 0 then state
   else if Tile.chii_legal hand_dark last_discarded
   then begin
-    print_endline {|Enter command to Chii.|};
+    chii_combo state last_discarded hand_dark;
+    print_endline {|You can chii the last discarded tile.|};
+    print_endline {|Which combo you would like to Chii? E.g. Chii 1|}
     print_endline ">>";
     match Command.parse (read_line ()) with
     | Chii n -> 
-      Player.chii_update_handtile n last_discarded current_player; 
-      state
+        Player.chii_update_handtile n last_discarded current_player; 
+        state
     | Discard (kind, number) -> 
       print_endline "You can't discard now."; 
       after_chii state current_player last_discarded
