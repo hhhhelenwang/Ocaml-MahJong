@@ -135,14 +135,21 @@ let make_game state =
   let players = assign 4 shuffled_tiles [] in
   { state with players = players }
 
+(** [after_chii state current_player last_discarded] is the state of game after
+    [current_player] at [state] perform action chii. It calls pre-defined 
+    functions to decide if the player is qualified to chii, calculates all 
+    combination the player can build from chii, and update game state.  *)
 let rec after_chii state current_player last_discarded =
+  let hand_dark = Player.hand_tile_dark current_player in
   if Tile.get_id last_discarded = 0 then state
-  else if Tile.chii_legal (Player.hand_tile_dark current_player) last_discarded
+  else if Tile.chii_legal hand_dark last_discarded
   then begin
     print_endline {|Enter command to Chii.|};
     print_endline ">>";
     match Command.parse (read_line ()) with
-    | Chii n -> state
+    | Chii n -> 
+      Player.chii_update_handtile n last_discarded current_player; 
+      state
     | Discard (kind, number) -> 
       print_endline "You can't discard now."; 
       after_chii state current_player last_discarded
@@ -153,12 +160,19 @@ let rec after_chii state current_player last_discarded =
   end
   else state
 
-and chii state current_player = 
-  failwith ""
+(** displays all possible combinations the player can build by chii. *)
+and chii_combo state last hand_dark = 
+  let all_chii_combo = Tile.all_pos hand_dark last in
+  print_endline ""
+
 (* TODO: 
     call chii_legal, 
     display options for chii, 
     take user input, chii *)
+
+(** convert a set of combos to string for printing *)
+and string_of_combos combos = 
+  failwith ""
 
 let after_draw state current_player =
   let drawn_tile = 
