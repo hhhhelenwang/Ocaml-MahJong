@@ -138,11 +138,6 @@ let sorted_one_kind kind lst =
   let compare t1 t2 = t1.number - t2.number in
   List.sort compare (filter_kind kind lst)
 
-(* [sort_one_number num lst] returns a list of tiles with same 
-   number*)
-let sort_one_number num lst = 
-  List.filter (fun x -> x.number == num) lst
-
 let sort lst =
   let kinds = [Pin; Man; Sou; Wind; Dragon] in 
   let rec helper acc kinds =
@@ -186,7 +181,12 @@ let rec get_first_int lst int acc =
   if int = 0 then acc else
     match lst with
     | [] -> failwith "wrong list, length < 3"
-    | h :: t -> get_first_int t (int - 1) (h :: acc)
+    | h :: t -> get_first_int t (int   - 1) (h :: acc)
+
+(* [sort_one_number num lst] returns a list of tiles with same 
+   number*)
+let sort_one_number num lst = 
+  List.filter (fun x -> x.number == num) lst
 
 (* return all possible ke. *)
 let pos_ke same_kind t =

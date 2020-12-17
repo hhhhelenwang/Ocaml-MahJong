@@ -72,3 +72,4 @@ val chii_update_handtile : Tile.t -> Tile.t -> Tile.t -> t -> unit
 
 val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
 val print_info: (Tile.t * int) list -> unit
+val check_riichi: t -> Tile.t list

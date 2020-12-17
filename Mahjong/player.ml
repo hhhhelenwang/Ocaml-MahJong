@@ -66,11 +66,6 @@ let display_I t =
   d_list lt;
   d_list dt
 
-let riichi t=
-  failwith "hah"
-
-let check_riichi t=
-  failwith "hah"
 
 (** [init_player id richii chii light dark discard] is the constructor of 
     player type*)
@@ -93,7 +88,6 @@ let combine t =
   let hand = t.hand_tile in 
   Tile.sort hand.light @ hand.dark
 
-(* 
 (* [get_ele lst n] gets the nth tile in user's combined hand tile *)
 let rec get_ele lst n=
   match lst with
@@ -107,7 +101,7 @@ let rec get_ele lst n=
    (n+l)th in user's combined hand tile *)
 let rec get_ele_range lst n l acc = 
   if l = 0 then acc
-  else get_ele_range lst n (l-1) (get_ele lst (n+1)) @ acc *)
+  else get_ele_range lst n (l-1) (get_ele lst (n+1)) @ acc
 
 (* remove [int] number of tiles that are equal to [t] from 
    a list of tiles [right_acc] *)
@@ -128,42 +122,27 @@ let rec remove_tile tlist pile =
   | [] -> pile
   | tile :: t -> remove_tile t (remove_helper tile [] pile 1)
 
+
 (* given [player] wants to and is eligible to chii tiles [t1] [t2] [t3], 
    update player's handtile*)
-let chii_update_handtile t1 t2 t3 player = 
+let chii_update_handtile int tile player = 
   let hand_tile = player.hand_tile in
   let dark = hand_tile.dark in 
   let light = hand_tile.light in
-  hand_tile.dark <- [t1; t2; t3] @ dark;
-  hand_tile.light <-  remove_tile [t1; t2; t3] light;
+  let all_pos = Tile.all_pos dark tile in 
+  let picked = get_ele all_pos int in
+  hand_tile.dark <- picked @ dark;
+  hand_tile.light <- remove_tile picked light;
+  player.state_c <- true;
   ()
 
-type combination= {
-  left_list: Tile.t list;
-  right_list: Tile.t list;
-  c_comb: Tile.t list;
-  pos : Tile.t list list;
-  long_list:  Tile.t list list list;
-}
-
-(**all possibility that divdes 12 tile to 4*3 part *)
-(* let rec get_3 n1 n2 tup =
-   if n1 = 0 then
-    let new_t= { tup with pos = []; long_list= tup.pos::tup.long_list } in
-    new_t 
-   else
-   if n2 = 0 then 
-    let new_t = { tup with c_comb = []; 
-                           pos = tup.c_comb::tup.pos; 
-                           left_list = []; 
-                           right_list = tup.left_list } in
-    get_3 (n1-1) 3 new_t
-   else begin
-    match tup.right_list with 
-    | [] -> { tup with c_comb = []; 
-                       left_list = []; 
-                       right_list = tup.left_list @ tup.right_list }
-    | h :: t -> begin 
+(* let chii_update_handtile t1 t2 t3 player = 
+   let hand_tile = player.hand_tile in
+   let dark = hand_tile.dark in 
+   let light = hand_tile.light in
+   hand_tile.dark <- [t1; t2; t3] @ dark;
+   hand_tile.light <-  remove_tile [t1; t2; t3] light;
+   ()
         let new_comb = tup.c_comb @ [h] in 
         if List.length tup.right_list = n2
         then get_3 n1 (n2-1) {tup with c_comb = new_comb;
@@ -189,6 +168,7 @@ type comb = {
   seq: Tile.t list list;
   mutable ron: bool;
 }
+
 
 (* find h in acc, if exist >> (h, count+1), if not, append (h,1) on acc *)
 let rec generate_info h left_acc right_acc=
@@ -352,7 +332,7 @@ and
       end
     else false
 
-let ini_comb lst ={
+let ini_comb lst = {
   pair = [];
   triplet = [];
   info = ini_info lst [];
@@ -360,6 +340,51 @@ let ini_comb lst ={
   seq = [];
   ron = false;
 }
+
+let riichi t=
+  failwith "hah"
+
+
+
+(**hand represent hand tile, list represent various tile type,
+   acc represent feasible riichi tile *)
+let rec check_r_help hand lst acc = 
+  match lst with
+  | [] -> acc
+  | h ::t -> begin
+      let n_hand = Tile.sort (h :: hand) in 
+      let n_comb= ini_comb n_hand in
+      if (check_triplet n_comb)then
+        check_r_help hand t (h :: acc)
+      else 
+        check_r_help hand t acc
+    end
+
+(** given the kind, generate 1-9 tile of this kind  *)
+let rec generate_n kind n acc = 
+  let new_t= Tile.construct 1 kind n false in
+  generate_n kind (n - 1) (new_t :: acc)
+
+(**generate a list of all differnet tile*)
+let generate_tiles = 
+  let rec generate lst acc = 
+    match lst with
+    | [] -> acc
+    | h :: t -> begin
+        match h with
+        | Tile.Pin | Tile.Man | Tile.Sou -> generate t (acc @ generate_n h 9 [])
+        | Tile.Wind -> generate t (acc @ generate_n h 4 [])
+        | Tile.Dragon -> generate t (acc @ generate_n h 3 [])
+      end
+  in generate [Tile.Pin; Tile.Man; Tile.Sou; Tile.Wind; Tile.Dragon] []
+
+(** return a list of tile that the player needs to richii *)
+let check_riichi player =
+  if (player.state_c || player.state_r) then []
+  else
+    let handtile = combine player in
+    let lst = generate_tiles in
+    check_r_help handtile lst []
 
 (**case 1: 111 333 555 777 [normal]   3 3 3 3 
    case 2: 223344 567 789          6 3 3

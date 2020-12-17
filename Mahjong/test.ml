@@ -155,7 +155,6 @@ let ron_l8 = [t1;t2;t2;t2;t3;t4]
 let ron_l9 = [ t2;t2; t5;t6;t7;t7;t8;t9;]
 let ron_l10 = [t1;t1; t3;t3; t5;t5; t7;t7; t8;t8; t9;t9; t11;t11]
 
-
 let n_comb1 = Player.ini_comb ron_l1
 let n_comb2 = Player.ini_comb ron_l2
 let n_comb3 = Player.ini_comb ron_l3 
@@ -166,7 +165,6 @@ let n_comb7 = Player.ini_comb ron_l7
 let n_comb8 = Player.ini_comb ron_l8
 let n_comb9 = Player.ini_comb ron_l9
 let n_comb10 = Player.ini_comb ron_l10
-
 
 let print_a_info= Player.print_info (Player.ini_info ron_l1 [])
 
@@ -189,8 +187,6 @@ let ron_tests = [
   ron_test "cannot exhaust 12 234" n_comb8 false;
   ron_test "<14 tiles 22 567789" n_comb9 false;
   ron_test "7 pairs" n_comb10 true;
-
-
 ]
 
 (* Tile tests ******************)
