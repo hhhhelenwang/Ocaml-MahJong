@@ -104,7 +104,7 @@ let combine t =
   let hand = t.hand_tile in 
   Tile.sort hand.light @ hand.dark
 
-(* [get_ele lst n] gets the nth tile in user's combined hand tile *)
+(* [get_ele lst n] gets nth element (used in chii_update) *)
 let rec get_ele lst n=
   match lst with
   | [] -> []
@@ -140,12 +140,21 @@ let rec remove_tile tlist pile =
 
 (* given [player] wants to and is eligible to chii tiles [t1] [t2] [t3], 
    update player's handtile*)
-let chii_update_handtile t1 t2 t3 player = 
+(* let chii_update_handtile t1 t2 t3 player = 
+   let hand_tile = player.hand_tile in
+   let dark = hand_tile.dark in 
+   let light = hand_tile.light in
+   hand_tile.dark <- [t1; t2; t3] @ dark;
+   hand_tile.light <-  remove_tile [t1; t2; t3] light;
+   () *)
+let chii_update_handtile int tile player = 
   let hand_tile = player.hand_tile in
   let dark = hand_tile.dark in 
   let light = hand_tile.light in
-  hand_tile.dark <- [t1; t2; t3] @ dark;
-  hand_tile.light <-  remove_tile [t1; t2; t3] light;
+  let all_pos = Tile.all_pos dark tile in 
+  let picked = get_ele all_pos int in
+  hand_tile.dark <- picked @ dark;
+  hand_tile.light <-  remove_tile picked light;
   ()
 
 (* 12 choose 3, 9 choose 3, 6 choose 3, 3
