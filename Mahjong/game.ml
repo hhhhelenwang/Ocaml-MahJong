@@ -141,41 +141,39 @@ let make_game state =
     combination the player can build from chii, and update game state.  *)
 let rec after_chii state current_player last_discarded =
   let hand_dark = Player.hand_tile_dark current_player in
-  if Tile.get_id last_discarded = 0 then state
-  else if Tile.chii_legal hand_dark last_discarded
-  then begin
-    chii_combo state last_discarded hand_dark;
-    print_endline {|You can chii the last discarded tile.|};
-    print_endline {|Which combo you would like to Chii? E.g. Chii 1|}
-    print_endline ">>";
-    match Command.parse (read_line ()) with
-    | Chii n -> 
-        Player.chii_update_handtile n last_discarded current_player; 
-        state
-    | Discard (kind, number) -> 
-      print_endline "You can't discard now."; 
-      after_chii state current_player last_discarded
-    | Ron -> 
-      print_endline "You can't Ron now. Good luck with the rest of the game!"; 
-      after_chii state current_player last_discarded
-    | Quit -> {state with in_game = false}
-  end
+  if Tile.chii_legal hand_dark last_discarded
+  then chii_helper state last_discarded hand_dark current_player
   else state
 
 (** displays all possible combinations the player can build by chii. *)
-and chii_combo state last hand_dark = 
+and chii_helper state last hand_dark current_player = 
   let all_chii_combo = Tile.all_pos hand_dark last in
-  print_endline ""
-
-(* TODO: 
-    call chii_legal, 
-    display options for chii, 
-    take user input, chii *)
+  print_endline {|You can chii the last discarded tile.|};
+  print_endline (string_of_all_combos all_chii_combo);
+  print_endline {|Which combo you would like to Chii? E.g. Chii 1\n>>|};
+  match Command.parse (read_line ()) with
+  | Chii n when n < List.length all_chii_combo -> 
+    Player.chii_update_handtile n last current_player; state
+  | Chii n -> 
+    print_endline "Please choose from the given option\n>>";
+    after_chii state current_player last
+  | Discard (kind, number) -> 
+    print_endline "You can't discard now."; 
+    after_chii state current_player last
+  | Ron -> 
+    print_endline "You can't Ron now. Good luck with the rest of the game!"; 
+    after_chii state current_player last
+  | Quit -> 
+    print_endline "Thank you for playing, bye!";
+    {state with in_game = false}
 
 (** convert a set of combos to string for printing *)
-and string_of_combos combos = 
+and string_of_all_combos combos = 
   failwith ""
 
+(** [after_draw state current_player] is the state of game after
+    [current_player] at [state] draws a card. It takes the first tile from 
+    the randomized pile and put it in player's hand. *)
 let after_draw state current_player =
   let drawn_tile = 
     match state.wall_tiles with
@@ -188,6 +186,8 @@ let after_draw state current_player =
   Tile.dp drawn_tile;
   state
 
+(** [after_discard state current_player] is the state of game after
+    [current_player] at [state] discard a tile. *)
 let rec after_discard state current_player =
   print_endline {|Enter command to discard a tile. E.g. "discard Man 1"\n|};
   print_endline ">>";
