@@ -25,21 +25,21 @@ let string_tile t =
   let num = string_of_int t.number in
   let n = t.number in 
   match t.kind with
-  | Man -> "   Man " ^ num
-  | Pin -> "   Pin "^ num
-  | Sou -> "   Sou "^ num
+  | Man -> " Man " ^ num
+  | Pin -> " Pin "^ num
+  | Sou -> " Sou "^ num
   | Wind-> begin match n with
-      | 1 -> "   East"^ num
-      | 2 -> "   South"^ num
-      | 3 -> "   West"^ num
-      | 4 -> "   North"^ num
-      |_ -> "   Not right"^ num
+      | 1 -> " East"^ num
+      | 2 -> " South"^ num
+      | 3 -> " West"^ num
+      | 4 -> " North"^ num
+      | _ -> " Not right"^ num
     end
   | Dragon -> begin match n with
-      | 1 -> "   Red_Dragon"^ num
-      | 2 -> "   Green_Dragon"^ num
-      | 3 -> "   White_Draon"^ num
-      |_ -> "   Not right"^ num
+      | 1 -> " Red_Dragon"^ num
+      | 2 -> " Green_Dragon"^ num
+      | 3 -> " White_Draon"^ num
+      | _ -> " Not right"^ num
     end
 
 
@@ -51,10 +51,12 @@ let rec find_tile kind number lst=
   | h :: t when h.kind = kind && h.number = number -> Some h
   | h :: t -> find_tile kind number t
 
+(* [remove_tile target lst] remove a single tile [target] from [lst] *)
 let remove_tile target lst =
   List.filter (fun this_tile -> get_id this_tile <> get_id target) lst
 
-let dp t=
+(* [dp t] display a tile [t] by printing it*)
+let dp t =
   let n= t.number in
   match t.kind with
   | Man -> print_string "   Man "; print_int n
@@ -158,11 +160,6 @@ let sorted_one_kind kind lst =
   let compare t1 t2 = t1.number - t2.number in
   List.sort compare (filter_kind kind lst)
 
-(* [sort_one_number num lst] returns a list of tiles with same 
-   number*)
-let sort_one_number num lst = 
-  List.filter (fun x -> x.number == num) lst
-
 let sort lst =
   let kinds = [Pin; Man; Sou; Wind; Dragon] in 
   let rec helper acc kinds =
@@ -206,10 +203,15 @@ let rec get_first_int lst int acc =
   if int = 0 then acc else
     match lst with
     | [] -> failwith "wrong list, length < 3"
-    | h :: t -> get_first_int t (int-1) (h :: acc)
+    | h :: t -> get_first_int t (int   - 1) (h :: acc)
+
+(* [sort_one_number num lst] returns a list of tiles with same 
+   number*)
+let sort_one_number num lst = 
+  List.filter (fun x -> x.number == num) lst
 
 (* return all possible ke. *)
-let pos_ke same_kind t =
+let pos_triplet same_kind t =
   let same_num = sort_one_number t.number same_kind in
   if (List.length same_num > 2) 
   then get_first_int same_num 3 []
@@ -222,18 +224,15 @@ let all_pos lst t =
   let same_kind = sorted_one_kind t.kind (t::lst) in
   let seq_all = seq_all same_kind t.number in
   begin 
-    if List.length (pos_ke same_kind t) = 0 then seq_all 
-    else (pos_ke same_kind t) :: seq_all 
+    if List.length (pos_triplet same_kind t) = 0 then seq_all 
+    else (pos_triplet same_kind t) :: seq_all 
   end
 
 (* [chii_legal lst t] checks if user is able to chii. [lst] is
    player's current dark hand tile, and [t] is the tile we want to
    check.  require lst length > 3*)
 let chii_legal lst t = 
-  let same_kind = sorted_one_kind t.kind (t::lst) in
-  let same_num = sort_one_number t.number same_kind in
-  let seq_all = seq_all same_kind t.number in
-  List.length same_num > 2 || List.length seq_all > 0
+  List.length (all_pos lst t) > 0
 
 (* [pong_legal lst t] checks is user is able to pong*)
 let pong lst t = 

@@ -30,8 +30,9 @@ val draw_tile : t -> Tile.t -> unit
     discard is not in their hand tiles.  *)
 val discard_tile: t -> Tile.t option -> bool
 
-(** riichi check if the player can riichi *)
-val check_riichi: t -> bool
+(** riichi check if the player can riichi 
+    return an empty list if the player can't*)
+val check_riichi: t -> Tile.t list
 
 (** change status from normal to riichi *)
 val riichi: t -> unit
@@ -46,28 +47,19 @@ val d_list: Tile.t list -> unit
 val init_player: int -> bool -> bool -> Tile.t list -> Tile.t list -> 
   Tile.t list -> t
 
-type combination ={
-  left_list: Tile.t list;
-  right_list: Tile.t list;
-  c_comb: Tile.t list;
-  pos : Tile.t list list;
-  long_list:  Tile.t list list list;
-}
-
-val get_3 : int -> int -> combination -> combination
-
-type  n_comb={
-  pair:Tile.t list;
+type comb = {
+  pair: Tile.t list;
   triplet: Tile.t list list;
-  info: (Tile.t*int) list;
-  rest_tile: Tile.t list;
+  info: (Tile.t * int) list;
   seq: Tile.t list list;
-  mutable rong: bool;
+  mutable ron: bool;
 }
 
-val ron_legal : n_comb -> bool
-val ini_comb: Tile.t list -> n_comb
-val check_triplet :  n_comb -> bool
+(* val ron_legal : n_comb -> bool  *)
 
-(** [chii_update_handtile n tile player] updates player's handtile *)
+val ini_comb: Tile.t list -> comb
+val check_triplet : comb -> bool
 val chii_update_handtile : int -> Tile.t -> t -> unit
+
+val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
+val print_info: (Tile.t * int) list -> unit
