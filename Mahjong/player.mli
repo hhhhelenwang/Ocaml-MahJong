@@ -46,16 +46,6 @@ val d_list: Tile.t list -> unit
 val init_player: int -> bool -> bool -> Tile.t list -> Tile.t list -> 
   Tile.t list -> t
 
-type combination ={
-  left_list: Tile.t list;
-  right_list: Tile.t list;
-  c_comb: Tile.t list;
-  pos: Tile.t list list;
-  long_list:  Tile.t list list list;
-}
-
-(* val get_3 : int -> int -> combination -> combination *)
-
 type comb = {
   pair: Tile.t list;
   triplet: Tile.t list list;
@@ -68,7 +58,7 @@ type comb = {
 
 val ini_comb: Tile.t list -> comb
 val check_triplet : comb -> bool
-val chii_update_handtile : Tile.t -> Tile.t -> Tile.t -> t -> unit
+val chii_update_handtile : int -> Tile.t -> t -> unit
 
 val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
 val print_info: (Tile.t * int) list -> unit

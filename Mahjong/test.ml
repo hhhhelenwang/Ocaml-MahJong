@@ -70,6 +70,9 @@ let player_tests =
 (* let player_handt = Player.display_I player1 *)
 (* let x = Player.d_list t_list1 *)
 
+let _ = print_endline ("finish evaluate player test" )
+
+
 
 (* Game tests ******************)
 let init_deck = init_state ()
@@ -118,6 +121,12 @@ let command_tests = [
     "Discard something" Malformed;
   command_parse_text_exn {|"" -> Empty|} "" Empty;
 ]
+
+
+
+let _ = print_endline ("finish evaluate command parse test" )
+
+
 (** Rong test- *)
 (* tile: id kind num isDiscarded *)
 let t1 = Tile.construct 1 Man 1 false
@@ -189,6 +198,11 @@ let ron_tests = [
   ron_test "7 pairs" n_comb10 true;
 ]
 
+
+let _ = print_endline ("finish evaluate ron test" )
+
+
+
 (* Tile tests ******************)
 
 let rec display_ll lst = 
@@ -243,6 +257,10 @@ let tile_tests = [
   chii_legal_test "Man 12345, Man 8, wrong num" pos_l1 t8 false;
 
 ]
+
+
+let _ = print_endline ("finish evaluate chii_legal  test" )
+
 
 let print_the_pos= display_ll (all_pos pos_l1 t3)
 let print1 = display_ll (all_pos pos_l2 t2)

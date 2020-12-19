@@ -291,12 +291,10 @@ let rec check_triplet comb =
   else begin
     match comb.info with
     | [] -> failwith "not right triple"
-    | h :: t -> print_endline ("enter check_trip");
+    | h :: t -> 
       let new_tile = fst h in
       let new_info = update_info (rem_info_c 3 new_tile [] comb.info) in
       let new_k = [new_tile; new_tile; new_tile] :: comb.triplet in
-      print_info (comb.info);
-
       if ( get_info new_tile comb.info > 2 && 
            check_triplet {comb with info = new_info; triplet = new_k}) 
       then true
@@ -307,7 +305,7 @@ and
   check_pair comb = 
   match comb.info with 
   | [] -> failwith "not right pair"
-  | h :: t ->  print_endline ("enter check_pair");
+  | h :: t -> 
     let new_tile = fst h in
     let new_info = update_info (rem_info_c 2 new_tile [] comb.info) in
     let new_p =[new_tile; new_tile] @ comb.pair in begin
@@ -320,7 +318,7 @@ and
   check_seq comb = 
   match comb.info with 
   | [] -> failwith "not right seq"
-  | h :: t ->  print_endline ("enter check_comb");
+  | h :: t ->  
     if List.length comb.info > 2 then
       begin
         let new_info = update_info (remove_info_seq 3 comb.info []) in
@@ -362,8 +360,11 @@ let rec check_r_help hand lst acc =
 
 (** given the kind, generate 1-9 tile of this kind  *)
 let rec generate_n kind n acc = 
-  let new_t= Tile.construct 1 kind n false in
-  generate_n kind (n - 1) (new_t :: acc)
+  if (n > 0) then begin 
+    let new_t= Tile.construct 1 kind n false in
+    generate_n kind (n - 1) (new_t :: acc)
+  end
+  else acc
 
 (**generate a list of all differnet tile*)
 let generate_tiles = 
