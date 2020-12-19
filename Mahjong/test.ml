@@ -56,8 +56,10 @@ let tile7 = Tile.construct 8 Dragon 1 false
 
 let t_list1 = [tile2; tile4]
 let t_list2 = [tile1; tile2; tile1; tile2; tile4; tile5; tile6; tile7]
+(* Man127 Sou3 Wind2 Dragon2 Dragon1*)
 let dark1 = [tile1; tile2; tile3; tile4; tile5; tile6; tile7]
 
+(* id richii chii light dark discard *)
 let player1 = Player.init_player 1 false false [] dark1 t_list1
 
 (* let sorted_tiles = Player.d_list (Tile.sort t_list2) *)
@@ -127,7 +129,7 @@ let command_tests = [
 let _ = print_endline ("finish evaluate command parse test" )
 
 
-(** Rong test- *)
+(** Rong test--------------------------------------------- *)
 (* tile: id kind num isDiscarded *)
 let t1 = Tile.construct 1 Man 1 false
 let t2 = Tile.construct 1 Man 2 false
@@ -152,6 +154,15 @@ let t19 = Tile.construct 1 Sou 9 false
 let t21 = Tile.construct 1 Dragon 1 false
 let t22 = Tile.construct 1 Dragon 2 false
 let t23 = Tile.construct 1 Dragon 3 false
+
+let t31 = Tile.construct 1 Pin 1 false
+let t32 = Tile.construct 1 Pin 2 false
+let t33 = Tile.construct 1 Pin 3 false
+let t34 = Tile.construct 1 Pin 4 false
+
+let t41 = Tile.construct 1 Wind 1 false
+let t42 = Tile.construct 1 Wind 2 false
+let t43 = Tile.construct 1 Wind 3 false
 
 let ron_l1= [t1;t1;t1; t2;t2;t2; t3;t3;t3; t4;t4;t4; t5;t5]
 let ron_l2= [t1;t2;t3; t7;t8;t9; t11;t12;t13; t17;t18;t19; t5;t5]
@@ -201,6 +212,27 @@ let ron_tests = [
 
 let _ = print_endline ("finish evaluate ron test" )
 
+(**riichi test *)
+
+let riichi_test
+    (name : string)
+    (player : Player.t)
+    (expected_output : Tile.t list) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (Player.check_riichi player) 
+        ~printer: (pp_list Tile.string_tile))
+
+let player2 = init_player 3 false false [] 
+    [t1;t1;t1; t2;t2;t2; t3;t3;t3; t4;t4;t4; t5] []
+(* 111 222 333 444 5 *)
+let player3 = init_player 3 false false [] 
+    [t11;t11;t11; t12;t12;t12; t13;t13;t13; t14;t14;t14; t15] []
+(* 111 222 333 444 5 *)
+
+let riichi_tests = [
+  riichi_test "player2 can riichi" player2 [t6;t5;t4;t3;t2] ;
+  riichi_test "player3 can riichi" player3 [t16;t15;t14;t13;t12] ;
+] 
 
 
 (* Tile tests ******************)
@@ -232,7 +264,7 @@ let all_pos_test
     (expected_output : Tile.t list list) : test =
   name >:: (fun _ ->
       assert_equal expected_output (all_pos lst t)
-        ~printer:(pp_matrix))
+        ~printer: pp_matrix)
 
 let chii_legal_test
     (name : string)
@@ -242,22 +274,99 @@ let chii_legal_test
   name >:: (fun _ ->
       assert_equal expected_output (chii_legal lst t))
 
-let pos_l1 = [t1;t2;t3;t4;t5]
-let pos_l2 = [t1;t2;t2;t2;t3;t4;t5]
+let chii_update_handtile_test
+    (name : string)
+    (player : Player.t)
+    (expected_output : Tile.t list list) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output 
+        ([hand_tile_light player] @ [hand_tile_dark player]) 
+        ~printer: pp_matrix)
 
+let chii_update_state_c_test
+    (name : string)
+    (player : Player.t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (state_c player) ~printer: string_of_bool)
+
+let draw_tile_test
+    (name : string)
+    (player : Player.t)
+    (expected_output : Tile.t list) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (hand_tile_dark player) 
+        ~printer: (pp_list Tile.string_tile))
+
+let discard_tile_test
+    (name : string)
+    (player : Player.t)
+    (tile_opt : Tile.t option)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (discard_tile player tile_opt) 
+        ~printer: string_of_bool)
+
+let discard_tile_detail_test
+    (name : string)
+    (player : Player.t)
+    (expected_output : Tile.t list list) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output ([hand_tile_dark player] @ 
+                                    [discard_pile player]) 
+        ~printer: pp_matrix)
+
+let pos_l1 = [t1;t2;t4;t5]
+let pos_l2 = [t1;t2;t2]
+let pos_l3 = [t1;t2;t2;t3;t4;t5]
+let pos_l4 = [t11;t12;t1;t2]
+let pos_l5 = [t11;t12;t13;t14;t21;t22;t23;t41;t43;t32;t33]
+
+(* id richii chii light dark discard *)
+let player11 = Player.init_player 11 false false [] pos_l1 []
+let _ = chii_update_handtile 1 t3 player11
+let _ = draw_tile player11 t1
+
+let player12 = Player.init_player 12 false false [t1;t1;t1] pos_l2 []
+let _ = chii_update_handtile 1 t2 player12
+let _ = draw_tile player12 t31
+
+let player13 = Player.init_player 13 false false [] [t1;t2;t3;t4] []
 
 let tile_tests = [
-  (* all_pos_test "Man 12345, Man3" 
-     pos_l1 t3 [[t1;t2;t3];[t3;t4;t5];[t2;t3;t4]];
-     all_pos_test "Man 1 222 345, Man2" 
-     pos_l2 t2 [[t2;t2;t2];[t2;t3;t4];[t1;t2;t3]]; *)
+  all_pos_test "Only Sequence: Man 1245, Man3" 
+    pos_l1 t3 [[t2; t3; t4];[t3; t4; t5];[t1; t2; t3]];
+  all_pos_test "Only Triplet: Man 22, Man2" 
+    pos_l2 t2 [[t2; t2; t2]];
+  all_pos_test "Sequence and triplet: Man 1 22 345, Man2" 
+    pos_l3 t2 [[t2; t2; t2];[t1; t2; t3];[t2; t3; t4]];
+  all_pos_test "Different kinds: Man12 Sou12, Sou3" 
+    pos_l4 t13 [[t11; t12; t13]];
+  all_pos_test "all kinds, but only Sou 123 valid" 
+    pos_l5 t31 [[t31; t32; t33]];
 
-  chii_legal_test "Man 12345, Man3" pos_l1 t3 true;
+  chii_legal_test "Man 12 45, Man3" pos_l1 t3 true;
+  chii_legal_test "Man122, Man2" pos_l2 t2 true;
+  chii_legal_test "Man122345, Man2" pos_l3 t2 true;
   chii_legal_test "Man 12345, Sou1, dif kind" pos_l1 t11 false;
   chii_legal_test "Man 12345, Man 8, wrong num" pos_l1 t8 false;
+  chii_legal_test "Man 1, Man 2, not enough tiles" [t1] t2 false;
 
+  draw_tile_test "draw Man1" player11 [t1;t1;t5];
+  draw_tile_test "draw Man1" player12 [t31;t1];
+
+  chii_update_handtile_test "update chii_handtile" player11 
+    [[t2;t3;t4];[t1;t1;t5]];
+  chii_update_state_c_test "update state_c" player11 true;
+
+  chii_update_handtile_test "update chii_handtile" player12 
+    [[t2;t2;t2;t1;t1;t1];[t31;t1]];
+  chii_update_state_c_test "update state_c" player12 true;
+
+  (* discard_tile_test "discard existing tile" player13 (Some t2) true;
+     discard_tile_detail_test "discard existing tile" player13
+     [[t1;t3;t4];[t2]]; *)
 ]
-
 
 let _ = print_endline ("finish evaluate chii_legal  test" )
 
@@ -272,6 +381,7 @@ let suite =
   "test suite for Mahjong" >::: List.flatten [
     player_tests;
     command_tests;
+    riichi_tests;
     ron_tests;
     tile_tests;
   ]

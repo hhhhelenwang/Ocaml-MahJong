@@ -42,7 +42,7 @@ let hand_tile_dark t = t.hand_tile.dark
 let discard_pile t = t.discard_pile
 
 let draw_tile player tile =
-  player.hand_tile.dark <- [tile] @ player.hand_tile.dark
+  player.hand_tile.dark <- (Tile.sort ([tile] @ player.hand_tile.dark))
 
 let discard_tile player tile_opt =
   let handt = player.hand_tile.dark in
@@ -66,7 +66,6 @@ let display_I t =
   d_list lt;
   d_list dt
 
-
 (** [init_player id richii chii light dark discard] is the constructor of 
     player type*)
 let init_player id richii chii light dark discard =
@@ -88,77 +87,37 @@ let combine t =
   let hand = t.hand_tile in 
   Tile.sort hand.light @ hand.dark
 
-(* [get_ele lst n] gets the nth tile in user's combined hand tile *)
-let rec get_ele lst n=
+(*
+!!!!replaced by get_nth_opt??
+ [get_ele lst n] gets the nth tile in user's combined hand tile *)
+let rec get_ele lst n =
   match lst with
   | [] -> []
   | h :: t -> begin
-      if n = 0 then h
+      if n <= 0 then h
       else get_ele lst (n-1)
     end
 
-(* [get_ele_range lst n l acc] gets a list of tiles starting from n-th to 
-   (n+l)th in user's combined hand tile *)
-let rec get_ele_range lst n l acc = 
-  if l = 0 then acc
-  else get_ele_range lst n (l-1) (get_ele lst (n+1)) @ acc
-
-(* remove [int] number of tiles that are equal to [t] from 
-   a list of tiles [right_acc] *)
-let rec remove_helper tile left_acc right_acc int = 
-  if int = 0 then left_acc @ right_acc
-  else begin
-    match right_acc with
-    | [] -> failwith "wron_legal input"
-    | h :: t -> begin
-        if Tile.ck_eq h tile then remove_helper tile left_acc t (int -1) 
-        else remove_helper tile (h :: left_acc) t (int - 1)
-      end
-  end
-
 (* remove a list of tiles [tlist] from pile *)
-let rec remove_tile tlist pile = 
-  match tlist with
-  | [] -> pile
-  | tile :: t -> remove_tile t (remove_helper tile [] pile 1)
+let remove_tile_lst tlist pile = 
+  List.filter (fun x -> not (List.mem x tlist)) pile
 
-
-(* given [player] wants to and is eligible to chii tiles [t1] [t2] [t3], 
-   update player's handtile*)
+(* [chii_update_handtile int tile player] updates player's dark, light handtile,
+   and state_c to true.
+   [int] is the i-th option in all possible chii-combination, the first element
+   in a list is the 1st option. Return 1st ele if int <= 0
+   [tile] is the tile [player] wants to chii. 
+   Precondition:[player] wants to and is eligible to chii tiles.*)
 let chii_update_handtile int tile player = 
   let hand_tile = player.hand_tile in
   let dark = hand_tile.dark in 
   let light = hand_tile.light in
   let all_pos = Tile.all_pos dark tile in 
-  let picked = get_ele all_pos int in
-  hand_tile.dark <- picked @ dark;
-  hand_tile.light <- remove_tile picked light;
+  let picked = get_ele all_pos (int-1) in
+  hand_tile.dark <- remove_tile_lst picked dark;
+  hand_tile.light <- picked @ light;
   player.state_c <- true;
   ()
-
-(* let chii_update_handtile t1 t2 t3 player = 
-   let hand_tile = player.hand_tile in
-   let dark = hand_tile.dark in 
-   let light = hand_tile.light in
-   hand_tile.dark <- [t1; t2; t3] @ dark;
-   hand_tile.light <-  remove_tile [t1; t2; t3] light;
-   ()
-        let new_comb = tup.c_comb @ [h] in 
-        if List.length tup.right_list = n2
-        then get_3 n1 (n2-1) {tup with c_comb = new_comb;
-                                       left_list = tup.left_list @ [h];
-                                       right_list = t}
-        else if n2 mod 3 = 0
-        then get_3 n1 (n2-1) { tup with c_comb = new_comb;
-                                        left_list = tup.left_list;
-                                        right_list = t }
-        else
-          let new_tup = get_3 n1 (n2-1) { tup with c_comb = new_comb; 
-                                                   right_list = t } in
-          get_3 n1 n2 { new_tup with left_list = tup.left_list @ [h]; 
-                                     right_list = t }
-      end
-   end *)
 
 type comb = {
   pair: Tile.t list;
@@ -168,7 +127,6 @@ type comb = {
   seq: Tile.t list list;
   mutable ron: bool;
 }
-
 
 (* find h in acc, if exist >> (h, count+1), if not, append (h,1) on acc *)
 let rec generate_info h left_acc right_acc=
@@ -330,6 +288,7 @@ and
       end
     else false
 
+(**initialize a  comb which work as information of hand tile*)
 let ini_comb lst = {
   pair = [];
   triplet = [];
@@ -339,8 +298,11 @@ let ini_comb lst = {
   ron = false;
 }
 
-let riichi t=
-  failwith "hah"
+let riichi player=
+  if (player.state_r) then failwith " player already riichi ed"
+  else 
+    player.state_r <- true;
+  ()
 
 
 

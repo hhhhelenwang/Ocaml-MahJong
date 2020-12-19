@@ -30,8 +30,9 @@ val draw_tile : t -> Tile.t -> unit
     discard is not in their hand tiles.  *)
 val discard_tile: t -> Tile.t option -> bool
 
-(** riichi check if the player can riichi *)
-val check_riichi: t -> bool
+(** riichi check if the player can riichi 
+    return an empty list if the player can't*)
+val check_riichi: t -> Tile.t list
 
 (** change status from normal to riichi *)
 val riichi: t -> unit
@@ -62,4 +63,3 @@ val chii_update_handtile : int -> Tile.t -> t -> unit
 
 val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
 val print_info: (Tile.t * int) list -> unit
-val check_riichi: t -> Tile.t list
