@@ -74,6 +74,26 @@ let dp t=
       |_ -> print_string "   Not right"
     end
 
+let string_of_tile tile =
+  let n = tile.number in
+  match tile.kind with
+  | Man -> "Man " ^ string_of_int n
+  | Pin -> "Pin " ^ string_of_int n
+  | Sou -> "Sou " ^ string_of_int n
+  | Wind-> begin match n with
+      | 1 -> "East"
+      | 2 -> "South"
+      | 3 -> "West"
+      | 4 ->  "North"
+      | _ -> "Not a tile"
+    end
+  | Dragon -> begin match n with
+      | 1 -> "Red_Dragon"
+      | 2 -> "Green_Dragon"
+      | 3 -> "White_Draon"
+      | _ -> "Not right"
+    end
+
 let construct id kind num b =
   {
     id = id;

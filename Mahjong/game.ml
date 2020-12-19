@@ -153,7 +153,7 @@ and chii_helper state last hand_dark current_player =
   print_endline {|Which combo you would like to Chii? E.g. Chii 1\n>>|};
   match Command.parse (read_line ()) with
   | Chii n when n < List.length all_chii_combo -> 
-    Player.chii_update_handtile n last current_player; state
+    Player.chii_update_handtile (n - 1) last current_player; state
   | Chii n -> 
     print_endline "Please choose from the given option\n>>";
     after_chii state current_player last
@@ -169,7 +169,14 @@ and chii_helper state last hand_dark current_player =
 
 (** convert a set of combos to string for printing *)
 and string_of_all_combos combos = 
-  failwith ""
+  let order = ref 0 in
+  List.fold_left (fun acc combo -> 
+      order := !order + 1; 
+      acc ^ (string_of_int !order) ^ (string_of_combo combo)) "" combos
+
+and string_of_combo combo =
+  List.fold_left 
+    (fun acc tile -> acc ^ "  " ^ Tile.string_of_tile tile) "" combo
 
 (** [after_draw state current_player] is the state of game after
     [current_player] at [state] draws a card. It takes the first tile from 
@@ -189,8 +196,7 @@ let after_draw state current_player =
 (** [after_discard state current_player] is the state of game after
     [current_player] at [state] discard a tile. *)
 let rec after_discard state current_player =
-  print_endline {|Enter command to discard a tile. E.g. "discard Man 1"\n|};
-  print_endline ">>";
+  print_endline {|Enter command to discard a tile. E.g. "discard Man 1"\n>>|};
   match Command.parse (read_line ()) with
   | Discard (kind, number) -> discard_helper state current_player kind number
   | Chii n -> print_endline "You can't Chii now."; state
@@ -202,13 +208,19 @@ let rec after_discard state current_player =
 and discard_helper state current_player kind number = 
   let tile_opt = 
     Tile.find_tile kind number (Player.hand_tile_dark current_player) in
-  if Player.discard_tile current_player tile_opt then state
-  else after_discard state current_player
+  match Player.discard_tile current_player tile_opt with
+  | true -> state
+  | false -> 
+    print_endline "You don't have this tile.";
+    after_discard state current_player
 (* let tile_opt = 
    match Command.parse read_line () with
    | Discard (kind, number) ->
    Tile.find_tile kind number Player.hand_tile_dark current_player
    | Chii n ->  *)
+
+let after_richii state current_player =
+  failwith ""
 
 (** [next_state state] is the game state after a player has played their turn. 
      get the last player

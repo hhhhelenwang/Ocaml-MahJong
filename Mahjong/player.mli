@@ -68,4 +68,6 @@ type  n_comb={
 val ron_legal : n_comb -> bool
 val ini_comb: Tile.t list -> n_comb
 val check_triplet :  n_comb -> bool
+
+(** [chii_update_handtile n tile player] updates player's handtile *)
 val chii_update_handtile : int -> Tile.t -> t -> unit

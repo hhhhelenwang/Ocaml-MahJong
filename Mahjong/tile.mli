@@ -34,6 +34,9 @@ val remove_tile : t -> t list -> t list
 (** display this tile*)
 val dp : t -> unit
 
+(** [string_of_tile tile] is a tring representation of [tile]. *)
+val string_of_tile : t -> string
+
 (** init a tile *)
 val construct : id -> kind -> int -> bool -> t
 
