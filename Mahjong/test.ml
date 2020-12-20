@@ -14,13 +14,17 @@ open Command
       All functions except display related functions and their helper functions 
       are tested by OUnit. This is because we think it is more efficient to see
       if display/print related functions are functioning correctly by looking 
-      at them. Specifically, the parts of the system tested by OUnit are 
+      at them. 
+
+      Specifically, the parts of the system tested by OUnit are 
       1) Player Module: 
       divided into riichi, ron, and other —— three pieces of logic
         i) riichi_tests: check_riichi, riichi
-        ii) ron_tests: 
-        iii) player_tests:
-      2) Tile Module: 
+        ii) ron_tests: check_triplet, ron
+        iii) player_tests: discard_tile, draw_tile, init_player,ini_comb, 
+        ini_info
+      2) Tile Module: construct, sim_construct, find_tile, ck_adj, ck_eq, 
+      ck_seq, ck_tri, chii_legal, all_pos
     Parts of the system tested manually and why:
 
     How OUnit test cases were developed (black box, galss box, randomized, etc):
@@ -188,22 +192,39 @@ let ron_test
       assert_equal expected_output (Player.check_triplet com) 
         ~printer: string_of_bool)
 
+let pp_bool_yaku tuple = 
+  "("^ (string_of_bool (fst tuple)) ^ ", " ^(string_of_yaku (snd tuple)) ^ ")"
+
+let ron_output_test
+    (name : string)
+    (com : Player.comb)
+    (expected_output : (bool * yaku)) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (Player.ron com) ~printer: pp_bool_yaku)
+
 let ron_tests = [
-  ron_test "111 222 333 444 55" n_comb1 true;
-  ron_test "123 789 123 789 55" n_comb2 true;
-  ron_test "1122334567 88 11" n_comb3 false;
-  ron_test "111 22 333 444 555 " n_comb4 true;
-  ron_test "333 444 555 345 12" n_comb5 true;
-  ron_test "rrr ggg 56667 www" n_comb6 true;
-  ron_test "333 444 555 345 89" n_comb7 false;
-  ron_test "cannot exhaust 12 234" n_comb8 false;
-  ron_test "<14 tiles 22 567789" n_comb9 false;
-  ron_test "7 pairs" n_comb10 true;
-  ron_test "tungyao only Man222 333 456 777 Sou88" n_comb11 true;
-  ron_test "hunyise only Man111 333 456 777 88" n_comb12 true;
-  ron_test "did not riichi, eventhough formed 4*(seq||tri)+2" n_comb13 false;
-  ron_test " not riichi, but has draon triplet" n_comb14 true;
-  ron_test " not riichi, but pinfu" n_comb15 true;
+  (* ron_test "111 222 333 444 55" n_comb1 true;
+     ron_test "123 789 123 789 55" n_comb2 true;
+     ron_test "1122334567 88 11" n_comb3 false;
+     ron_test "111 22 333 444 555 " n_comb4 true;
+     ron_test "333 444 555 345 12" n_comb5 true;
+     ron_test "rrr ggg 56667 www" n_comb6 true;
+     ron_test "333 444 555 345 89" n_comb7 false;
+     ron_test "cannot exhaust 12 234" n_comb8 false;
+     ron_test "<14 tiles 22 567789" n_comb9 false;
+     ron_test "7 pairs" n_comb10 true;
+     ron_test "Tanyao only Man222 333 456 777 Sou88" n_comb11 true;
+     ron_test "hunyise only Man111 333 456 777 88" n_comb12 true;
+     ron_test "did not riichi, eventhough formed 4*(seq||tri)+2" n_comb13 false;
+     ron_test " not riichi, but has draon triplet" n_comb14 true;
+     ron_test " not riichi, but pinfu" n_comb15 true; *)
+
+  ron_output_test "true, riichi" n_comb1 (true, Riichi);
+  ron_output_test "true, Tanyao" n_comb11 (true, Tanyao);
+  ron_output_test "true, Hunyise" n_comb12 (true, Hunyise);
+  (* ron_output_test "true, draon triplet" n_comb14 (true, Dragontriplet);
+     ron_output_test "true, pinfu" n_comb14 (true, Pinfu);
+     ron_output_test "false, None" n_comb9 (false, None); *)
 ]
 
 let _ = print_endline ("finished evaluating ron test" )

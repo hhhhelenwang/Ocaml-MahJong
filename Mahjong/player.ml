@@ -249,11 +249,12 @@ let tanyao_helper tile =
 
 (** check if it is duanyaoji: cannot be number 1, number 9, wind or dragon *)
 let is_tanyao new_l =
-  not (List.exists tanyao_helper new_l) 
+  (* print_endline (string_of_bool (List.exists tanyao_helper new_l)); *)
+  not (List.exists tanyao_helper new_l)
 
 (* a hand with tiles from only one of the three number tiles (Man Pin Sou),
     and wind tiles and dragon tiles*)
-let is_hunyise new_l = 
+let is_hunyise new_l =
   let man = List.length (Tile.filter_kind Tile.Man new_l) in 
   let sou = List.length (Tile.filter_kind Tile.Sou new_l) in 
   let bin = List.length (Tile.filter_kind Tile.Pin new_l) in 
@@ -346,7 +347,6 @@ and
       end
     else false
 
-
 type yaku = Riichi | Tanyao | Hunyise | Dragontriplet | Seven_Pairs | Pinfu 
           | None
 
@@ -360,26 +360,22 @@ let string_of_yaku yaku =
   | Pinfu -> "Pinfu"
   | None -> ""
 
-
 let ron comb =
   let new_tri = List.concat comb.triplet in
   let new_seq = List.concat comb.seq in
   let new_l = new_tri @ new_seq @ comb.pair in
+  print_endline (string_of_bool (List.exists tanyao_helper new_l));
   if check_triplet comb then begin
     if comb.riichied then (true, Riichi)
-    else if is_tanyao new_l then (true, Tanyao)
-    else if is_hunyise new_l then (true, Hunyise)
     else if is_dragons new_tri then (true, Dragontriplet)
     else if List.length comb.pair = 14 then (true, Seven_Pairs)
     else if is_pinfu new_seq comb.pair then (true, Pinfu)
+    else if is_tanyao new_l then (true, Tanyao)
+    else if is_hunyise new_l then (true, Hunyise)
+
     else (false, None)
   end
   else (false, None) 
-
-
-(* comb.riichied || is_tanyao new_l || is_hunyise new_l || 
-   is_dragons new_tri || is_pinfu new_seq comb.pair*)
-
 
 (**initialize a comb which work as information of hand tile*)
 let ini_comb lst bool = {
