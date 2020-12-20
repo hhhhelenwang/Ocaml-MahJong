@@ -121,6 +121,7 @@ let extract_rand lst =
 
 (** [shuffle_list lst] is the shuffled [lst]. *)
 let shuffle_list lst = 
+  Random.self_init ();
   let shuffled, left = extract_n lst (List.length lst) [] extract_rand in
   shuffled
 
@@ -139,16 +140,16 @@ let extract_first_n lst n =
     - [players] has each player with 13 hand tiles *)
 let make_game state = 
   let shuffled_tiles = shuffle_list state.wall_tiles in
-  let rec assign n_of_p shuffled_tiles acc = 
-    if n_of_p = 0 then acc
+  let rec assign n_of_p left acc = 
+    if n_of_p = 0 then (acc, left)
     else begin
       let hand, left = extract_first_n shuffled_tiles 13 in
       let hand' = Tile.sort hand in
       let player = Player.init_player n_of_p false false [] hand' [] in
-      assign (n_of_p - 1) left (player :: acc)
+      assign (n_of_p - 1) left (player :: acc) 
     end in
-  let players = assign 4 shuffled_tiles [] in
-  { state with players = players }
+  let players, walls = assign 4 shuffled_tiles [] in
+  { state with players = players; wall_tiles = walls}
 
 (* pretty-print helpers ************************************)
 
@@ -176,9 +177,9 @@ let string_of_current player =
   ^ string_of_int id 
   ^ "\n"
   ^ "Light hand: " ^ "\n"
-  ^ string_of_combo light ^ "\n"
+  ^ string_of_combo light
   ^ "Dark hand: " ^ "\n"
-  ^ string_of_combo dark ^ "\n"
+  ^ string_of_combo dark ^ "\n\n"
 
 (** [string_of_other player] is the string representation of [player]'s tiles
     provided that player is not the current player. *)
@@ -197,7 +198,6 @@ let string_of_other player =
       match tile_opt with
       | Some last_tile -> Tile.string_of_tile last_tile
       | None -> "") last_tile 
-  ^ "\n"
   ^ "Light hand: " 
   ^  string_of_combo light 
   ^ "\n"
@@ -234,7 +234,7 @@ and chii_helper state last combos current_player hand_dark =
     match Command.parse (read_line ()) with
     | Chii n when 0 < n && n <= List.length combos -> 
       Player.chii_update_handtile (n - 1) last current_player;
-      print_endline (string_of_current current_player);
+      ANSITerminal.(print_string [cyan] (string_of_current current_player));
       state
     | Chii n -> 
       print_endline ("Please choose from the given option." ^ "\n" ^ ">>");
@@ -261,11 +261,16 @@ and chii_helper state last combos current_player hand_dark =
     [current_player] at [state] draws a card. It takes the first tile from 
     the randomized pile and put it in player's hand. *)
 let after_draw current_player state =
-  let drawn_tile = List.hd state.wall_tiles in
+  (* let drawn_tile = List.hd state.wall_tiles in *)
+  let drawn_tile, wall =
+    match state.wall_tiles with
+    | [] -> raise Not_found
+    | h :: t -> (h, t) in
   Player.draw_tile current_player drawn_tile;
-  print_endline ("Drawn tile: " ^ (Tile.string_of_tile drawn_tile));
-  print_endline (string_of_current current_player);
-  state
+  ANSITerminal.(print_string [yellow] 
+                  ("Drawn tile: " ^ Tile.string_of_tile drawn_tile));
+  ANSITerminal.(print_string [cyan] (string_of_current current_player));
+  { state with wall_tiles = wall }
 
 (** [after_discard state current_player] is the state of game after
     [current_player] at [state] discard a tile. *)
@@ -331,7 +336,7 @@ let after_check_rong this_plr tile state =
   let comb_for_rong = Player.ini_comb hand in (* TODO: add riichi state *)
   match Player.check_triplet comb_for_rong with
   | true -> print_endline "Rong! Congratulations, you win the game!";
-    {state with in_game = false}
+    { state with in_game = false }
   | false -> state
 
 (** [next_state state] is the game state after a player has played their turn.
@@ -363,19 +368,22 @@ and update_current_player state =
   let next_id = (state.current_player_id mod 4) + 1 in
   { state with current_player_id = next_id }
 
+(** [check_for_tie state] check if the game is tie, which means the wall
+    tiles have less than or equal to 4 tiles left but no player has won. *)
+and check_for_tie state = 
+  match state with
+  | state when List.length state.wall_tiles <= 4 -> 
+    ANSITerminal.(print_string [cyan] "Game tie!");
+    { state with in_game = false}
+  | state -> state     
+
 (** [first_round_routine this_plr last_plr state] is the state after this turn 
     if [this_plr] is the first one in the whole game to make a move. This means
     that chii is not possible and we skip to draw. *)
 and first_round_routine this_plr last_plr state =
   let state_after_draw = after_draw this_plr state in
   let drawn_tile = this_plr |> Player.hand_tile_dark |> List.hd in
-  match after_check_rong this_plr drawn_tile state_after_draw with
-  | state' when state'.in_game -> 
-    state' 
-    |> after_discard this_plr 
-    |> after_check_richii this_plr
-    |> update_current_player
-  | state' -> state'
+  rong_discard_riichi_routine this_plr drawn_tile state_after_draw 
 
 (** [chii_routine this_plr last_tile hand_dark state] is the state after this 
     turn if [this_plr] can perform chii action. In this case, the player cannot
@@ -394,16 +402,25 @@ and chii_routine this_plr last_tile hand_dark state =
     this turn if [this_plr] can not chii. This means they will draw, be checked
     for rong, and be checked for riichi. *)
 and not_chii_routine this_plr last_plr last_tile state =
-  let state1 = match after_check_rong this_plr last_tile state with
-    | state' when state'.in_game ->
-      state'
-      |> after_draw this_plr
-    | state' -> state' in
-  let drawn_tile = this_plr |> Player.hand_tile_dark |> List.hd in
-  match after_check_rong this_plr drawn_tile state1 with
-  | state' when state'.in_game ->
-    state' 
-    |> after_discard this_plr 
-    |> after_check_richii this_plr
-    |> update_current_player
+  match after_check_rong this_plr last_tile state with
+  | state' when state'.in_game -> begin
+      let state1 = after_draw this_plr state' in
+      let drawn_tile = this_plr |> Player.hand_tile_dark |> List.hd in
+      rong_discard_riichi_routine this_plr drawn_tile state1
+    end
+  | state' -> state'
+
+(** [rong_routine this_plr tile state] is a subroutine to check for rong in
+    between of a turn. *)
+and rong_discard_riichi_routine this_plr tile state = 
+  match after_check_rong this_plr tile state with
+  | state' when state'.in_game -> begin
+      let state1 = after_discard this_plr state' in
+      match check_for_tie state1 with
+      | state' when state'.in_game ->
+        state'
+        |> after_check_richii this_plr
+        |> update_current_player
+      | state' -> state'
+    end
   | state' -> state'

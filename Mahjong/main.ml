@@ -19,7 +19,7 @@ let main () =
       let message = "You can't start game with" 
                     ^ command 
                     ^ {|, please restart the game with "make play" and enter start this time.|} in
-      ANSITerminal.(print_string [magenta] message);
+      ANSITerminal.(print_string [red] message);
     end
 
 let () = main ()
