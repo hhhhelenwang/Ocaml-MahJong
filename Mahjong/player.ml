@@ -434,7 +434,8 @@ let generate_tiles =
     | [] -> acc
     | h :: t -> begin
         match h with
-        | Tile.Pin | Tile.Man | Tile.Sou -> generate t (acc @ generate_n h 9 [])
+        | Tile.Pin | Tile.Man | Tile.Sou -> 
+          generate t (acc @ generate_n h 9 [])
         | Tile.Wind -> generate t (acc @ generate_n h 4 [])
         | Tile.Dragon -> generate t (acc @ generate_n h 3 [])
       end

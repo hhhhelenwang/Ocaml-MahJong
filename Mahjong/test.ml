@@ -241,7 +241,7 @@ let check_riichi_test
     (expected_output : Tile.t list) : test =
   name >:: (fun _ ->
       assert_equal expected_output (Player.check_riichi player) 
-        ~printer: (pp_list Tile.string_tile))
+        ~printer: (pp_list Tile.string_of_tile))
 
 let riichi_test
     (name : string)
@@ -285,8 +285,8 @@ let rec display_ll lst =
 let rec lst_to_string r =
   match r with
   | [] -> ""
-  | h :: [] -> Tile.string_tile h
-  | h :: t -> Tile.string_tile h ^ ";" ^ (lst_to_string t)
+  | h :: [] -> Tile.string_of_tile h
+  | h :: t -> Tile.string_of_tile h ^ ";" ^ (lst_to_string t)
 
 let rec pp_matrix matrix =
   match matrix with
@@ -448,7 +448,7 @@ let draw_tile_test
     (expected_output : Tile.t list) : test =
   name >:: (fun _ ->
       assert_equal expected_output (hand_tile_dark player) 
-        ~printer: (pp_list Tile.string_tile))
+        ~printer: (pp_list Tile.string_of_tile))
 
 let discard_tile_test
     (name : string)

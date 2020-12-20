@@ -27,15 +27,15 @@ val discard_pile : t -> Tile.t list
 val draw_tile : t -> Tile.t -> unit
 
 (** [discard_tile t tile_opt] play a tile with id in t, return false if the tile
-   that player wants to discard is not in their hand tiles.  *)
+    that player wants to discard is not in their hand tiles.  *)
 val discard_tile: t -> Tile.t option -> bool
 
 (** [check_riichi t] checks if the player [t] can riichi. 
-  return an empty list if the player cannot riichi*)
+    return an empty list if the player cannot riichi*)
 val check_riichi: t -> Tile.t list
 
 (**  [riichi t] changes the status from normal to riichi, given the player is 
-    legal to riichi *)
+     legal to riichi *)
 val riichi: t -> unit
 
 (** [display_I t] displays a player's handtile *)
@@ -50,15 +50,15 @@ val init_player: int -> bool -> bool -> Tile.t list -> Tile.t list ->
 
 type comb = {
   (**  Players handtile in the form of (Tile, number_of_tiles) list. 
-  For example: [Sou1; Sou2; Sou2] is stored as [(Sou1, 1); (Sou2, 2)]*)
+       For example: [Sou1; Sou2; Sou2] is stored as [(Sou1, 1); (Sou2, 2)]*)
   info: (Tile.t * int) list;
 
   (**  the pair in user's handtile*)
   pair: Tile.t list;
-  
+
   (**  the triplets in user's handtile*)
   triplet: Tile.t list list;
-    
+
   (**  the sequence in user's handtile*)
   seq: Tile.t list list;
 
@@ -70,7 +70,7 @@ type comb = {
 val ini_comb: Tile.t list -> bool -> comb
 
 (** [ini_info lst acc] takes in a list [lst] of tiles and return a list [acc] 
-   of tuples [(tile, count)] *)
+    of tuples [(tile, count)] *)
 val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
 
 (**  [print_info info] prints info*)
@@ -80,8 +80,8 @@ val print_info: (Tile.t * int) list -> unit
 val check_triplet : comb -> bool
 
 (** [chii_update_handtile int tile player] updates handtile and state_c of
-[player]. [int] is the n-th option [player] chose among all options, [tile] is 
-the tile [player] wants to chii *)
+    [player]. [int] is the n-th option [player] chose among all options, [tile] is 
+    the tile [player] wants to chii *)
 val chii_update_handtile : int -> Tile.t -> t -> unit
 
 (** yaku supported *)
@@ -92,7 +92,9 @@ type yaku = Riichi | Tanyao | Hunyise | Dragontriplet | Seven_Pairs | Pinfu
 val string_of_yaku : yaku -> string
 
 (** [ron comb] returns a tuple. First element indicates if the player can ron or
-  not, the second indicates one of the yakus that the helps user to 
-  successfully ron. *)
+    not, the second indicates one of the yakus that the helps user to 
+    successfully ron. *)
 val ron : comb -> (bool * yaku)
 
+val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
+val print_info: (Tile.t * int) list -> unit

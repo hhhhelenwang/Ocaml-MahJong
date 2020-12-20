@@ -21,11 +21,11 @@ val update_status : t -> unit
 (** [get_id tile] gets  the id of [tile] *)
 val get_id : t -> id
 
-(** find the tile represented by [kind] [number]. i.e. given the kind of the 
-    tile and the number on the tile, find the complete tile representation 
-    among a given list of tiles. In case of duplicated kind and number, find
-    the first occurence.
-    Some tile if found, None if not found. *)
+(** [find_tile kind number] finds the tile represented by [kind] [number]. 
+    i.e. given the kind of the tile and the number on the tile, find the 
+    complete tile representation among a given list of tiles. In case of 
+    duplicated kind and number, find the first occurence.
+    [find_tile kind number] = [Some tile] if found, [None] if not found. *)
 val find_tile : kind -> int -> t list -> t option
 
 (** remove a tile from a given list.  *)
@@ -33,6 +33,9 @@ val find_tile : kind -> int -> t list -> t option
 
 (** [dp tile] display [tile] *)
 val dp : t -> unit
+
+(** [string_of_tile tile] is a tring representation of [tile]. *)
+val string_of_tile : t -> string
 
 (** [construct id kind num discarded] init a tile *)
 val construct : id -> kind -> int -> bool -> t
@@ -80,5 +83,3 @@ val chii_legal : t list -> t -> bool
 (* [all_pos t_list tile] returns all possible triplet and sequence *)
 val all_pos : t list -> t -> t list list
 
-(* [string_of_tile tile] convert the kind and number of [tile] to a string *)
-val string_tile : t -> string

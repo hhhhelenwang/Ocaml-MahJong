@@ -3,7 +3,6 @@
 type command =
   | Discard of (Tile.kind * int)
   | Chii of int
-  | Ron
   | Quit
 
 (** Exception raised when an empty command is parsed. *)
