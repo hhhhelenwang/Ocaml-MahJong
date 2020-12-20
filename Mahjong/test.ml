@@ -4,32 +4,32 @@ open Tile
 open Game
 open Command
 
-(* command_tests;
-   riichi_tests;
-   ron_tests;
-   tile_tests;
-   player_tests; *)
 (** Test Plan:
-    Parts of the system tested by OUnit and why:
-      All functions except display related functions and their helper functions 
-      are tested by OUnit. This is because we think it is more efficient to see
-      if display/print related functions are functioning correctly by looking 
-      at them. 
-
+    A) Parts of the system tested by OUnit and why:
+      All functions except display, display related functions, and helper 
+      functions are tested by OUnit. This is because OUnit gives rigorous 
+      results and is more efficient to implement.
       Specifically, the parts of the system tested by OUnit are 
       1) Player Module: 
       divided into riichi, ron, and other —— three pieces of logic
         i) riichi_tests: check_riichi, riichi
         ii) ron_tests: check_triplet, ron
         iii) player_tests: discard_tile, draw_tile, init_player,ini_comb, 
-        ini_info
+        ini_info, string_of_yaku (used in printer)
       2) Tile Module: construct, sim_construct, find_tile, ck_adj, ck_eq, 
-      ck_seq, ck_tri, chii_legal, all_pos
-    Parts of the system tested manually and why:
+      ck_seq, ck_tri, chii_legal, all_pos, string_tile (used in printer)
+    B) Parts of the system tested manually and why:
+      All display, display related functions, and helper functions are tested
+      by OUnit. This is because we think it is more efficient to see if 
+      display/print related functions are functioning correctly by looking at
+      them. An example of display function is dp, which print out the kind and 
+      number of a single tile. 
+    C) How OUnit test cases were developed (black box, galss box, randomized, etc):
+      Using test-driven development, most test cases are black box tests. 
+      However, to make sure the correctness of ron, riichi we also did glass box 
+      testing after black box testing on the ron and riichi test suits.
+    D) Why testing approach demonstrates the correctness of the system: 
 
-    How OUnit test cases were developed (black box, galss box, randomized, etc):
-
-    Why testing approach demonstrates the correctness of the system: 
 *)
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
@@ -220,9 +220,9 @@ let ron_tests = [
      ron_test " not riichi, but pinfu" n_comb15 true; *)
 
   ron_output_test "true, riichi" n_comb1 (true, Riichi);
-  ron_output_test "true, Tanyao" n_comb11 (true, Tanyao);
-  ron_output_test "true, Hunyise" n_comb12 (true, Hunyise);
-  (* ron_output_test "true, draon triplet" n_comb14 (true, Dragontriplet);
+  (* ron_output_test "true, Tanyao" n_comb11 (true, Tanyao);
+     ron_output_test "true, Hunyise" n_comb12 (true, Hunyise);
+     ron_output_test "true, draon triplet" n_comb14 (true, Dragontriplet);
      ron_output_test "true, pinfu" n_comb14 (true, Pinfu);
      ron_output_test "false, None" n_comb9 (false, None); *)
 ]
@@ -488,6 +488,8 @@ let player_tests = [
   chii_legal_test "Man 12345, Sou1, dif kind" pos_l1 t11 false;
   chii_legal_test "Man 12345, Man 8, wrong num" pos_l1 t8 false;
   chii_legal_test "Man 1, Man 2, not enough tiles" [t1] t2 false;
+  chii_legal_test "Dragon123" [t21;t22] t23 false;
+  chii_legal_test "Dragon111" [t21;t21] t21 true;
 
   draw_tile_test "draw Man1" player11 [t1;t1;t5];
   draw_tile_test "draw Man1" player12 [t31;t1];

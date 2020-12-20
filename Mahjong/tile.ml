@@ -119,7 +119,9 @@ let ck_adj t1 t2 =
 
 (**check if three tiles can form a sequence *)
 let ck_seq t1 t2 t3=
+
   (ck_adj t1 t2) && (ck_adj t2 t3)
+
 
 (**check if two tile is the same *)
 let ck_eq t1 t2=
@@ -210,11 +212,12 @@ let pos_triplet same_kind t =
    we want to check *)
 let all_pos lst t =
   let same_kind = sorted_one_kind t.kind (t::lst) in
+  let triplet = begin if List.length (pos_triplet same_kind t) = 0 then [] 
+    else [pos_triplet same_kind t] end in
   let seq_all = seq_all same_kind t.number in
-  begin 
-    if List.length (pos_triplet same_kind t) = 0 then seq_all 
-    else (pos_triplet same_kind t) :: seq_all 
-  end
+  match t.kind with 
+  | Dragon | Wind -> triplet
+  | Pin | Sou | Man ->  triplet @ seq_all
 
 (* [chii_legal lst t] checks if user is able to chii. [lst] is
    player's current dark hand tile, and [t] is the tile we want to

@@ -250,7 +250,7 @@ let tanyao_helper tile =
 (** check if it is duanyaoji: cannot be number 1, number 9, wind or dragon *)
 let is_tanyao new_l =
   (* print_endline (string_of_bool (List.exists tanyao_helper new_l)); *)
-  not (List.exists tanyao_helper new_l)
+  not (List.exists Tile.ck_n_o new_l)
 
 (* a hand with tiles from only one of the three number tiles (Man Pin Sou),
     and wind tiles and dragon tiles*)
@@ -364,7 +364,7 @@ let ron comb =
   let new_tri = List.concat comb.triplet in
   let new_seq = List.concat comb.seq in
   let new_l = new_tri @ new_seq @ comb.pair in
-  print_endline (string_of_bool (List.exists tanyao_helper new_l));
+  (* print_endline (string_of_bool (List.exists tanyao_helper new_l)); *)
   if check_triplet comb then begin
     if comb.riichied then (true, Riichi)
     else if is_dragons new_tri then (true, Dragontriplet)
@@ -372,7 +372,6 @@ let ron comb =
     else if is_pinfu new_seq comb.pair then (true, Pinfu)
     else if is_tanyao new_l then (true, Tanyao)
     else if is_hunyise new_l then (true, Hunyise)
-
     else (false, None)
   end
   else (false, None) 
