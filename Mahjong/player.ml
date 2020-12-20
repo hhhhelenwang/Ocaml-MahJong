@@ -303,7 +303,7 @@ let check_yaku comb =
   let new_tri = List.concat comb.triplet in
   let new_seq = List.concat comb.seq in
   let new_l = new_tri @ new_seq @ comb.pair in
-  comb.riichied || is_tanyao new_l || is_hunyise new_l || 
+  is_tanyao new_l || is_hunyise new_l || 
   is_dragons new_tri || is_pinfu new_seq comb.pair
 
 (** check if a combination of tiles can Ron  *)
@@ -378,7 +378,7 @@ let ron comb =
   let new_seq = List.concat comb.seq in
   let new_l = new_tri @ new_seq @ comb.pair in
   (* print_endline (string_of_bool (List.exists tanyao_helper new_l)); *)
-  if check_triplet comb then begin
+  if (check_triplet comb )then begin
     if comb.riichied then (true, Riichi)
     else if is_dragons new_tri then (true, Dragontriplet)
     else if List.length comb.pair = 14 then (true, Seven_Pairs)
@@ -389,7 +389,8 @@ let ron comb =
   end
   else (false, None) 
 
-(**initialize a comb which work as information of hand tile*)
+(**initialize a comb which work as information of hand tile
+  bool represent whether the player have riichied*)
 let ini_comb lst bool = {
   pair = [];
   triplet = [];

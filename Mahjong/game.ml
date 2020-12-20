@@ -370,7 +370,7 @@ let after_check_rong this_plr tile state =
              @ [tile] in
   let riichi_state = Player.state_r this_plr in 
   let comb_for_rong = Player.ini_comb hand riichi_state in
-  match Player.check_triplet comb_for_rong with
+  match fst (Player.ron comb_for_rong )with
   | true -> ANSITerminal.(print_string [yellow] rong_message);
     { state with in_game = false }
   | false -> state

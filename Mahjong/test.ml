@@ -193,7 +193,7 @@ let ron_test
     (com : Player.comb)
     (expected_output : bool) : test =
   name >:: (fun _ ->
-      assert_equal expected_output (Player.check_triplet com) 
+      assert_equal expected_output ( fst (Player.ron com)) 
         ~printer: string_of_bool)
 
 let pp_bool_yaku tuple = 
@@ -207,28 +207,28 @@ let ron_output_test
       assert_equal expected_output (Player.ron com) ~printer: pp_bool_yaku)
 
 let ron_tests = [
-  (* ron_test "111 222 333 444 55" n_comb1 true;
-     ron_test "123 789 123 789 55" n_comb2 true;
-     ron_test "1122334567 88 11" n_comb3 false;
-     ron_test "111 22 333 444 555 " n_comb4 true;
-     ron_test "333 444 555 345 12" n_comb5 true;
-     ron_test "rrr ggg 56667 www" n_comb6 true;
-     ron_test "333 444 555 345 89" n_comb7 false;
-     ron_test "cannot exhaust 12 234" n_comb8 false;
-     ron_test "<14 tiles 22 567789" n_comb9 false;
-     ron_test "7 pairs" n_comb10 true;
-     ron_test "Tanyao only Man222 333 456 777 Sou88" n_comb11 true;
-     ron_test "hunyise only Man111 333 456 777 88" n_comb12 true;
-     ron_test "did not riichi, eventhough formed 4*(seq||tri)+2" n_comb13 false;
-     ron_test " not riichi, but has draon triplet" n_comb14 true;
-     ron_test " not riichi, but pinfu" n_comb15 true; *)
-  ron_test " richiied normal" n_comb16 true; 
-  (* ron_output_test "true, riichi" n_comb1 (true, Riichi); *)
+  ron_test "111 222 333 444 55" n_comb1 true;
+  ron_test "123 789 123 789 55" n_comb2 true;
+  ron_test "1122334567 88 11" n_comb3 false;
+  ron_test "111 22 333 444 555 " n_comb4 true;
+  ron_test "333 444 555 345 12" n_comb5 true;
+  ron_test "rrr ggg 56667 www" n_comb6 true;
+  ron_test "333 444 555 345 89" n_comb7 false;
+  ron_test "cannot exhaust 12 234" n_comb8 false;
+  ron_test "<14 tiles 22 567789" n_comb9 false;
+  ron_test "7 pairs" n_comb10 true;
+  ron_test "Tanyao only Man222 333 456 777 Sou88" n_comb11 true;
+  ron_test "hunyise only Man111 333 456 777 88" n_comb12 true;
+  ron_test "did not riichi, eventhough formed 4*(seq||tri)+2" n_comb13 false;
+  ron_test " not riichi, but has draon triplet" n_comb14 true;
+  ron_test " not riichi, but pinfu" n_comb15 true;
+  (* ron_test " richiied normal" n_comb16 true;  *)
+  ron_output_test "true, riichi" n_comb1 (true, Riichi);
   (* ron_output_test "true, Tanyao" n_comb11 (true, Tanyao);
      ron_output_test "true, Hunyise" n_comb12 (true, Hunyise);
      ron_output_test "true, draon triplet" n_comb14 (true, Dragontriplet);
-     ron_output_test "true, pinfu" n_comb14 (true, Pinfu);
-     ron_output_test "false, None" n_comb9 (false, None); *)
+     ron_output_test "true, pinfu" n_comb14 (true, Pinfu); *)
+  ron_output_test "false, None" n_comb9 (false, None);
 ]
 
 let _ = print_endline ("finished evaluating ron test" )
