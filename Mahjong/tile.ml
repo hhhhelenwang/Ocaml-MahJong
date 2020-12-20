@@ -94,60 +94,46 @@ let sim_construct kind num =
     discarded = false; 
   }
 
-(**check if it is Nine-one tile *)
-let ck_n_o t=
+(** [ck_n_o tile] checks if it is Nine-one tile *)
+let ck_n_o t =    
   match t.kind with
-  | Dragon | Wind-> true
+  | Dragon | Wind -> true
   | Man | Pin | Sou -> begin
-      let n=t.number in
-      if (n=1 || n=9) then true
-      else false
+      let n = t.number in
+      n = 1 || n = 9
     end
 
-(*helper function for Rong***********************************************)
+(* helper function for Rong ***********************************************)
 (** check if two tile is adjacent*)
 let ck_adj t1 t2 =
   match t1.kind with
   | Dragon | Wind -> false
   | Man | Pin | Sou ->
     begin
-      if t1.kind = t2.kind then begin
-        let k = t2.number - t1.number in
-        if (k = 1) then true
-        else false
-      end
-      else false
+      let k = t2.number - t1.number in
+      t1.kind = t2.kind && k = 1
     end 
 
 (**check if three tiles can form a sequence *)
 let ck_seq t1 t2 t3=
-
-  (ck_adj t1 t2) && (ck_adj t2 t3)
-
+  ck_adj t1 t2 && ck_adj t2 t3
 
 (**check if two tile is the same *)
 let ck_eq t1 t2=
-  if t1.kind = t2.kind then begin 
-    if t1.number = t2.number then true
-    else false
-  end
-  else false
+  t1.kind = t2.kind && t1.number = t2.number 
 
-(** check if three tiles are identical
-    AF: return true for three identical tiles, for example,
-    Man 1 Man 1 Man 1
-*)
+(** check if three tiles are identical *)
 let ck_tri t1 t2 t3= 
   ck_eq t1 t2 && ck_eq t2 t3
 
-(*end of helper function for Rong******************************************)
+(* end of helper function for Ron ******************************************)
 
 (* [filter_kind kind lst ] gives all tiles with specific kind *)
 let filter_kind kind lst =
   List.filter (fun x -> x.kind == kind) lst
 
 (* [sort_one_kind kind lst] returns the sorted list of one kind. 
-   [compare t1 t2] compares the number between tiles*)
+   [compare t1 t2] compares the number between tiles *)
 let sorted_one_kind kind lst = 
   let compare t1 t2 = t1.number - t2.number in
   List.sort compare (filter_kind kind lst)
@@ -161,20 +147,19 @@ let sort lst =
   in helper [] kinds
 
 (* [get_seq f lst num acc] given a number, find if sequence satisfying f 
-   exists*)
+   exists. *)
 let rec get_seq f lst num acc = 
   match lst with
   | [] -> begin if List.length acc == 3 then acc else [] end
   | h :: t -> begin
       if f h num
       then get_seq f t num 
-          (List.sort_uniq (fun x y -> x.number - y.number) (h::acc))
+          (List.sort_uniq (fun x y -> x.number - y.number) (h :: acc))
       else get_seq f t num acc
     end
 
 (* [seq_all lst num] returns all possible sequence. Return empty list if there 
-   is no sequence 
-   lst is a list with same kind*)
+   is no sequence. Requires: lst is a list with same kind. *)
 let seq_all lst num = 
   let compare1 h num = h.number >= num -2 && h.number <= num in
   let compare2 h num = h.number >= num && h.number <= num + 2 in 
@@ -183,7 +168,8 @@ let seq_all lst num =
   let rec helper acc compare =
     match compare with 
     | [] -> acc
-    | h :: t -> helper (
+    | h :: t -> 
+      helper (
         begin
           if List.length (get_seq h lst num []) = 0 then acc
           else (get_seq h lst num []) :: acc
@@ -195,7 +181,7 @@ let rec get_first_int lst int acc =
   if int = 0 then acc else
     match lst with
     | [] -> failwith "wrong list, length < 3"
-    | h :: t -> get_first_int t (int   - 1) (h :: acc)
+    | h :: t -> get_first_int t (int - 1) (h :: acc)
 
 (* [sort_one_number num lst] returns a list of tiles with same 
    number*)
@@ -213,7 +199,7 @@ let pos_triplet same_kind t =
    [lst] is player's current dark hand tile, and [t] is the tile 
    we want to check *)
 let all_pos lst t =
-  let same_kind = sorted_one_kind t.kind (t::lst) in
+  let same_kind = sorted_one_kind t.kind (t :: lst) in
   let triplet = begin if List.length (pos_triplet same_kind t) = 0 then [] 
     else [pos_triplet same_kind t] end in
   let seq_all = seq_all same_kind t.number in

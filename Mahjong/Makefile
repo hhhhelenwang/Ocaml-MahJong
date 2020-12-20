@@ -19,7 +19,7 @@ play:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 
 zip:
-	zip Mahjong.zip *.ml* *.json _tags Makefile
+	zip Mahjong.zip *.ml* *.json *.md *.txt _tags Makefile
 
 docs: docs-public docs-private
 

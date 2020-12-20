@@ -1,0 +1,3 @@
+This project is of 1555 lines of codes including specifications, excluding 
+tests. However, there are two main parts to our game that is harder and we 
+think that this 

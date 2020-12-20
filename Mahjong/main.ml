@@ -1,4 +1,5 @@
-
+(** [play_game ()] runs the game. It repetitively calls [next_state state] to
+    update game state at each turn. *)
 let play_game () =
   let init = Game.init_state () in
   let state = ref (Game.make_game init) in 
@@ -12,10 +13,10 @@ let title =
  ___ ___   ____  __ __  ____   ___   ____    ____ 
 |   |   | /    ||  |  ||    | /   \\ |    \\  /    |
 | _   _ ||  o  ||  |  ||__  ||     ||  _  ||   __|
-|  \_/  ||     ||  _  |__|  ||  O  ||  |  ||  |  |
+|  \\_/  ||     ||  _  |__|  ||  O  ||  |  ||  |  |
 |   |   ||  _  ||  |  /  |  ||     ||  |  ||  |_ |
 |   |   ||  |  ||  |  \\  `  ||     ||  |  ||     |
-|___|___||__|__||__|__|\\____j \___/ |__|__||___,_|
+|___|___||__|__||__|__|\\____j \\___/ |__|__||___,_|
 
 "
 let welcome_message = "\n\nWelcome to the Text-based Richii Mahjong!"
@@ -38,9 +39,11 @@ Chii (we will give you # of options to choose from): chii 1
 Skip a Chii action: skip
 Quit the game: quit
 
-Note that all commands are case sensitve. Enjoy!
+Note that all commands are case sensitve. Enjoy! XD
 "
 
+(** [main ()] prints out starting message and ask user to enter command to
+    start the game. *)
 let main () = 
   ANSITerminal.(print_string [yellow] title);
   ANSITerminal.(print_string [cyan] welcome_message);
@@ -52,9 +55,10 @@ let main () =
   | "start" -> play_game ()
   | "quit" -> ANSITerminal.(print_string [cyan] "Bye!")
   | command -> begin
-      let message = "You can't start game with" 
-                    ^ command 
-                    ^ {|, please restart the game with "make play" and enter start this time.|} 
+      let message = 
+        "You can't start game with" 
+        ^ command 
+        ^ {|, please restart the game with "make play" and enter start this time.|} 
       in
       ANSITerminal.(print_string [red] message);
     end

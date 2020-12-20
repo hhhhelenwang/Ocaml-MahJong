@@ -11,10 +11,10 @@
         [players] must contain 4 players. [current_player_id] is 1, 2, 3, or 4. 
 *)
 type game_state = {
-  (** [wall_tiles] is the deck of unassigned tiles from which players draw. 
+  (* [wall_tiles] is the deck of unassigned tiles from which players draw. 
       [wall_tiles] contains all the tiles before the game starts. *)
   wall_tiles : Tile.t list;
-  (** a list of players *)
+  (* a list of players *)
   players : Player.t list;
   current_player_id : Player.id;
   in_game : bool
@@ -22,17 +22,19 @@ type game_state = {
 
 type t = game_state 
 
-(** [is_in_game state] is wheter the game is still going on. Updated to false
+(** [is_in_game state] is whether the game is still going on. Updated to false
     whenever a player has won. *)
 let is_in_game state = state.in_game
 
-(* Man, Pin, Sou:
-   - represented by id = a * 9 + x, where id <= 108
-   - if a = 0, 3, 6, 9 => Man
-   - if a = 1, 4, 7, 10 => Pin
-   - if a = 2, 5, 8, 11 => Sou
-   - x + 1 = number on tile
-   - e.g. id = 3 = 0 * 0 + 3 => Man 3 *)
+(** [mps_of_id id] generates a Min, Pin, or Sou tile according to its id by 
+    the following rules:
+    Man, Pin, Sou:
+    - represented by id = a * 9 + x, where id <= 108
+    - if a = 0, 3, 6, 9 => Man
+    - if a = 1, 4, 7, 10 => Pin
+    - if a = 2, 5, 8, 11 => Sou
+    - x + 1 = number on tile
+    - e.g. id = 3 = 0 * 0 + 3 => Man 3 *)
 let mps_of_id id =
   let a = (id - 1) / 9 in
   let x = 1 + (id mod 9) in
@@ -40,7 +42,9 @@ let mps_of_id id =
   else if a = 1 || a = 4 || a = 7 || a = 10 then (Tile.Pin, x)
   else (Tile.Sou, x)
 
-(*  Wind:
+(** [wind_of_id id] generates a Wind tile according to its id by the following
+    rules: 
+    Wind:
     - represented by id = 81 + b * 4 + y, where id > 108
     - b = 0, 1, 2, 3
     - y = 1, 2, 3, 4
@@ -52,16 +56,18 @@ let mps_of_id id =
 let wind_of_id id =
   let y = 1 + (id - 81) mod 4 in (Tile.Wind, y)
 
-(* Dragon:
-   - id = 124 + c * 3 + z, where id > 124
-   - c = 0, 1, 2
-   - z = 1, 2, 3
-   - Dragon z *)
+(** [dragon_of_id id] generates a Dragon tile according to its id by the 
+    following rules: 
+    Dragon:
+    - id = 124 + c * 3 + z, where id > 124
+    - c = 0, 1, 2
+    - z = 1, 2, 3
+    - Dragon z *)
 let dragon_of_id id = 
   let z = 1 + (id - 124) mod 3 in (Tile.Dragon, z)
 
-(* [tile_of_num] is a tile calculated from a given [num]. The relation 
-   between a tile and a num is described above. *)
+(* [tile_of_id id] is a tile calculated from a given [id]. The relation 
+   between a tile and a id is described above. *)
 let tile_of_id id = 
   let kind, n = begin
     if id <= 108 then mps_of_id id
@@ -70,14 +76,15 @@ let tile_of_id id =
   end in
   Tile.construct id kind n false
 
-(* [init] initializes a list of something *)
+(* [init_tiles id acc] initializes a list of tiles with id = 1 - [id]. *)
 let rec init_tiles id acc = 
   if id = 0 then acc
   else init_tiles (id - 1) (tile_of_id id :: acc)
 
-(** [init_state] is a game state where 
-    - [wall_tiles] contains all tiles in the game
-    - [players] has each players with an empty list of hand tiles *)
+(** [init_state ()] is a game state where 
+    - [wall_tiles] contains all tiles needed in the game
+    - [players] is not populated with players yet.
+    - [current_player_id] starts from 1. *)
 let init_state () =
   {
     wall_tiles = init_tiles 136 [];
@@ -90,7 +97,8 @@ let init_state () =
     the list with remaining elements after extraction. This cannot be done with
     [List.nth] or [List.nth_opt] since the remaining list is needed to ensure
     that no dupicated elements are extracted when extracting multiple 
-    elements. *)
+    elements, and to update the game's wall tiles with whats left after 
+    extraction. *)
 let rec extract not_picked n lst = 
   match lst with
   | [] -> raise Not_found
@@ -98,10 +106,6 @@ let rec extract not_picked n lst =
       if n = 0 then (h, not_picked @ t)
       else extract (h :: not_picked) (n - 1) t
     end 
-(* let picked = List.nth lst n in
-   let not_picked =  List.filter 
-    (fun elem -> elem <> picked) lst in
-   (picked, not_picked) *)
 
 (** [extract_n lst n acc op] extracts n elements and put then in a new list and
     get the list with remaining elements after extraction. It either extract 
@@ -113,7 +117,7 @@ let rec extract_n lst n acc op =
     let picked, not_picked = op lst in
     extract_n not_picked (n - 1) (picked :: acc) op
 
-(** [extract_rand] extracts one random element from [lst]. Evaluates to a 
+(** [extract_rand lst] extracts one random element from [lst]. Evaluates to a 
     tuple (picked, not_picked). *)
 let extract_rand lst = 
   let n = lst |> List.length |> Random.int in
@@ -126,18 +130,20 @@ let shuffle_list lst =
   shuffled
 
 (** [extract_seq lst] extracts the first element in [lst]. It is the op passed 
-    into [extract_n] for sequentially extracting the first n elements. *)
+    into [extract_n] for sequentially extracting the first n elements. This 
+    cannot be done conviniently with [List.hd] since whats left after 
+    extraction is needed to update the game's wall tiles. *)
 let extract_seq lst =
   extract [] 0 lst
 
-(** Extract first n elementes for a list and construct a new list from them.
-    Evaluates to (extracted, left) *)
+(** [extract_first_n lst n] extracts first [n] elementes for [lst] and 
+    construct a new list from them. Evaluates to (extracted, left) *)
 let extract_first_n lst n = 
   extract_n lst n [] extract_seq
 
-(** [make_game] is a game state where 
+(** [make_game state] is a game state where 
     - [wall_tiles] is shuffled and first 4 * 13 tiles are given to each player
-    - [players] has each player with 13 hand tiles *)
+    - [players] has 4 players and each player with 13 hand tiles. *)
 let make_game state = 
   let shuffled_tiles = shuffle_list state.wall_tiles in
   let rec assign n_of_p left acc = 
@@ -204,21 +210,26 @@ let string_of_other player =
   ^  string_of_combo light 
   ^ "\n"
 
-(** [string_of_other player] prints all player's hand. It varies in color and
-    content according to who is the current player. *)
+(** [display_player player] prints some of a player's information that is 
+    appropriate to reveal at this turn. It varies in color and content 
+    according to who is the current player. *)
 let display_player state player =
   match player with
   | player when Player.p_id player = state.current_player_id ->
     ANSITerminal.(print_string [cyan] (string_of_current player))
   | player -> print_endline (string_of_other player)
 
+(** [display_game state] prints the game at [state] *)
 let display_game state = 
   List.map (display_player state) state.players
 
-(** [after_chii state current_player last_discarded] is the state of game after
-    [current_player] at [state] perform action chii. It calls pre-defined 
-    functions to decide if the player is qualified to chii, calculates all 
-    combination the player can build from chii, and update game state.  *)
+(* pretty-print helpers ends ************************************)
+
+(** [after_chii current_player last_discarded hand_dark state] is the state of 
+    game after [current_player] at [state] perform action chii. It calls 
+    pre-defined functions to decide if the player is qualified to chii,
+    calculates all combinations the player can build from chii, and update game 
+    state.*)
 let rec after_chii current_player last_discarded hand_dark state =
   let all_chii_combo = Tile.all_pos hand_dark last_discarded in
   ANSITerminal.(print_string [yellow] 
@@ -230,9 +241,9 @@ let rec after_chii current_player last_discarded hand_dark state =
   print_endline ">>";
   chii_helper state last_discarded all_chii_combo current_player hand_dark
 
-(** [chii_helper state last hand_dark current_player] displays all possible 
-    combinations the player can build by chii and update their hand according
-    to the combo they command to build. *)
+(** [chii_helper state last combos current_player hand_dark] displays all 
+    update their hand according to the combo they command to build or skip this
+    step if player decide not to chii. *)
 and chii_helper state last combos current_player hand_dark = 
   try 
     match Command.parse (read_line ()) with
@@ -262,12 +273,10 @@ and chii_helper state last combos current_player hand_dark =
     print_endline "I don't understand this command. Please try again.\n";
     after_chii current_player last hand_dark state 
 
-
-(** [after_draw state current_player] is the state of game after
+(** [after_draw current_player state] is the state of game after
     [current_player] at [state] draws a card. It takes the first tile from 
     the randomized pile and put it in player's hand. *)
 let after_draw current_player state =
-  (* let drawn_tile = List.hd state.wall_tiles in *)
   let drawn_tile, wall =
     match state.wall_tiles with
     | [] -> raise Not_found
@@ -278,8 +287,9 @@ let after_draw current_player state =
   ANSITerminal.(print_string [cyan] (string_of_current current_player));
   { state with wall_tiles = wall }
 
-(** [after_discard state current_player] is the state of game after
-    [current_player] at [state] discard a tile. *)
+(** [after_discard current_player state] is the state of game after
+    [current_player] at [state] discard a tile. If the player has riichi-ed,
+    it automatically discard the tile they just drew. *)
 let rec after_discard current_player state =
   print_endline {|Enter command to discard a tile. E.g. "discard Man 1"|};
   let drawn_tile = current_player |> Player.hand_tile_dark |> List.hd in
@@ -292,6 +302,8 @@ let rec after_discard current_player state =
     discard_helper current_player kind number state
   | false -> normal_discard current_player state
 
+(** [normal_discard current_player state] is the routine where the player is
+    not riichi-ed and can choose which tile to discard. *)
 and normal_discard current_player state =
   try 
     match Command.parse (read_line ()) with
@@ -317,9 +329,9 @@ and normal_discard current_player state =
                     "I don't understand this command. Please try again.\n");
     after_discard current_player state
 
-(** [discars_helper] discards the tile <[kind] [number]> commanded by [
-    current_player] if the tile is found in their dark hand, and prompt them 
-    to re-enter command otherwise. *)
+(** [discars_helper current_player kind number state] discards the tile 
+    <[kind] [number]> commanded by [current_player] if the tile is found in 
+    their dark hand, and prompt them to re-enter command otherwise. *)
 and discard_helper current_player kind number state = 
   let tile_opt = 
     Tile.find_tile kind number (Player.hand_tile_dark current_player) in
@@ -329,9 +341,9 @@ and discard_helper current_player kind number state =
     ANSITerminal.(print_string [red] "You don't have this tile.\n");
     after_discard current_player state
 
-(** [riichi_helper state current_player to_get] changes the state for 
-    [current_player] to richii and display what tiles are needed for them to 
-    win. *)    
+(** [riichi_helper current_player to_get state] changes the state for 
+    [current_player] to richii-ed and display what tiles are needed for them 
+    to win. *)    
 let riichi_helper current_player to_get state =
   ANSITerminal.(print_string [yellow] 
                   "You are riichi-ed!\n");
@@ -340,9 +352,9 @@ let riichi_helper current_player to_get state =
   Player.riichi current_player;
   state
 
-(** [after_check_richii state current_player] is the game state after we check
+(** [after_check_richii current_player state] is the game state after we check
     if [current_player] can richii according to the rule. It calls 
-    [riichi_helper] to perform the richii action display more info for the 
+    [riichi_helper] to perform the richii action and display more info for the 
     player. *)
 let after_check_richii current_player state =
   let to_get = Player.check_riichi current_player in
@@ -362,8 +374,8 @@ let ron_message =
 Ron! Congratulations, you won the game!
 "
 
-(** [afte_check_ron this_plr last_plr tile state] is the state after we check
-    if [this_plr] has won. Game ends if won. *)
+(** [afte_check_ron this_plr tile state] is the state after we check
+    if [this_plr] has won. Game ends if a player won. *)
 let after_check_ron this_plr tile state =
   let hand = Player.hand_tile_dark this_plr 
              @ Player.hand_tile_light this_plr 
@@ -383,7 +395,7 @@ let after_check_ron this_plr tile state =
     In a turn, a player will draw and discard tile, and if possible chii, 
     riichi, or win. *)
 let rec next_state state = 
-  display_game state;
+  ignore (display_game state);
   let last_plr_id = 
     if state.current_player_id <= 1 then 4
     else state.current_player_id - 1 in
@@ -443,7 +455,7 @@ and chii_routine this_plr last_tile hand_dark state =
     else not_chii_routine this_plr last_tile state'
   | state' -> state'
 
-(** [not_chii_routine this_plr last_plr last_tile state] is the state after 
+(** [not_chii_routine this_plr last_tile state] is the state after 
     this turn if [this_plr] can not chii. This means they will draw, be checked
     for ron, and be checked for riichi. *)
 and not_chii_routine this_plr last_tile state =
@@ -455,8 +467,8 @@ and not_chii_routine this_plr last_tile state =
     end
   | state' -> state'
 
-(** [ron_routine this_plr tile state] is a subroutine to check for ron in
-    between of a turn. *)
+(** [ron_discard_riichi_routine this_plr tile state] is a subroutine to check 
+    for ron in between of a turn. *)
 and ron_discard_riichi_routine this_plr tile state = 
   match after_check_ron this_plr tile state with
   | state' when state'.in_game -> begin

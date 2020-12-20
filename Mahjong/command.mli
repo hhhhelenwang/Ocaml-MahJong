@@ -1,3 +1,10 @@
+(** 
+   Parsing of player commands.
+
+   This module represents the player command that is decomposed into 
+   either [Discard], [Chii], [Ron], or [Quit] and possibly a tile.
+*)
+
 (** The type [command] represents a player command that is decomposed into 
     either [Discard], [Chii], [Ron], or [Quit] and possibly a tile. *)
 type command =

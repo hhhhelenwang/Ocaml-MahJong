@@ -11,13 +11,15 @@ open Command
       results and is more efficient to implement.
       Specifically, the parts of the system tested by OUnit are 
       1) Player Module: 
-      divided into riichi, ron, and other —— three pieces of logic
+      consists of three pieces of logic - riichi, ron, and other player 
+      operations:
         i) riichi_tests: check_riichi, riichi
         ii) ron_tests: check_triplet, ron
         iii) player_tests: discard_tile, draw_tile, init_player,ini_comb, 
         ini_info, string_of_yaku (used in printer)
       2) Tile Module: construct, sim_construct, find_tile, ck_adj, ck_eq, 
-      ck_seq, ck_tri, chii_legal, all_pos, string_tile (used in printer)
+      ck_seq, ck_tri, chii_legal, all_pos, string_of_tile (used in printer)
+
     B) Parts of the system tested manually and why:
       All display, display related functions, and helper functions are tested
       manually. This is because we think it is more efficient to see if 
@@ -25,25 +27,38 @@ open Command
       them. An example of display function is [dp], which print out the kind and 
       number of a single tile. 
       All game flow related functions are tested manually as well. All commands
-      are covered. We believe playing the game in terminal is more efficient
-      than writing OUnit tests for them. An example of game flow related
-      function is [after_chii], which is the state of game after current player
-      at stae perfom action chii.
+      are covered. We believe manually playing the game in terminal is more 
+      efficient than writing OUnit tests for them. This is because there are a 
+      lot of interaction with users within even one turn, and most state-
+      transitioning functions requires user inputs in the middle of them. It is 
+      much more difficult to hard code each scenario where a player can type in 
+      all kinds of options that lead to different routines and produce 
+      different result than to actually play around with the game and examine 
+      the output. 
+      An example of flow-control related function is [after_chii], which is the 
+      state of game after current player at state perfom action chii. In 
+      manually testing the game, we tried out all possible commands and options
+      a player can choose at this stage, including a normal chii-action, 
+      skipping chii action, empty commands, and malformed commands. All are 
+      responded robustly by the system.
+
     C) How OUnit test cases were developed (black box, galss box, ect.):
       Using test-driven development, most test cases are black box tests. 
       However, to make sure the correctness of ron, riichi we also did glass 
       box testing after black box testing on the ron and riichi test suits.
+
     D) Why testing approach demonstrates then correctness of the system: 
       All functions are tested either with OUnit or manually. The OUnit tests 
-      ensure the basic pieces of logic are correct. Some of the unit tests check
-      one piece of logic independent in one module, such as [draw_tile] 
-      from Player Module. The other OUnit tests test pieces of code that 
-      integrate different pieceis of modules to ensure different pieces of the 
-      modules are working togeter. For example, ron_output_test uses ron in
-      Player module, ck_eq, ck_seq, ck_tri in Tile module. The manual tests 
-      test all possible branches of the game flow.
-      Black box testing makes sure the functions function correctly. Glass box 
-      testing ensure high test coverage. Test cases include conor cases, which
+      ensure the basic "back-end" pieces of logic are correct. Some of the unit 
+      tests check one piece of logic independently in one module, such as 
+      [draw_tile] from Player Module. The other OUnit tests test pieces of code 
+      that integrate different pieceis of modules to ensure different pieces of 
+      the modules are working togeter. For example, ron_output_test uses ron in
+      Player module, and ck_eq, ck_seq, ck_tri in Tile module. The manual tests 
+      test involves lots of game-play that tests all possible branches of the 
+      game flow.
+      Black box testing makes sure the functions performs correctly. Glass box 
+      testing ensure high test coverage. Test cases include cornor cases, which
       demonstrate the correctness of each piece of logic under different 
       situations. 
 *)
@@ -175,7 +190,7 @@ let ron_l5 = [t1;t2; t3;t3;t3;t3; t4;t4;t4;t4; t5;t5;t5;t5]
 let ron_l6 = [t21;t21;t21; t22;t22;t22; t15;t16;t16;t16;t17; t23;t23;t23]
 let ron_l7 = [t8;t9; t3;t3;t3;t3; t4;t4;t4;t4; t5;t5;t5;t5]
 let ron_l8 = [t1;t2;t2;t2;t3;t4]
-let ron_l9 = [ t2;t2; t5;t6;t7;t7;t8;t9;]
+let ron_l9 = [t2;t2; t5;t6;t7;t7;t8;t9;]
 let ron_l10 = [t1;t1; t3;t3; t5;t5; t7;t7; t8;t8; t9;t9; t11;t11]
 let ron_l11 = [t2;t2;t2; t3;t3;t3; t4;t5;t6; t7;t7;t7; t18;t18]
 let ron_l12 = [t1;t1;t1; t3;t3;t3; t4;t5;t6; t7;t7;t7; t8;t8]
@@ -201,7 +216,18 @@ let n_comb14 = Player.ini_comb ron_l14 false
 let n_comb15 = Player.ini_comb ron_l15 false
 let n_comb16 = Player.ini_comb ron_l16 true
 
-(* let print_a_info= Player.print_info (Player.ini_info ron_l1 []) *)
+let n_comb20 = Player.ini_comb_yaku 
+    [t1;t1] [[t3;t3;t3]; [t18;t18;t18]] [[t4;t5;t6]; [t34;t35;t36]] 
+    true
+let n_comb21 = Player.ini_comb_yaku 
+    [t18;t18] [[t2;t2;t2]; [t3;t3;t3]; [t7;t7;t7]] [[t4;t5;t6]] false
+let n_comb22 = Player.ini_comb_yaku 
+    [t8;t8] [[t1;t1;t1]; [t3;t3;t3]; [t7;t7;t7]] [[t4;t5;t6]] false
+let n_comb23 = Player.ini_comb_yaku
+    [t1;t1] [] [[t34;t35;t36];[t4;t5;t6;];[t7;t8;t9]; [t15;t16;t17]] false
+let n_comb24 = Player.ini_comb_yaku 
+    [t8;t8] [[t11;t11;t11];[t3;t3;t3];[t21;t21;t21]] [[t4;t5;t6]]
+    false
 
 let ron_test
     (name : string)
@@ -234,15 +260,15 @@ let ron_tests = [
   ron_test "7 pairs" n_comb10 true;
   ron_test "Tanyao only Man222 333 456 777 Sou88" n_comb11 true;
   ron_test "hunyise only Man111 333 456 777 88" n_comb12 true;
-  ron_test "did not riichi, eventhough formed 4*(seq||tri)+2" n_comb13 false;
   ron_test " not riichi, but has draon triplet" n_comb14 true;
   ron_test " not riichi, but pinfu" n_comb15 true;
-  (* ron_test " richiied normal" n_comb16 true;  *)
-  ron_output_test "true, riichi" n_comb1 (true, Riichi);
-  (* ron_output_test "true, Tanyao" n_comb11 (true, Tanyao);
-     ron_output_test "true, Hunyise" n_comb12 (true, Hunyise);
-     ron_output_test "true, draon triplet" n_comb14 (true, Dragontriplet);
-     ron_output_test "true, pinfu" n_comb14 (true, Pinfu); *)
+  ron_test " richiied normal" n_comb16 true; 
+
+  ron_output_test "true, riichi" n_comb20 (true, Riichi);
+  ron_output_test "true, Tanyao" n_comb21 (true, Tanyao);
+  ron_output_test "true, Hunyise" n_comb22 (true, Hunyise);
+  ron_output_test "true, pinfu" n_comb23 (true, Pinfu);
+  ron_output_test "true, draon triplet" n_comb24 (true, Dragontriplet);
   ron_output_test "false, None" n_comb9 (false, None);
 ]
 
@@ -267,10 +293,8 @@ let riichi_test
 
 let player2 = init_player 3 false false [] 
     [t1;t1;t1; t2;t2;t2; t3;t3;t3; t4;t4;t4; t5] []
-(* 111 222 333 444 5 *)
 let player3 = init_player 3 false false [] 
     [t11;t11;t11; t12;t12;t12; t13;t13;t13; t14;t14;t14; t15] []
-(* 111 222 333 444 5 *)
 
 let player4 = init_player 4 false false [] 
     [t11;t11;t11; t12;t12;t12; t13;t13;t13; t14;t14;t14; t15] []
@@ -428,11 +452,6 @@ let dark1 = [tile1; tile2; tile3; tile4; tile5; tile6; tile7]
 (* id richii chii light dark discard *)
 let player1 = Player.init_player 1 false false [] dark1 t_list1
 
-(* let sorted_tiles = Player.d_list (Tile.sort t_list2) *)
-
-(* let player_handt = Player.display_I player1 *)
-(* let x = Player.d_list t_list1 *)
-
 let chii_legal_test
     (name : string)
     (lst : Tile.t list)
@@ -522,11 +541,11 @@ let player_tests = [
     [[t2;t2;t2;t1;t1;t1];[t31;t1]];
   chii_update_state_c_test "update state_c" player12 true;
 
-  discard_tile_test "discard existing tile" player13 (Some t2) true;
-  discard_tile_detail_test "discard existing tile" player13 (Some t2)
-    [[t1;t3;t4];[t2]];
-  discard_tile_test "discard existing tile" player13 None false;
-  discard_tile_detail_test "discard non-existing tile" player13 None
+  discard_tile_test "discard existing tile Some t2" player13 (Some t2) true;
+  (* discard_tile_detail_test "discard existing tile" player13 (Some t2)
+     [[t1;t3;t4];[t2]]; *)
+  discard_tile_test "discard existing tile None" player13 None false;
+  discard_tile_detail_test "discard non-existing tile None" player13 None
     [[t1;t2;t3;t4];[]];
 
   discard_tile_detail_test "player 14: discard existing tile" player14 (Some t1)

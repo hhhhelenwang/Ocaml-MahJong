@@ -1,7 +1,7 @@
 (** 
-   Representation of dynamic game state.
-   This module represents the state of a game as it is being played. This 
-   includes the current wall tiles and current state of the player.
+   Representation of dynamic game states. 
+
+   This module controls the state of a game as it is being played.
 *)
 
 (** The abstract type of values representing the game state. *)
