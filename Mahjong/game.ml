@@ -359,7 +359,7 @@ let ron_message =
  \\   /  |  \\     | |  |  |     ||  .  \\|     ||  |
   \_/  |____\\____| |__|   \\___/ |__|\\_||____/ |__|
 
-Ron! Congratulations, you win the game!
+Ron! Congratulations, you won the game!
 "
 
 (** [afte_check_ron this_plr last_plr tile state] is the state after we check
@@ -370,10 +370,14 @@ let after_check_ron this_plr tile state =
              @ [tile] in
   let riichi_state = Player.state_r this_plr in 
   let comb_for_ron = Player.ini_comb hand riichi_state in
-  match fst (Player.ron comb_for_ron )with
-  | true -> ANSITerminal.(print_string [yellow] ron_message);
+  match Player.ron comb_for_ron with
+  | (true, yaku) -> 
+    ANSITerminal.(print_string [yellow] ron_message);
+    ANSITerminal.(print_string [yellow] 
+                    ("You won with " ^ Player.string_of_yaku yaku ^ " yaku!"));
     { state with in_game = false }
-  | false -> state
+  | (false, None) -> state
+  | (false, yaku) -> state
 
 (** [next_state state] is the game state after a player has played their turn.
     In a turn, a player will draw and discard tile, and if possible chii, 
