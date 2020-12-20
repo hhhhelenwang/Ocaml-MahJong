@@ -306,20 +306,6 @@ let riichi player=
 
 
 
-(**hand represent hand tile, list represent various tile type,
-   acc represent feasible riichi tile *)
-let rec check_r_help hand lst acc = 
-  match lst with
-  | [] -> acc
-  | h ::t -> begin
-      let n_hand = Tile.sort (h :: hand) in 
-      let n_comb= ini_comb n_hand in
-      if (check_triplet n_comb)then
-        check_r_help hand t (h :: acc)
-      else 
-        check_r_help hand t acc
-    end
-
 (** given the kind, generate 1-9 tile of this kind  *)
 let rec generate_n kind n acc = 
   if (n > 0) then begin 
@@ -340,6 +326,20 @@ let generate_tiles =
         | Tile.Dragon -> generate t (acc @ generate_n h 3 [])
       end
   in generate [Tile.Pin; Tile.Man; Tile.Sou; Tile.Wind; Tile.Dragon] []
+
+(**hand represent hand tile, list represent various tile type,
+   acc represent feasible riichi tile *)
+let rec check_r_help hand lst acc = 
+  match lst with
+  | [] -> acc
+  | h ::t -> begin
+      let n_hand = Tile.sort (h :: hand) in 
+      let n_comb= ini_comb n_hand in
+      if (check_triplet n_comb)then
+        check_r_help hand t (h :: acc)
+      else 
+        check_r_help hand t acc
+    end
 
 (** return a list of tile that the player needs to richii *)
 let check_riichi player =
