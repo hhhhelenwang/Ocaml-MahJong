@@ -23,4 +23,4 @@ val next_state : t -> t
 val is_in_game : t -> bool
 
 (** [display_game] displays the current information about the game. *)
-val display_game : t -> unit
+val display_game : t -> unit list

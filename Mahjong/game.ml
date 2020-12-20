@@ -22,6 +22,10 @@ type game_state = {
 
 type t = game_state 
 
+(** [is_in_game state] is wheter the game is still going on. Updated to false
+    whenever a player has won. *)
+let is_in_game state = state.in_game
+
 (* Man, Pin, Sou:
    - represented by id = a * 9 + x, where id <= 108
    - if a = 0, 3, 6, 9 => Man
@@ -88,16 +92,16 @@ let init_state () =
     that no dupicated elements are extracted when extracting multiple 
     elements. *)
 let rec extract not_picked n lst = 
-  (* match lst with
-     | [] -> raise Not_found
-     | h :: t -> begin
+  match lst with
+  | [] -> raise Not_found
+  | h :: t -> begin
       if n = 0 then (h, not_picked @ t)
       else extract (h :: not_picked) (n - 1) t
-     end  *)
-  let picked = List.nth lst n in
-  let not_picked =  List.filter 
-      (fun elem -> elem <> picked) lst in
-  (picked, not_picked)
+    end 
+(* let picked = List.nth lst n in
+   let not_picked =  List.filter 
+    (fun elem -> elem <> picked) lst in
+   (picked, not_picked) *)
 
 (** [extract_n lst n acc op] extracts n elements and put then in a new list and
     get the list with remaining elements after extraction. It either extract 
@@ -139,11 +143,75 @@ let make_game state =
     if n_of_p = 0 then acc
     else begin
       let hand, left = extract_first_n shuffled_tiles 13 in
-      let player = Player.init_player n_of_p false false [] hand [] in
+      let hand' = Tile.sort hand in
+      let player = Player.init_player n_of_p false false [] hand' [] in
       assign (n_of_p - 1) left (player :: acc)
     end in
   let players = assign 4 shuffled_tiles [] in
   { state with players = players }
+
+(* pretty-print helpers ************************************)
+
+(** [string_of_combo combo] convert a combination of tiles represented by a 
+    list [combo] to a string. *)
+let  string_of_combo combo =
+  List.fold_left 
+    (fun acc tile -> acc ^ "  " ^ Tile.string_of_tile tile) "" combo
+
+(** [string_of_all_combos combos] convert a list of combinations of tiles to 
+    string for easy-printing. *)
+let string_of_all_combos combos = 
+  let order = ref 0 in
+  List.fold_left (fun acc combo -> 
+      order := !order + 1; 
+      acc ^ (string_of_int !order) ^ (string_of_combo combo)) "" combos
+
+(** [string_of_current player] is the string representation of [player]'s tiles
+    provided that player is the current player. *)
+let string_of_current player =
+  let id = Player.p_id player in
+  let dark = Player.hand_tile_dark player in
+  let light = Player.hand_tile_light player in
+  "\nPlayer " 
+  ^ string_of_int id 
+  ^ "\n"
+  ^ "Light hand: " ^ "\n"
+  ^ string_of_combo light ^ "\n"
+  ^ "Dark hand: " ^ "\n"
+  ^ string_of_combo dark ^ "\n"
+
+(** [string_of_other player] is the string representation of [player]'s tiles
+    provided that player is not the current player. *)
+let string_of_other player =
+  let id = Player.p_id player in
+  let last_tile = 
+    match Player.discard_pile player with
+    | [] -> None
+    | h :: s -> Some h in
+  let light = Player.hand_tile_light player in
+  "\nPlayer " 
+  ^ string_of_int id 
+  ^ "\n"
+  ^ "Last discarded: "  
+  ^ (fun tile_opt -> 
+      match tile_opt with
+      | Some last_tile -> Tile.string_of_tile last_tile
+      | None -> "") last_tile 
+  ^ "\n"
+  ^ "Light hand: " 
+  ^  string_of_combo light 
+  ^ "\n"
+
+(** [string_of_other player] prints all player's hand. It varies in color and
+    content according to who is the current player. *)
+let display_player state player =
+  match player with
+  | player when Player.p_id player = state.current_player_id ->
+    ANSITerminal.(print_string [cyan] (string_of_current player))
+  | player -> print_endline (string_of_other player)
+
+let display_game state = 
+  List.map (display_player state) state.players
 
 (** [after_chii state current_player last_discarded] is the state of game after
     [current_player] at [state] perform action chii. It calls pre-defined 
@@ -151,9 +219,10 @@ let make_game state =
     combination the player can build from chii, and update game state.  *)
 let rec after_chii current_player last_discarded hand_dark state =
   let all_chii_combo = Tile.all_pos hand_dark last_discarded in
-  print_endline {|You can chii the last discarded tile.|};
+  print_endline "You can chii the last discarded tile.";
   print_endline (string_of_all_combos all_chii_combo);
-  print_endline {|Which combo you would like to Chii? E.g. Chii 1\n>>|};
+  print_endline {|Which combo you would like to Chii? E.g. "Chii 1"|};
+  print_endline ">>";
   (* if Tile.chii_legal hand_dark last_discarded *)
   chii_helper state last_discarded all_chii_combo current_player hand_dark
 
@@ -161,35 +230,32 @@ let rec after_chii current_player last_discarded hand_dark state =
     combinations the player can build by chii and update their hand according
     to the combo they command to build. *)
 and chii_helper state last combos current_player hand_dark = 
-  match Command.parse (read_line ()) with
-  | Chii n when 0 < n && n <= List.length combos -> 
-    Player.chii_update_handtile (n - 1) last current_player; state
-  | Chii n -> 
-    print_endline "Please choose from the given option\n>>";
+  try 
+    match Command.parse (read_line ()) with
+    | Chii n when 0 < n && n <= List.length combos -> 
+      Player.chii_update_handtile (n - 1) last current_player;
+      print_endline (string_of_current current_player);
+      state
+    | Chii n -> 
+      print_endline ("Please choose from the given option." ^ "\n" ^ ">>");
+      after_chii current_player last hand_dark state 
+    | Discard (kind, number) -> 
+      print_endline "You can't discard now."; 
+      after_chii current_player last hand_dark state 
+    | Ron -> 
+      print_endline "You can't Rong now."; 
+      after_chii current_player last hand_dark state 
+    | Quit -> 
+      print_endline "Thank you for playing, bye!";
+      {state with in_game = false}
+  with
+  | Command.Empty -> 
+    print_endline "Empty command. Please try again."; 
     after_chii current_player last hand_dark state 
-  | Discard (kind, number) -> 
-    print_endline "You can't discard now."; 
+  | Command.Malformed -> 
+    print_endline "I don't understand this command. Please try again.";
     after_chii current_player last hand_dark state 
-  | Ron -> 
-    print_endline "You can't Ron now. Good luck with the rest of the game!"; 
-    after_chii current_player last hand_dark state 
-  | Quit -> 
-    print_endline "Thank you for playing, bye!";
-    {state with in_game = false}
 
-(** [string_of_all_combos combos] convert a list of combinations of tiles to 
-    string for easy-printing. *)
-and string_of_all_combos combos = 
-  let order = ref 0 in
-  List.fold_left (fun acc combo -> 
-      order := !order + 1; 
-      acc ^ (string_of_int !order) ^ (string_of_combo combo)) "" combos
-
-(** [string_of_combo combo] convert a combination of tiles represented by a 
-    list [combo] to a string. *)
-and string_of_combo combo =
-  List.fold_left 
-    (fun acc tile -> acc ^ "  " ^ Tile.string_of_tile tile) "" combo
 
 (** [after_draw state current_player] is the state of game after
     [current_player] at [state] draws a card. It takes the first tile from 
@@ -197,21 +263,34 @@ and string_of_combo combo =
 let after_draw current_player state =
   let drawn_tile = List.hd state.wall_tiles in
   Player.draw_tile current_player drawn_tile;
-  print_endline {|Drawn tile:\n|};
-  print_endline (Tile.string_of_tile drawn_tile);
+  print_endline ("Drawn tile: " ^ (Tile.string_of_tile drawn_tile));
+  print_endline (string_of_current current_player);
   state
 
 (** [after_discard state current_player] is the state of game after
     [current_player] at [state] discard a tile. *)
 let rec after_discard current_player state =
-  print_endline {|Enter command to discard a tile. E.g. "discard Man 1"\n>>|};
-  match Command.parse (read_line ()) with
-  | Discard (kind, number) -> discard_helper current_player kind number state
-  | Chii n -> print_endline "You can't Chii now."; state
-  | Ron -> 
-    print_endline "You can't Ron now. Good luck with the rest of the game!"; 
-    state
-  | Quit -> print_endline "Quitting!"; { state with in_game = false }
+  print_endline {|Enter command to discard a tile. E.g. "discard Man 1"|};
+  try 
+    match Command.parse (read_line ()) with
+    | Discard (kind, number) -> 
+      discard_helper current_player kind number state
+    | Chii n -> 
+      print_endline "You can't Chii now."; 
+      after_discard current_player state
+    | Ron -> 
+      print_endline "You can't Rong now.";
+      after_discard current_player state
+    | Quit -> 
+      print_endline "Thank you for playing, bye!";
+      { state with in_game = false }
+  with
+  | Command.Empty -> 
+    print_endline "Empty command. Please try again."; 
+    after_discard current_player state
+  | Command.Malformed -> 
+    print_endline "I don't understand this command. Please try again.";
+    after_discard current_player state
 
 (** [discars_helper] discards the tile <[kind] [number]> commanded by [
     current_player] if the tile is found in their dark hand, and prompt them 
@@ -255,11 +334,11 @@ let after_check_rong this_plr tile state =
     {state with in_game = false}
   | false -> state
 
-
 (** [next_state state] is the game state after a player has played their turn.
     In a turn, a player will draw and discard tile, and if possible chii, 
     riichi, or win. *)
 let rec next_state state = 
+  display_game state;
   let last_plr_id = 
     if state.current_player_id <= 1 then 4
     else state.current_player_id - 1 in
@@ -277,12 +356,12 @@ let rec next_state state =
   | Some last_tile -> 
     not_chii_routine this_player last_player last_tile state 
   | None -> first_round_routine this_player last_player state 
-(* let after_chii_state = after_chii state this_player last_discarded_tile in
-   let after_draw_state = after_draw after_chii_state this_player in
-   let last_state = after_discard after_draw_state this_player in
-   if List.length last_state.wall_tiles <= 4 then 
-   {last_state with in_game = false}
-   else last_state *)
+
+(** [update_current_player state] is the state with current player updated to
+    point to the next player. *)
+and update_current_player state =
+  let next_id = (state.current_player_id mod 4) + 1 in
+  { state with current_player_id = next_id }
 
 (** [first_round_routine this_plr last_plr state] is the state after this turn 
     if [this_plr] is the first one in the whole game to make a move. This means
@@ -295,6 +374,7 @@ and first_round_routine this_plr last_plr state =
     state' 
     |> after_discard this_plr 
     |> after_check_richii this_plr
+    |> update_current_player
   | state' -> state'
 
 (** [chii_routine this_plr last_tile hand_dark state] is the state after this 
@@ -307,6 +387,7 @@ and chii_routine this_plr last_tile hand_dark state =
     |> after_chii this_plr last_tile hand_dark 
     |> after_discard this_plr 
     |> after_check_richii this_plr
+    |> update_current_player
   | state' -> state'
 
 (** [not_chii_routine this_plr last_plr last_tile state] is the state after 
@@ -324,22 +405,5 @@ and not_chii_routine this_plr last_plr last_tile state =
     state' 
     |> after_discard this_plr 
     |> after_check_richii this_plr
+    |> update_current_player
   | state' -> state'
-
-
-and riichi_routine this_plr last_plr last_tile state =
-  failwith ""
-
-let is_in_game state = state.in_game
-
-let rec display_all_player players =
-  match players with
-  | [] -> ()
-  | h :: t -> 
-    print_string "\n player \n";
-    Player.display_I h;
-    display_all_player t
-
-
-let display_game state = 
-  failwith ""
