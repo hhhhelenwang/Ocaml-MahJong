@@ -21,6 +21,10 @@ let update_status tile = tile.discarded <- true
 
 let get_id t = t.id
 
+let get_kind tile = tile.kind
+
+let get_number tile = tile.number
+
 (* print out the number and kind of the tile
    let dp t = *)
 let rec find_tile kind number lst=
@@ -70,7 +74,7 @@ let string_of_tile tile =
   | Dragon -> begin match n with
       | 1 -> "Red_Dragon"
       | 2 -> "Green_Dragon"
-      | 3 -> "White_Draon"
+      | 3 -> "White_Dragon"
       | _ -> "Not right"
     end
 

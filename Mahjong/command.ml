@@ -2,6 +2,7 @@
 type command =
   | Discard of (Tile.kind * int)
   | Chii of int
+  | Skip
   | Quit
 
 exception Empty
@@ -44,5 +45,6 @@ let parse str =
   | [] -> raise Empty
   | h :: t when h = "discard" && t <> [] -> Discard (parse_tile t 0 (Man, 0))
   | h :: t when h = "chii" && t <> [] -> Chii (parse_number t)
+  | h :: t when h = "skip" -> Skip
   | h :: t when h = "quit" -> Quit
   | h :: t -> raise Malformed

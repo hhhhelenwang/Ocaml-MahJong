@@ -111,7 +111,7 @@ let rec get_ele lst n =
   | [] -> []
   | h :: t -> begin
       if n <= 0 then h
-      else get_ele lst (n-1)
+      else get_ele t (n - 1)
     end
 
 (* [chii_update_handtile int tile player] updates player's dark, light handtile,
@@ -125,7 +125,7 @@ let chii_update_handtile int tile player =
   let dark = hand_tile.dark in 
   let light = hand_tile.light in
   let all_pos = Tile.all_pos dark tile in 
-  let picked = get_ele all_pos (int-1) in
+  let picked = get_ele all_pos (int - 1) in
   hand_tile.dark <- remove_tile_lst picked (tile::dark);
   hand_tile.light <- picked @ light;
   player.state_c <- true;

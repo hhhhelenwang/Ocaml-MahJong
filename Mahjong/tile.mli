@@ -21,6 +21,10 @@ val update_status : t -> unit
 (** [get_id tile] gets  the id of [tile] *)
 val get_id : t -> id
 
+val get_kind : t -> kind
+
+val get_number : t -> int
+
 (** [find_tile kind number] finds the tile represented by [kind] [number]. 
     i.e. given the kind of the tile and the number on the tile, find the 
     complete tile representation among a given list of tiles. In case of 

@@ -35,6 +35,7 @@ Dragon tiles:
   Dragon 3 = White Dragon
 Discard a tile: discard Man 1
 Chii (we will give you # of options to choose from): chii 1
+Skip a Chii action: skip
 Quit the game: quit
 
 Note that all commands are case sensitve. Enjoy!

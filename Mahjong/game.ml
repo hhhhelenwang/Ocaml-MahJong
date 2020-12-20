@@ -143,7 +143,7 @@ let make_game state =
   let rec assign n_of_p left acc = 
     if n_of_p = 0 then (acc, left)
     else begin
-      let hand, left = extract_first_n shuffled_tiles 13 in
+      let hand, left = extract_first_n left 13 in
       let hand' = Tile.sort hand in
       let player = Player.init_player n_of_p false false [] hand' [] in
       assign (n_of_p - 1) left (player :: acc) 
@@ -178,7 +178,7 @@ let string_of_current player =
   ^ string_of_int id 
   ^ "\n"
   ^ "Light hand: " ^ "\n"
-  ^ string_of_combo light
+  ^ string_of_combo light ^ "\n"
   ^ "Dark hand: " ^ "\n"
   ^ string_of_combo dark ^ "\n\n"
 
@@ -191,14 +191,15 @@ let string_of_other player =
     | [] -> None
     | h :: s -> Some h in
   let light = Player.hand_tile_light player in
-  "\nPlayer " 
+  "Player " 
   ^ string_of_int id 
   ^ "\n"
-  ^ "Last discarded: "  
+  ^ "Last discarded: " 
   ^ (fun tile_opt -> 
       match tile_opt with
       | Some last_tile -> Tile.string_of_tile last_tile
       | None -> "") last_tile 
+  ^ "\n"
   ^ "Light hand: " 
   ^  string_of_combo light 
   ^ "\n"
@@ -221,11 +222,11 @@ let display_game state =
 let rec after_chii current_player last_discarded hand_dark state =
   let all_chii_combo = Tile.all_pos hand_dark last_discarded in
   ANSITerminal.(print_string [yellow] 
-                  "You can chii the last discarded tile. 
-                  Here are the options:");
+                  "You can chii the last discarded tile.\n");
+  print_endline "Here are the options: ";
   print_endline (string_of_all_combos all_chii_combo);
   ANSITerminal.(print_string [yellow] 
-                  {|Which combo you would like to Chii? E.g. "Chii 1"|});
+                  "Which combo you would like to Chii? E.g. Chii 1\n");
   print_endline ">>";
   chii_helper state last_discarded all_chii_combo current_player hand_dark
 
@@ -236,26 +237,29 @@ and chii_helper state last combos current_player hand_dark =
   try 
     match Command.parse (read_line ()) with
     | Chii n when 0 < n && n <= List.length combos -> 
-      Player.chii_update_handtile (n - 1) last current_player;
+      Player.chii_update_handtile n last current_player;
       ANSITerminal.(print_string [cyan] (string_of_current current_player));
       state
     | Chii n -> 
       ANSITerminal.(print_string [red] 
                       ("Please choose from the given option." ^ "\n" ^ ">>"));
-      after_chii current_player last hand_dark state 
+      after_chii current_player last hand_dark state
+    | Skip -> 
+      ANSITerminal.(print_string [cyan] "Skipped!\n");  
+      state
     | Discard (kind, number) -> 
       ANSITerminal.(print_string [red] 
                       ("You can't discard now."));
       after_chii current_player last hand_dark state 
     | Quit -> 
-      print_endline "Thank you for playing, bye!";
-      {state with in_game = false}
+      ANSITerminal.(print_string [yellow] "Thank you for playing, bye!");
+      { state with in_game = false }
   with
   | Command.Empty -> 
-    print_endline "Empty command. Please try again."; 
+    print_endline "Empty command. Please try again.\n"; 
     after_chii current_player last hand_dark state 
   | Command.Malformed -> 
-    print_endline "I don't understand this command. Please try again.";
+    print_endline "I don't understand this command. Please try again.\n";
     after_chii current_player last hand_dark state 
 
 
@@ -278,6 +282,17 @@ let after_draw current_player state =
     [current_player] at [state] discard a tile. *)
 let rec after_discard current_player state =
   print_endline {|Enter command to discard a tile. E.g. "discard Man 1"|};
+  let drawn_tile = current_player |> Player.hand_tile_dark |> List.hd in
+  let kind = Tile.get_kind drawn_tile in
+  let number = Tile.get_number drawn_tile in
+  match Player.state_r current_player with
+  | true -> 
+    ANSITerminal.(print_string [yellow] 
+                    "You have riichi-ed, you can only discard the last drawn tile.");
+    discard_helper current_player kind number state
+  | false -> normal_discard current_player state
+
+and normal_discard current_player state =
   try 
     match Command.parse (read_line ()) with
     | Discard (kind, number) -> 
@@ -286,16 +301,20 @@ let rec after_discard current_player state =
       ANSITerminal.(print_string [red] 
                       ("You can't Chii now." ^ "\n" ^ ">>"));
       after_discard current_player state
+    | Skip ->
+      ANSITerminal.(print_string [red] 
+                      ("You can't Skip now. Skip is for Chii" ^ "\n" ^ ">>"));
+      after_discard current_player state
     | Quit -> 
-      print_endline "Thank you for playing, bye!";
+      ANSITerminal.(print_string [yellow] "Thank you for playing, bye!");
       { state with in_game = false }
   with
   | Command.Empty -> 
-    ANSITerminal.(print_string [red] "Empty command. Please try again.");
+    ANSITerminal.(print_string [red] "Empty command. Please try again.\n");
     after_discard current_player state
   | Command.Malformed -> 
     ANSITerminal.(print_string [red] 
-                    "I don't understand this command. Please try again.");
+                    "I don't understand this command. Please try again.\n");
     after_discard current_player state
 
 (** [discars_helper] discards the tile <[kind] [number]> commanded by [
@@ -307,13 +326,16 @@ and discard_helper current_player kind number state =
   match Player.discard_tile current_player tile_opt with
   | true -> state
   | false -> 
-    ANSITerminal.(print_string [red] "You don't have this tile.");
+    ANSITerminal.(print_string [red] "You don't have this tile.\n");
     after_discard current_player state
 
 (** [riichi_helper state current_player to_get] changes the state for 
     [current_player] to richii and display what tiles are needed for them to 
     win. *)    
 let riichi_helper current_player to_get state =
+  ANSITerminal.(print_string [yellow] 
+                  "You are riichi-ed!\n");
+  print_endline "Just need these tiles to win: ";
   print_endline (string_of_combo to_get);
   Player.riichi current_player;
   state
@@ -327,6 +349,19 @@ let after_check_richii current_player state =
   if to_get = [] then state
   else riichi_helper current_player to_get state
 
+let rong_message = 
+  "
+ __ __  ____   __ ______   ___   ____   __ __  __ 
+|  |  ||    | /  ]      | /   \\ |    \\ |  |  ||  |
+|  |  | |  | /  /|      ||     ||  D  )|  |  ||  |
+|  |  | |  |/  / |_|  |_||  O  ||    / |  ~  ||__|
+|  :  | |  /   \\_  |  |  |     ||    \\ |___, | __ 
+ \\   /  |  \\     | |  |  |     ||  .  \\|     ||  |
+  \_/  |____\\____| |__|   \\___/ |__|\\_||____/ |__|
+
+Rong! Congratulations, you win the game!
+"
+
 (** [afte_check_rong this_plr last_plr tile state] is the state after we check
     if [this_plr] has won. Game ends if won. *)
 let after_check_rong this_plr tile state =
@@ -336,7 +371,7 @@ let after_check_rong this_plr tile state =
   let riichi_state = Player.state_r this_plr in 
   let comb_for_rong = Player.ini_comb hand riichi_state in
   match Player.check_triplet comb_for_rong with
-  | true -> print_endline "Rong! Congratulations, you win the game!";
+  | true -> ANSITerminal.(print_string [yellow] rong_message);
     { state with in_game = false }
   | false -> state
 
@@ -360,7 +395,7 @@ let rec next_state state =
   | Some last_tile when Tile.chii_legal hand_dark last_tile -> 
     chii_routine this_player last_tile hand_dark state 
   | Some last_tile -> 
-    not_chii_routine this_player last_player last_tile state 
+    not_chii_routine this_player last_tile state 
   | None -> first_round_routine this_player last_player state 
 
 (** [update_current_player state] is the state with current player updated to
@@ -388,21 +423,26 @@ and first_round_routine this_plr last_plr state =
 
 (** [chii_routine this_plr last_tile hand_dark state] is the state after this 
     turn if [this_plr] can perform chii action. In this case, the player cannot
-    draw and we skip drawing and checking for rong to discarding tile. *)
+    draw and we skip drawing and checking for rong to discarding tile. If the
+    player choose not to chii, we jump to [not_chii_routine]. *)
 and chii_routine this_plr last_tile hand_dark state = 
   match after_check_rong this_plr last_tile state with
   | state' when state'.in_game ->
-    state'
-    |> after_chii this_plr last_tile hand_dark 
-    |> after_discard this_plr 
-    |> after_check_richii this_plr
-    |> update_current_player
+    let light0 = Player.hand_tile_light this_plr in
+    let state1 = after_chii this_plr last_tile hand_dark state' in
+    if List.length (Player.hand_tile_light this_plr) 
+       <> List.length light0 then 
+      state1
+      |> after_discard this_plr 
+      |> after_check_richii this_plr
+      |> update_current_player
+    else not_chii_routine this_plr last_tile state'
   | state' -> state'
 
 (** [not_chii_routine this_plr last_plr last_tile state] is the state after 
     this turn if [this_plr] can not chii. This means they will draw, be checked
     for rong, and be checked for riichi. *)
-and not_chii_routine this_plr last_plr last_tile state =
+and not_chii_routine this_plr last_tile state =
   match after_check_rong this_plr last_tile state with
   | state' when state'.in_game -> begin
       let state1 = after_draw this_plr state' in
