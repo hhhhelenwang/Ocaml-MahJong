@@ -165,7 +165,8 @@ let string_of_all_combos combos =
   let order = ref 0 in
   List.fold_left (fun acc combo -> 
       order := !order + 1; 
-      acc ^ (string_of_int !order) ^ (string_of_combo combo)) "" combos
+      acc ^ (string_of_int !order) ^ (string_of_combo combo) ^ "\n") 
+    "" combos
 
 (** [string_of_current player] is the string representation of [player]'s tiles
     provided that player is the current player. *)
@@ -219,11 +220,13 @@ let display_game state =
     combination the player can build from chii, and update game state.  *)
 let rec after_chii current_player last_discarded hand_dark state =
   let all_chii_combo = Tile.all_pos hand_dark last_discarded in
-  print_endline "You can chii the last discarded tile.";
+  ANSITerminal.(print_string [yellow] 
+                  "You can chii the last discarded tile. 
+                  Here are the options:");
   print_endline (string_of_all_combos all_chii_combo);
-  print_endline {|Which combo you would like to Chii? E.g. "Chii 1"|};
+  ANSITerminal.(print_string [yellow] 
+                  {|Which combo you would like to Chii? E.g. "Chii 1"|});
   print_endline ">>";
-  (* if Tile.chii_legal hand_dark last_discarded *)
   chii_helper state last_discarded all_chii_combo current_player hand_dark
 
 (** [chii_helper state last hand_dark current_player] displays all possible 
@@ -237,13 +240,12 @@ and chii_helper state last combos current_player hand_dark =
       ANSITerminal.(print_string [cyan] (string_of_current current_player));
       state
     | Chii n -> 
-      print_endline ("Please choose from the given option." ^ "\n" ^ ">>");
+      ANSITerminal.(print_string [red] 
+                      ("Please choose from the given option." ^ "\n" ^ ">>"));
       after_chii current_player last hand_dark state 
     | Discard (kind, number) -> 
-      print_endline "You can't discard now."; 
-      after_chii current_player last hand_dark state 
-    | Ron -> 
-      print_endline "You can't Rong now."; 
+      ANSITerminal.(print_string [red] 
+                      ("You can't discard now."));
       after_chii current_player last hand_dark state 
     | Quit -> 
       print_endline "Thank you for playing, bye!";
@@ -281,20 +283,19 @@ let rec after_discard current_player state =
     | Discard (kind, number) -> 
       discard_helper current_player kind number state
     | Chii n -> 
-      print_endline "You can't Chii now."; 
-      after_discard current_player state
-    | Ron -> 
-      print_endline "You can't Rong now.";
+      ANSITerminal.(print_string [red] 
+                      ("You can't Chii now." ^ "\n" ^ ">>"));
       after_discard current_player state
     | Quit -> 
       print_endline "Thank you for playing, bye!";
       { state with in_game = false }
   with
   | Command.Empty -> 
-    print_endline "Empty command. Please try again."; 
+    ANSITerminal.(print_string [red] "Empty command. Please try again.");
     after_discard current_player state
   | Command.Malformed -> 
-    print_endline "I don't understand this command. Please try again.";
+    ANSITerminal.(print_string [red] 
+                    "I don't understand this command. Please try again.");
     after_discard current_player state
 
 (** [discars_helper] discards the tile <[kind] [number]> commanded by [
@@ -306,7 +307,7 @@ and discard_helper current_player kind number state =
   match Player.discard_tile current_player tile_opt with
   | true -> state
   | false -> 
-    print_endline "You don't have this tile.";
+    ANSITerminal.(print_string [red] "You don't have this tile.");
     after_discard current_player state
 
 (** [riichi_helper state current_player to_get] changes the state for 
