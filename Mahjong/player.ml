@@ -43,9 +43,22 @@ let discard_pile t = t.discard_pile
 let draw_tile player tile =
   player.hand_tile.dark <- (Tile.sort ([tile] @ player.hand_tile.dark))
 
-(* remove a list of tiles [tlist] from pile *)
-let remove_tile_lst tlist pile = 
-  List.filter (fun x -> not (List.mem x tlist)) pile
+(* remove first occurence of [tile] from [lst] *)
+let rec remove_fst_occur lst tile acc = 
+  match lst with
+  | [] -> lst 
+  | h :: t -> begin
+      if Tile.ck_eq h tile then acc @ t else 
+        remove_fst_occur t tile (acc @ [h])
+    end
+
+(* remove [tlist] from [pile] *)
+let rec remove_tile_lst tlist pile = 
+  match tlist with
+  | [] -> pile
+  | h :: t -> begin
+      remove_tile_lst t (remove_fst_occur pile h [])
+    end
 
 let discard_tile player tile_opt =
   let handt = player.hand_tile.dark in
@@ -113,7 +126,7 @@ let chii_update_handtile int tile player =
   let light = hand_tile.light in
   let all_pos = Tile.all_pos dark tile in 
   let picked = get_ele all_pos (int-1) in
-  hand_tile.dark <- remove_tile_lst picked dark;
+  hand_tile.dark <- remove_tile_lst picked (tile::dark);
   hand_tile.light <- picked @ light;
   player.state_c <- true;
   ()
@@ -380,7 +393,7 @@ let ron comb =
 let ini_comb lst bool = {
   pair = [];
   triplet = [];
-  info = ini_info lst [];
+  info = ini_info (Tile.sort lst) [];
   seq = [];
   riichied = bool;
 }

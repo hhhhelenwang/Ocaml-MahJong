@@ -145,6 +145,8 @@ let t31 = Tile.construct 1 Pin 1 false
 let t32 = Tile.construct 1 Pin 2 false
 let t33 = Tile.construct 1 Pin 3 false
 let t34 = Tile.construct 1 Pin 4 false
+let t35 = Tile.construct 1 Pin 5 false
+let t36 = Tile.construct 1 Pin 6 false
 
 let t41 = Tile.construct 1 Wind 1 false
 let t42 = Tile.construct 1 Wind 2 false
@@ -165,6 +167,7 @@ let ron_l12 = [t1;t1;t1; t3;t3;t3; t4;t5;t6; t7;t7;t7; t8;t8]
 let ron_l13 = [t11;t11;t11; t3;t3;t3; t4;t5;t6; t7;t7;t7; t8;t8]
 let ron_l14 = [t11;t11;t11; t3;t3;t3; t4;t5;t6; t21;t21;t21; t8;t8]
 let ron_l15 = [t1;t2;t3; t11;t12;t13; t4;t5;t6; t17;t18;t19; t5;t5]
+let ron_l16 = [t34;t35;t36; t5;t6; t3;t3;t3; t18;t18;t18; t1;t1; t4]
 
 let n_comb1 = Player.ini_comb ron_l1 true
 let n_comb2 = Player.ini_comb ron_l2 true
@@ -181,6 +184,7 @@ let n_comb12 = Player.ini_comb ron_l12 false
 let n_comb13 = Player.ini_comb ron_l13 false
 let n_comb14 = Player.ini_comb ron_l14 false
 let n_comb15 = Player.ini_comb ron_l15 false
+let n_comb16 = Player.ini_comb ron_l16 true
 
 (* let print_a_info= Player.print_info (Player.ini_info ron_l1 []) *)
 
@@ -218,8 +222,8 @@ let ron_tests = [
      ron_test "did not riichi, eventhough formed 4*(seq||tri)+2" n_comb13 false;
      ron_test " not riichi, but has draon triplet" n_comb14 true;
      ron_test " not riichi, but pinfu" n_comb15 true; *)
-
-  ron_output_test "true, riichi" n_comb1 (true, Riichi);
+  ron_test " richiied normal" n_comb16 true; 
+  (* ron_output_test "true, riichi" n_comb1 (true, Riichi); *)
   (* ron_output_test "true, Tanyao" n_comb11 (true, Tanyao);
      ron_output_test "true, Hunyise" n_comb12 (true, Hunyise);
      ron_output_test "true, draon triplet" n_comb14 (true, Dragontriplet);
@@ -352,17 +356,6 @@ let pos_l3 = [t1;t2;t2;t3;t4;t5]
 let pos_l4 = [t11;t12;t1;t2]
 let pos_l5 = [t11;t12;t13;t14;t21;t22;t23;t41;t43;t32;t33]
 
-(* id richii chii light dark discard *)
-let player11 = Player.init_player 11 false false [] pos_l1 []
-let _ = chii_update_handtile 1 t3 player11
-let _ = draw_tile player11 t1
-
-let player12 = Player.init_player 12 false false [t1;t1;t1] pos_l2 []
-let _ = chii_update_handtile 1 t2 player12
-let _ = draw_tile player12 t31
-
-let player13 = Player.init_player 13 false false [] [t1;t2;t3;t4] []
-
 let tile_tests = [
   ck_adj_test "man 1 2" t1 t2 true;
   ck_adj_test "man 1 Sou 2" t1 t12 false;
@@ -478,6 +471,19 @@ let discard_tile_detail_test
           ~printer: pp_matrix else ()
     )
 
+(* id richii chii light dark discard *)
+let player11 = Player.init_player 11 false false [] pos_l1 []
+let _ = chii_update_handtile 1 t3 player11
+let _ = draw_tile player11 t1
+
+let player12 = Player.init_player 12 false false [t1;t1;t1] pos_l2 []
+let _ = chii_update_handtile 1 t2 player12
+let _ = draw_tile player12 t31
+
+let player13 = Player.init_player 13 false false [] [t1;t2;t3;t4] []
+
+let player14 = Player.init_player 14 false false [] [t1;t1;t1;t2;t3;t4] []
+
 let player_tests = [
   discard_tile_test "discard one existing tile" player1 (Some tile2) true;
   discard_tile_test "discard one not existed tile" player1 None false;
@@ -491,7 +497,6 @@ let player_tests = [
   chii_legal_test "Dragon123" [t21;t22] t23 false;
   chii_legal_test "Dragon111" [t21;t21] t21 true;
 
-  draw_tile_test "draw Man1" player11 [t1;t1;t5];
   draw_tile_test "draw Man1" player12 [t31;t1];
 
   chii_update_handtile_test "update chii_handtile" player11 
@@ -508,6 +513,9 @@ let player_tests = [
   discard_tile_test "discard existing tile" player13 None false;
   discard_tile_detail_test "discard non-existing tile" player13 None
     [[t1;t2;t3;t4];[]];
+
+  discard_tile_detail_test "player 14: discard existing tile" player14 (Some t1)
+    [[t1;t1;t2;t3;t4];[t1]];
 ]
 
 let _ = print_endline ("finished evaluating player test" )
