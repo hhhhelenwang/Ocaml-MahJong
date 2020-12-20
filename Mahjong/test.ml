@@ -4,7 +4,7 @@ open Tile
 open Game
 open Command
 
-(** Test Plan:
+(** The Test Plan:
     A) Parts of the system tested by OUnit and why:
       All functions except display, display related functions, and helper 
       functions are tested by OUnit. This is because OUnit gives rigorous 
@@ -33,8 +33,19 @@ open Command
       Using test-driven development, most test cases are black box tests. 
       However, to make sure the correctness of ron, riichi we also did glass 
       box testing after black box testing on the ron and riichi test suits.
-    D) Why testing approach demonstrates the correctness of the system: 
-      The testing approach
+    D) Why testing approach demonstrates then correctness of the system: 
+      All functions are tested either with OUnit or manually. The OUnit tests 
+      ensure the basic pieces of logic are correct. Some of the unit tests check
+      one piece of logic independent in one module, such as [draw_tile] 
+      from Player Module. The other OUnit tests test pieces of code that 
+      integrate different pieceis of modules to ensure different pieces of the 
+      modules are working togeter. For example, ron_output_test uses ron in
+      Player module, ck_eq, ck_seq, ck_tri in Tile module. The manual tests 
+      test all possible branches of the game flow.
+      Black box testing makes sure the functions function correctly. Glass box 
+      testing ensure high test coverage. Test cases include conor cases, which
+      demonstrate the correctness of each piece of logic under different 
+      situations. 
 *)
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
