@@ -6,6 +6,15 @@ type handt = {
   mutable dark: Tile.t list;
 }
 
+(* let yaojiu =
+   [(Tile.sim_construct Man 1)] @ [(Tile.sim_construct Man 9)]@
+   [(Tile.sim_construct Sou 1)] @ [(Tile.sim_construct Sou 9)] @
+   [(Tile.sim_construct Pin 1)] @ [(Tile.sim_construct Pin 9)] @
+   [(Tile.sim_construct Dragon 1)] @ [(Tile.sim_construct Dragon 2)]@
+   [(Tile.sim_construct Dragon 3)] @ [(Tile.sim_construct Wind 1)]@
+   [(Tile.sim_construct Wind 2)] @ [(Tile.sim_construct Wind 3)]@
+   [(Tile.sim_construct Wind 4)] *)
+
 type player = {
 
   (** id of the player*)
@@ -44,6 +53,10 @@ let discard_pile t = t.discard_pile
 let draw_tile player tile =
   player.hand_tile.dark <- (Tile.sort ([tile] @ player.hand_tile.dark))
 
+(* remove a list of tiles [tlist] from pile *)
+let remove_tile_lst tlist pile = 
+  List.filter (fun x -> not (List.mem x tlist)) pile
+
 let discard_tile player tile_opt =
   let handt = player.hand_tile.dark in
   let discardt = player.discard_pile in 
@@ -51,7 +64,7 @@ let discard_tile player tile_opt =
   | None -> false
   | Some tile -> begin 
       Tile.update_status tile;
-      player.hand_tile.dark <- Tile.remove_tile tile handt;
+      player.hand_tile.dark <- remove_tile_lst [tile] handt;
       player.discard_pile <- [tile] @ discardt;
       true
     end
@@ -98,10 +111,6 @@ let rec get_ele lst n =
       else get_ele lst (n-1)
     end
 
-(* remove a list of tiles [tlist] from pile *)
-let remove_tile_lst tlist pile = 
-  List.filter (fun x -> not (List.mem x tlist)) pile
-
 (* [chii_update_handtile int tile player] updates player's dark, light handtile,
    and state_c to true.
    [int] is the i-th option in all possible chii-combination, the first element
@@ -120,12 +129,11 @@ let chii_update_handtile int tile player =
   ()
 
 type comb = {
+  info: (Tile.t * int) list;
   pair: Tile.t list;
   triplet: Tile.t list list;
-  info: (Tile.t * int) list;
-  (* rest_tile: Tile.t list; *)
   seq: Tile.t list list;
-  mutable ron: bool;
+  riichied: bool;
 }
 
 (* find h in acc, if exist >> (h, count+1), if not, append (h,1) on acc *)
@@ -234,16 +242,49 @@ let rec print_info info =
   | (tile, int) :: t -> Tile.dp tile; print_endline (" " ^ string_of_int int);
     print_info t
 
-(**  *)
+(* check if [tile] is in list yaojiu. Not like List.mem bc need to use self-
+   defined check_equal but not physical equality*)
+let tungyao_helper tile =
+  let yaojiu =
+    (Tile.sim_construct Man 1) :: (Tile.sim_construct Man 9) ::
+    (Tile.sim_construct Sou 1):: (Tile.sim_construct Sou 9) ::
+    (Tile.sim_construct Pin 1) :: (Tile.sim_construct Pin 9) ::
+    (Tile.sim_construct Dragon 1) :: (Tile.sim_construct Dragon 2) ::
+    (Tile.sim_construct Dragon 3) :: (Tile.sim_construct Wind 1) ::
+    (Tile.sim_construct Wind 2) :: (Tile.sim_construct Wind 3) ::
+    [(Tile.sim_construct Wind 4)] in
+  match List.find_opt (fun x -> Tile.ck_eq tile x) yaojiu with
+  | None -> false
+  | Some _ -> true
+
+(** check if it is duanyaoji: cannot be number 1, number 9, wind or dragon *)
+let is_tungyao new_l =
+  not (List.exists tungyao_helper new_l) 
+
+(* 东南西北中发白 加 wanbinsuo 中的一种 *)
+let is_hunyise new_l = 
+  let man = List.length (Tile.filter_kind Tile.Man new_l) in 
+  let sou = List.length (Tile.filter_kind Tile.Sou new_l) in 
+  let bin = List.length (Tile.filter_kind Tile.Pin new_l) in 
+  (man = 0 && sou = 0) || (man = 0 && bin = 0) || (sou = 0 && bin = 0) 
+
+(**check if this combination of tile have at least one yaku *)
+let check_yaku comb = 
+  let new_tri =  List.concat comb.triplet  in
+  let new_seq =  List.concat comb.seq  in
+  let new_l = new_tri @ new_seq @ comb.pair in
+  comb.riichied || is_tungyao new_l || is_hunyise new_l
+
+(**check if a combination of tiles can Ron  *)
 let rec check_triplet comb = 
   if List.length comb.info = 0 
   then begin 
-    if (
+    if 
       ((List.length comb.pair = 2) &&
-       (List.length comb.triplet + List.length comb.seq = 4)) || 
+       (List.length comb.triplet + List.length comb.seq = 4) && 
+       (check_yaku comb))|| 
       ((List.length comb.pair = 14) &&
        (List.length comb.triplet + List.length comb.seq = 0))
-    )
     then true else false 
   end
   else begin
@@ -288,41 +329,38 @@ and
       end
     else false
 
-(**initialize a  comb which work as information of hand tile*)
-let ini_comb lst = {
+(**initialize a comb which work as information of hand tile*)
+let ini_comb lst bool = {
   pair = [];
   triplet = [];
   info = ini_info lst [];
-  (* rest_tile = lst; *)
   seq = [];
-  ron = false;
+  riichied = bool;
 }
 
-let riichi player=
-  if (player.state_r) then failwith " player already riichi ed"
+let riichi player =
+  if player.state_r then failwith " player already riichi ed"
   else 
     player.state_r <- true;
   ()
 
-
-
 (**hand represent hand tile, list represent various tile type,
    acc represent feasible riichi tile *)
-let rec check_r_help hand lst acc = 
+let rec check_r_help hand lst acc bol = 
   match lst with
   | [] -> acc
   | h ::t -> begin
       let n_hand = Tile.sort (h :: hand) in 
-      let n_comb= ini_comb n_hand in
-      if (check_triplet n_comb)then
-        check_r_help hand t (h :: acc)
+      let n_comb= ini_comb n_hand bol in
+      if (check_triplet n_comb )then
+        check_r_help hand t (h :: acc) bol
       else 
-        check_r_help hand t acc
+        check_r_help hand t acc bol
     end
 
 (** given the kind, generate 1-9 tile of this kind  *)
 let rec generate_n kind n acc = 
-  if (n > 0) then begin 
+  if n > 0 then begin 
     let new_t= Tile.construct 1 kind n false in
     generate_n kind (n - 1) (new_t :: acc)
   end
@@ -347,7 +385,7 @@ let check_riichi player =
   else
     let handtile = combine player in
     let lst = generate_tiles in
-    check_r_help handtile lst []
+    check_r_help handtile lst [] false
 
 (**case 1: 111 333 555 777 [normal]   3 3 3 3 
    case 2: 223344 567 789          6 3 3

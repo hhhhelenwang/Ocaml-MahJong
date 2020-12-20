@@ -18,7 +18,7 @@ exception UnknownTile of id
 (** The discardable status of a tile *)
 val update_status : t -> unit
 
-(** get id of this tile *)
+(** [get_id tile] gets  the id of [tile] *)
 val get_id : t -> id
 
 (** find the tile represented by [kind] [number]. i.e. given the kind of the 
@@ -29,13 +29,16 @@ val get_id : t -> id
 val find_tile : kind -> int -> t list -> t option
 
 (** remove a tile from a given list.  *)
-val remove_tile : t -> t list -> t list
+(* val remove_tile : t -> t list -> t list *)
 
-(** display this tile*)
+(** [dp tile] display [tile] *)
 val dp : t -> unit
 
-(** init a tile *)
+(** [construct id kind num discarded] init a tile *)
 val construct : id -> kind -> int -> bool -> t
+
+(** init a tile just for testing *)
+val sim_construct: kind -> int -> t
 
 (** check if it is Nine-one tile *)
 val ck_n_o : t -> bool
@@ -50,10 +53,14 @@ val ck_adj : t -> t -> bool
 (** check if two tile is same kind and same number*)
 val ck_eq : t -> t -> bool
 
+(** check if three tiles form a sequence  *)
 val ck_seq: t -> t -> t-> bool
 
 (** check if three tile has same kind and number*)
 val ck_ke : t -> t -> t-> bool
+
+(* [filter_kind kind lst] gives all tiles with specific kind *)
+val filter_kind : kind -> t list -> t list
 
 (**[sort lst] sorts a list of tiles based on kind and number*)
 val sort : t list -> t list
@@ -70,7 +77,8 @@ val chii_legal : t list -> t -> bool
 (* for testing purpose *)
 (* val seq_all : t list -> int -> t  list *)
 
-(* return all possible ke and seq *)
+(* [all_pos t_list tile] returns all possible triplet and sequence *)
 val all_pos : t list -> t -> t list list
 
+(* [string_of_tile tile] convert the kind and number of [tile] to a string *)
 val string_tile : t -> string

@@ -5,61 +5,81 @@ type t
     Different player should have different id*)
 type id = int
 
-(** get the id of this player *)
+(** [p_id t] gets the id of player [t]*)
 val p_id : t -> id
 
-(** riichi state of player *)
+(** [state_r t] gets riichi state of player [t]*)
 val state_r : t -> bool
 
-(** chii state of player *)
+(** [state_c t] gets chii state of player [t]*)
 val state_c : t -> bool
 
-(** get all the light hand tiles of the player *)
+(** [hand_tile_light t] gets all the light hand tiles of the player [t]*)
 val hand_tile_light : t -> Tile.t list
 
-(** get all the dark hand tiles of the player *)
+(** [hand_tile_dark r] gets all the dark hand tiles of the player [t]*)
 val hand_tile_dark : t -> Tile.t list
 
-(** the list of discarded tiles of the player *)
+(** [discard_pile t] gets the list of discarded tiles of the player [t]*)
 val discard_pile : t -> Tile.t list
 
 (** [draw_tile] puts tile into the player's dark tiles. *)
 val draw_tile : t -> Tile.t -> unit
 
-(** play a tile with id in t, return false if the tile that player wants to
-    discard is not in their hand tiles.  *)
+(** [discard_tile t tile_opt] play a tile with id in t, return false if the tile
+   that player wants to discard is not in their hand tiles.  *)
 val discard_tile: t -> Tile.t option -> bool
 
-(** riichi check if the player can riichi 
-    return an empty list if the player can't*)
+(** [check_riichi t] checks if the player [t] can riichi. 
+  return an empty list if the player cannot riichi*)
 val check_riichi: t -> Tile.t list
 
-(** change status from normal to riichi *)
+(**  [riichi t] changes the status from normal to riichi *)
 val riichi: t -> unit
 
-(**displayer a player's handtile *)
+(** [display_I t] displays a player's handtile *)
 val display_I : t -> unit
 
-(** display the tiles of current player *)
+(**  [d_list tile_lst] displays the tiles of current player *)
 val d_list: Tile.t list -> unit
 
-(** constructor for a player *)
+(** [init_player id richii chii light dark discard] constructor for a player *)
 val init_player: int -> bool -> bool -> Tile.t list -> Tile.t list -> 
   Tile.t list -> t
 
 type comb = {
-  pair: Tile.t list;
-  triplet: Tile.t list list;
+  (**  Players handtile in the form of (Tile, number_of_tiles) list. 
+  For example: [Sou1; Sou2; Sou2] is stored as [(Sou1, 1); (Sou2, 2)]*)
   info: (Tile.t * int) list;
+
+  (**  the pair in user's handtile*)
+  pair: Tile.t list;
+  
+  (**  the triplets in user's handtile*)
+  triplet: Tile.t list list;
+    
+  (**  the sequence in user's handtile*)
   seq: Tile.t list list;
-  mutable ron: bool;
+
+  (**  indicate if user has riichied or not*)
+  riichied: bool;
 }
 
-(*val ron_legal : n_comb -> bool  *)
+(** [ini_com tile_lst] is the constructor for comb *)
+val ini_comb: Tile.t list -> bool -> comb
 
-val ini_comb: Tile.t list -> comb
+(** [ini_info lst acc] takes in a list [lst] of tiles and return a list [acc] 
+   of tuples [(tile, count)] *)
+val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
+
+(**  [print_info info] prints info*)
+val print_info: (Tile.t * int) list -> unit
+
+(**  [check_triplet comb] checks if user is able to ron*)
 val check_triplet : comb -> bool
+
+(**  [chii_update_handtile int tile player] updates handtile and state_c of
+[player]. [int] is the n-th option [player] chose among all options, [tile] is 
+the tile [player] wants to chii *)
 val chii_update_handtile : int -> Tile.t -> t -> unit
 
-val ini_info: Tile.t list -> (Tile.t * int) list -> (Tile.t * int) list
-val print_info: (Tile.t * int) list -> unit

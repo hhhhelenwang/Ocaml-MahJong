@@ -52,8 +52,8 @@ let rec find_tile kind number lst=
   | h :: t -> find_tile kind number t
 
 (* [remove_tile target lst] remove a single tile [target] from [lst] *)
-let remove_tile target lst =
-  List.filter (fun this_tile -> get_id this_tile <> get_id target) lst
+(* let remove_tile target lst =
+   List.filter (fun this_tile -> get_id this_tile <> get_id target) lst *)
 
 (* [dp t] display a tile [t] by printing it*)
 let dp t =
@@ -82,6 +82,14 @@ let construct id kind num b =
     kind = kind;
     number = num;
     discarded = b; 
+  }
+
+let sim_construct kind num =
+  {
+    id = 0;
+    kind = kind;
+    number = num;
+    discarded = false; 
   }
 
 (**check if it is Nine-one tile *)

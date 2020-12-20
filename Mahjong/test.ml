@@ -72,7 +72,7 @@ let player_tests =
 (* let player_handt = Player.display_I player1 *)
 (* let x = Player.d_list t_list1 *)
 
-let _ = print_endline ("finish evaluate player test" )
+let _ = print_endline ("finished evaluating player test" )
 
 
 
@@ -126,7 +126,7 @@ let command_tests = [
 
 
 
-let _ = print_endline ("finish evaluate command parse test" )
+let _ = print_endline ("finished evaluating command parse test" )
 
 
 (** Rong test--------------------------------------------- *)
@@ -174,19 +174,25 @@ let ron_l7 = [t8;t9; t3;t3;t3;t3; t4;t4;t4;t4; t5;t5;t5;t5]
 let ron_l8 = [t1;t2;t2;t2;t3;t4]
 let ron_l9 = [ t2;t2; t5;t6;t7;t7;t8;t9;]
 let ron_l10 = [t1;t1; t3;t3; t5;t5; t7;t7; t8;t8; t9;t9; t11;t11]
+let ron_l11 = [t2;t2;t2; t3;t3;t3; t4;t5;t6; t7;t7;t7; t18;t18]
+let ron_l12 = [t1;t1;t1; t3;t3;t3; t4;t5;t6; t7;t7;t7; t8;t8]
+let ron_l13 = [t11;t11;t11; t3;t3;t3; t4;t5;t6; t7;t7;t7; t8;t8]
 
-let n_comb1 = Player.ini_comb ron_l1
-let n_comb2 = Player.ini_comb ron_l2
-let n_comb3 = Player.ini_comb ron_l3 
-let n_comb4 = Player.ini_comb ron_l4
-let n_comb5 = Player.ini_comb ron_l5
-let n_comb6 = Player.ini_comb ron_l6
-let n_comb7 = Player.ini_comb ron_l7
-let n_comb8 = Player.ini_comb ron_l8
-let n_comb9 = Player.ini_comb ron_l9
-let n_comb10 = Player.ini_comb ron_l10
+let n_comb1 = Player.ini_comb ron_l1 true
+let n_comb2 = Player.ini_comb ron_l2 true
+let n_comb3 = Player.ini_comb ron_l3 true
+let n_comb4 = Player.ini_comb ron_l4 true
+let n_comb5 = Player.ini_comb ron_l5 true
+let n_comb6 = Player.ini_comb ron_l6 true
+let n_comb7 = Player.ini_comb ron_l7 true
+let n_comb8 = Player.ini_comb ron_l8 true
+let n_comb9 = Player.ini_comb ron_l9 true
+let n_comb10 = Player.ini_comb ron_l10 false
+let n_comb11 = Player.ini_comb ron_l11 false
+let n_comb12 = Player.ini_comb ron_l12 false
+let n_comb13 = Player.ini_comb ron_l13 false
 
-let print_a_info= Player.print_info (Player.ini_info ron_l1 [])
+(* let print_a_info= Player.print_info (Player.ini_info ron_l1 []) *)
 
 let ron_test
     (name : string)
@@ -207,12 +213,14 @@ let ron_tests = [
   ron_test "cannot exhaust 12 234" n_comb8 false;
   ron_test "<14 tiles 22 567789" n_comb9 false;
   ron_test "7 pairs" n_comb10 true;
+  ron_test "tungyao only Man222 333 456 777 Sou88" n_comb11 true;
+  ron_test "hunyise only Man111 333 456 777 88" n_comb12 true;
+  ron_test "did not riichi, eventhough formed 4*(seq||tri)+2" n_comb13 false;
 ]
 
+let _ = print_endline ("finished evaluating ron test" )
 
-let _ = print_endline ("finish evaluate ron test" )
-
-(**riichi test *)
+(**riichi test *******************)
 
 let riichi_test
     (name : string)
@@ -310,11 +318,14 @@ let discard_tile_test
 let discard_tile_detail_test
     (name : string)
     (player : Player.t)
+    (tile_opt : Tile.t option)
     (expected_output : Tile.t list list) : test =
   name >:: (fun _ ->
-      assert_equal expected_output ([hand_tile_dark player] @ 
-                                    [discard_pile player]) 
-        ~printer: pp_matrix)
+      if (discard_tile player tile_opt) then 
+        assert_equal expected_output ([hand_tile_dark player] @ 
+                                      [discard_pile player]) 
+          ~printer: pp_matrix else ()
+    )
 
 let pos_l1 = [t1;t2;t4;t5]
 let pos_l2 = [t1;t2;t2]
@@ -363,19 +374,22 @@ let tile_tests = [
     [[t2;t2;t2;t1;t1;t1];[t31;t1]];
   chii_update_state_c_test "update state_c" player12 true;
 
-  (* discard_tile_test "discard existing tile" player13 (Some t2) true;
-     discard_tile_detail_test "discard existing tile" player13
-     [[t1;t3;t4];[t2]]; *)
+  discard_tile_test "discard existing tile" player13 (Some t2) true;
+  discard_tile_detail_test "discard existing tile" player13 (Some t2)
+    [[t1;t3;t4];[t2]];
+  discard_tile_test "discard existing tile" player13 None false;
+  discard_tile_detail_test "discard non-existing tile" player13 None
+    [[t1;t2;t3;t4];[]];
 ]
 
-let _ = print_endline ("finish evaluate chii_legal  test" )
+let _ = print_endline ("finished evaluating chii_legal test" )
 
-
+(* 
 let print_the_pos= display_ll (all_pos pos_l1 t3)
 let print1 = display_ll (all_pos pos_l2 t2)
 
 let intx= List.length (all_pos pos_l1 t3)
-let _ = print_int intx
+let _ = print_int intx *)
 
 let suite =
   "test suite for Mahjong" >::: List.flatten [
