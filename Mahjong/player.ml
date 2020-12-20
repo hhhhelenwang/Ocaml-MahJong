@@ -165,7 +165,7 @@ let rec ini_info lst acc=
   | h :: t -> 
     ini_info t (generate_info h [] acc)
 
-(** [get_info] gets the count of a certain tile*)
+(** [get_info h info] gets the count of a certain tile [h]*)
 let rec get_info h info=
   match info with
   | [] -> 0
@@ -174,7 +174,7 @@ let rec get_info h info=
       else get_info h t
     end
 
-(** update_info clears out tile from info with count = 0 *)
+(** [update_info info] clears out tile from info with count = 0 *)
 let update_info info = 
   let rec update info acc = 
     match info with
@@ -186,7 +186,7 @@ let update_info info =
   in
   update info []
 
-(* [rem_l int lst] remove first [int] elements from [lst] *)
+(* [rem_l int lst] remove first [int]-th elements from [lst] *)
 let rec rem_l int lst=
   if int = 0 then lst 
   else begin
@@ -207,7 +207,7 @@ let rec rem_info_c int h left_acc right_acc =
 
 (* [rem_li_seq n seq lst left_list] removes the first sequence from a sorted 
    lst.
-   requires: seq must be a sequence *)
+   Requires: Seq must be a sequence *)
 let rec rem_li_seq n seq lst left_list= 
   if n = 0 then left_list @ lst
   else 
@@ -245,6 +245,7 @@ let rec get_first_three int (info : (Tile.t * int) list) acc =
     | (tile, count) :: t -> get_first_three (int - 1) t (acc @ [tile])
   end
 
+(** [print_info info] prints info for display *)
 let rec print_info info = 
   match info with
   | [] -> ()
@@ -287,30 +288,32 @@ let is_dragons new_tri =
     match info with 
     | [] -> false 
     | (tile, int) :: t -> begin 
-        Tile.ck_eq (Tile.sim_construct Dragon 1) tile && int > 2
-        || Tile.ck_eq (Tile.sim_construct Dragon 2) tile && int > 2
-        || Tile.ck_eq (Tile.sim_construct Dragon 3) tile && int > 2 
+        (Tile.ck_eq (Tile.sim_construct Dragon 1) tile && int > 2)
+        || (Tile.ck_eq (Tile.sim_construct Dragon 2) tile && int > 2)
+        || (Tile.ck_eq (Tile.sim_construct Dragon 3) tile && int > 2)
         || dragon_help t
       end
   in dragon_help info
 
 (** return true if the combination satisfy pinfu - 
-    all sequence and a non-dragon pair *)
+    all sequence and a non-dragon pair - false otherwise. *)
 let is_pinfu new_seq pair =
   match pair with 
   | [] -> false
   | tile :: t -> 
-    let k = (Tile.ck_eq (Tile.sim_construct Dragon 1) tile 
-             || Tile.ck_eq (Tile.sim_construct Dragon 2) tile 
-             || Tile.ck_eq (Tile.sim_construct Dragon 3) tile) in 
+    let k = Tile.ck_eq (Tile.sim_construct Dragon 1) tile 
+            || Tile.ck_eq (Tile.sim_construct Dragon 2) tile 
+            || Tile.ck_eq (Tile.sim_construct Dragon 3) tile in 
     not k && List.length new_seq = 12
 
-(** [is_seven_pairs comb] if true if user satisfy seven_pairs *)
+(** [is_seven_pairs comb] if true if user satisfy seven_pairs, false otherwise
+*)
 let is_seven_pairs comb = 
   (List.length comb.pair = 14) &&
   (List.length comb.triplet + List.length comb.seq = 0)
 
-(** check if this combination of tile have at least one yaku *)
+(** [check_yaku comb] checks if this combination of tile satisfies at least one
+    yaku *)
 let check_yaku comb = 
   let new_tri = List.concat comb.triplet in
   let new_seq = List.concat comb.seq in
@@ -321,11 +324,11 @@ let check_yaku comb =
   || is_dragons new_tri 
   || is_pinfu new_seq comb.pair 
 
-(** type of yakus *)
+(** The type [yaku] represents the types of yaku player can achieve *)
 type yaku = Riichi | Tanyao | Hunyise | Dragontriplet | Seven_Pairs | Pinfu 
           | None
 
-(** take in a yaku return the string of it *)
+(** [string_of_yaku yaku] takes in [yaku] return the string of it *)
 let string_of_yaku yaku = 
   match yaku with
   | Riichi -> "Riichi"
@@ -336,12 +339,21 @@ let string_of_yaku yaku =
   | Pinfu -> "Pinfu"
   | None -> ""
 
+(** [check_sequence lst] checks if a given list of tiles [lst] is forms a seq*)
 let check_sequence lst = 
   match lst with
   | t1 :: t2 :: t3 :: []-> Tile.ck_seq t1 t2 t3
   | _ -> failwith "not right input for check sequence"
 
-(** check if a combination of tiles can Ron  *)
+(** Check if a combination of tiles can Ron 
+    - [check_triplet comb] is true if user can ron;
+    - [check_triplet_2 comb] is true if there is a valid triplet, modifies 
+      info, add triplet to comb.triplet, call check_pair
+    - [check_pair comb] is true if there is a valid pair, modifies info and add
+      pair into comb.pair, check_seq
+    - [check_seq comb] is true if there is a valid seq, modifies info, add seq
+      to comb.seq, call check_triplet
+*)
 let rec check_triplet comb = 
   if List.length comb.info = 0 
   then

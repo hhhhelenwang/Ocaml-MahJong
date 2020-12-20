@@ -50,9 +50,6 @@ val check_riichi: t -> Tile.t list
      legal to riichi *)
 val riichi: t -> unit
 
-(** [display_I t] displays a player's handtile *)
-(* val display_I : t -> unit *)
-
 (** [d_list tile_lst] displays the tiles of current player *)
 val d_list: Tile.t list -> unit
 

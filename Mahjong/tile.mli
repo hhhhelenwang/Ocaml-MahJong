@@ -46,10 +46,11 @@ val string_of_tile : t -> string
 (** [construct id kind num discarded] init a tile *)
 val construct : id -> kind -> int -> bool -> t
 
-(** init a tile just for testing *)
+(** [sim_construct kind number] initializes a tile from its [kind] and 
+    [number] *)
 val sim_construct: kind -> int -> t
 
-(** check if it is Nine-one tile *)
+(** [ck_n_o tile] is whether [tile] is of number 1 or 9. *)
 val ck_n_o : t -> bool
 
 (** [ck_adj t1 t2] checks if two tile are adjasent means that it has potential to be
@@ -68,7 +69,7 @@ val ck_tri : t -> t -> t-> bool
 (** [filter_kind kind lst] gives all tiles with specific kind *)
 val filter_kind : kind -> t list -> t list
 
-(**[sort lst] sorts a list of tiles based on kind and number*)
+(** [sort lst] sorts a list of tiles based on kind and number*)
 val sort : t list -> t list
 
 (** [chii_legal lst t] checks if user is able to chii *)
@@ -76,4 +77,3 @@ val chii_legal : t list -> t -> bool
 
 (** [all_pos t_list tile] returns all possible triplet and sequence *)
 val all_pos : t list -> t -> t list list
-
