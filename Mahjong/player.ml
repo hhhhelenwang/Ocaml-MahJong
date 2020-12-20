@@ -401,7 +401,7 @@ let ron comb =
   let new_tri = List.concat comb.triplet in
   let new_seq = List.concat comb.seq in
   let new_l = new_tri @ new_seq @ comb.pair in
-  if (check_triplet comb && check_yaku comb) then begin
+  if check_triplet comb && check_yaku comb then begin
     if comb.riichied then (true, Riichi)
     else if is_dragons new_tri then (true, Dragontriplet)
     else if List.length comb.pair = 14 then (true, Seven_Pairs)
