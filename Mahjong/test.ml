@@ -4,6 +4,30 @@ open Tile
 open Game
 open Command
 
+(* command_tests;
+   riichi_tests;
+   ron_tests;
+   tile_tests;
+   player_tests; *)
+(** Test Plan:
+    Parts of the system tested by OUnit and why:
+      All functions except display related functions and their helper functions 
+      are tested by OUnit. This is because we think it is more efficient to see
+      if display/print related functions are functioning correctly by looking 
+      at them. Specifically, the parts of the system tested by OUnit are 
+      1) Player Module: 
+      divided into riichi, ron, and other —— three pieces of logic
+        i) riichi_tests: check_riichi, riichi
+        ii) ron_tests: 
+        iii) player_tests:
+      2) Tile Module: 
+    Parts of the system tested manually and why:
+
+    How OUnit test cases were developed (black box, galss box, randomized, etc):
+
+    Why testing approach demonstrates the correctness of the system: 
+*)
+
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
     they are equivalent set-like lists.  That means checking two things.
     First, they must both be {i set-like}, meaning that they do not
@@ -36,45 +60,6 @@ let pp_list pp_elt lst =
 
 
 (* Start of tests **********************************)
-
-(* Player tests ******************)
-let discard_tile_test
-    (name : string)
-    (player : Player.t)
-    (tid : Tile.t option)
-    (expected_output : bool) : test =
-  name >:: (fun _ ->
-      assert_equal expected_output (discard_tile player tid))
-
-let tile1 = Tile.construct 1 Man 1 true
-let tile2 = Tile.construct 2 Sou 3 false
-let tile3 = Tile.construct 4 Man 2 true
-let tile4 = Tile.construct 5 Man 7 false
-let tile5 = Tile.construct 6 Wind 2 false
-let tile6 = Tile.construct 7 Dragon 2 false
-let tile7 = Tile.construct 8 Dragon 1 false
-
-let t_list1 = [tile2; tile4]
-let t_list2 = [tile1; tile2; tile1; tile2; tile4; tile5; tile6; tile7]
-(* Man127 Sou3 Wind2 Dragon2 Dragon1*)
-let dark1 = [tile1; tile2; tile3; tile4; tile5; tile6; tile7]
-
-(* id richii chii light dark discard *)
-let player1 = Player.init_player 1 false false [] dark1 t_list1
-
-(* let sorted_tiles = Player.d_list (Tile.sort t_list2) *)
-
-let player_tests = 
-  [
-    discard_tile_test "discard one existing tile" player1 (Some tile2) true;
-    discard_tile_test "discard one not existed tile" player1 None false;
-  ]
-(* let player_handt = Player.display_I player1 *)
-(* let x = Player.d_list t_list1 *)
-
-let _ = print_endline ("finished evaluating player test" )
-
-
 
 (* Game tests ******************)
 let init_deck = init_state ()
@@ -124,10 +109,7 @@ let command_tests = [
   command_parse_text_exn {|"" -> Empty|} "" Empty;
 ]
 
-
-
 let _ = print_endline ("finished evaluating command parse test" )
-
 
 (** Rong test--------------------------------------------- *)
 (* tile: id kind num isDiscarded *)
@@ -177,6 +159,8 @@ let ron_l10 = [t1;t1; t3;t3; t5;t5; t7;t7; t8;t8; t9;t9; t11;t11]
 let ron_l11 = [t2;t2;t2; t3;t3;t3; t4;t5;t6; t7;t7;t7; t18;t18]
 let ron_l12 = [t1;t1;t1; t3;t3;t3; t4;t5;t6; t7;t7;t7; t8;t8]
 let ron_l13 = [t11;t11;t11; t3;t3;t3; t4;t5;t6; t7;t7;t7; t8;t8]
+let ron_l14 = [t11;t11;t11; t3;t3;t3; t4;t5;t6; t21;t21;t21; t8;t8]
+let ron_l15 = [t1;t2;t3; t11;t12;t13; t4;t5;t6; t17;t18;t19; t5;t5]
 
 let n_comb1 = Player.ini_comb ron_l1 true
 let n_comb2 = Player.ini_comb ron_l2 true
@@ -191,6 +175,8 @@ let n_comb10 = Player.ini_comb ron_l10 false
 let n_comb11 = Player.ini_comb ron_l11 false
 let n_comb12 = Player.ini_comb ron_l12 false
 let n_comb13 = Player.ini_comb ron_l13 false
+let n_comb14 = Player.ini_comb ron_l14 false
+let n_comb15 = Player.ini_comb ron_l15 false
 
 (* let print_a_info= Player.print_info (Player.ini_info ron_l1 []) *)
 
@@ -216,19 +202,28 @@ let ron_tests = [
   ron_test "tungyao only Man222 333 456 777 Sou88" n_comb11 true;
   ron_test "hunyise only Man111 333 456 777 88" n_comb12 true;
   ron_test "did not riichi, eventhough formed 4*(seq||tri)+2" n_comb13 false;
+  ron_test " not riichi, but has draon triplet" n_comb14 true;
+  ron_test " not riichi, but pinfu" n_comb15 true;
 ]
 
 let _ = print_endline ("finished evaluating ron test" )
 
 (**riichi test *******************)
 
-let riichi_test
+let check_riichi_test
     (name : string)
     (player : Player.t)
     (expected_output : Tile.t list) : test =
   name >:: (fun _ ->
       assert_equal expected_output (Player.check_riichi player) 
         ~printer: (pp_list Tile.string_tile))
+
+let riichi_test
+    (name : string)
+    (player : Player.t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (state_r player) ~printer: string_of_bool)
 
 let player2 = init_player 3 false false [] 
     [t1;t1;t1; t2;t2;t2; t3;t3;t3; t4;t4;t4; t5] []
@@ -237,11 +232,19 @@ let player3 = init_player 3 false false []
     [t11;t11;t11; t12;t12;t12; t13;t13;t13; t14;t14;t14; t15] []
 (* 111 222 333 444 5 *)
 
+let player4 = init_player 4 false false [] 
+    [t11;t11;t11; t12;t12;t12; t13;t13;t13; t14;t14;t14; t15] []
+
+let _ = riichi player4
 let riichi_tests = [
-  riichi_test "player2 can riichi" player2 [t6;t5;t4;t3;t2] ;
-  riichi_test "player3 can riichi" player3 [t16;t15;t14;t13;t12] ;
+  check_riichi_test "player2 can riichi" player2 [t6;t5;t4;t3;t2];
+  check_riichi_test "player3 can riichi" player3 [t16;t15;t14;t13;t12];
+
+  riichi_test "player4 has riichied" player4 true;
+  riichi_test "player3 has not riichied" player3 false;
 ] 
 
+let _ = print_endline ("finished evaluating riichi test" )
 
 (* Tile tests ******************)
 
@@ -265,6 +268,54 @@ let rec pp_matrix matrix =
   | [] -> ""
   | h :: t -> "[" ^ (lst_to_string h) ^ "];\n" ^ (pp_matrix t)
 
+let ck_adj_test
+    (name : string)
+    (t1 : Tile.t)
+    (t2 : Tile.t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (ck_adj t1 t2)
+        ~printer: string_of_bool)
+
+let ck_eq_test
+    (name : string)
+    (t1 : Tile.t)
+    (t2 : Tile.t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (ck_eq t1 t2)
+        ~printer: string_of_bool)
+
+let ck_seq_test
+    (name : string)
+    (t1 : Tile.t)
+    (t2 : Tile.t)
+    (t3 : Tile.t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (ck_seq t1 t2 t3)
+        ~printer: string_of_bool)
+
+let ck_seq_test
+    (name : string)
+    (t1 : Tile.t)
+    (t2 : Tile.t)
+    (t3 : Tile.t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (ck_seq t1 t2 t3)
+        ~printer: string_of_bool)
+
+let ck_tri_test
+    (name : string)
+    (t1 : Tile.t)
+    (t2 : Tile.t)
+    (t3 : Tile.t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (ck_tri t1 t2 t3)
+        ~printer: string_of_bool)
+
 let all_pos_test
     (name : string)
     (lst : Tile.t list)
@@ -273,6 +324,85 @@ let all_pos_test
   name >:: (fun _ ->
       assert_equal expected_output (all_pos lst t)
         ~printer: pp_matrix)
+
+let pos_l1 = [t1;t2;t4;t5]
+let pos_l2 = [t1;t2;t2]
+let pos_l3 = [t1;t2;t2;t3;t4;t5]
+let pos_l4 = [t11;t12;t1;t2]
+let pos_l5 = [t11;t12;t13;t14;t21;t22;t23;t41;t43;t32;t33]
+
+(* id richii chii light dark discard *)
+let player11 = Player.init_player 11 false false [] pos_l1 []
+let _ = chii_update_handtile 1 t3 player11
+let _ = draw_tile player11 t1
+
+let player12 = Player.init_player 12 false false [t1;t1;t1] pos_l2 []
+let _ = chii_update_handtile 1 t2 player12
+let _ = draw_tile player12 t31
+
+let player13 = Player.init_player 13 false false [] [t1;t2;t3;t4] []
+
+let tile_tests = [
+  ck_adj_test "man 1 2" t1 t2 true;
+  ck_adj_test "man 1 Sou 2" t1 t12 false;
+  ck_adj_test "man 1 Man 3" t1 t3 false;
+
+  ck_eq_test "man1 = man1" t1 t1 true;
+  ck_eq_test "dif kind, same num" t1 t11 false;
+  ck_eq_test "dif num, same kin" t1 t8 false;
+
+  ck_seq_test "is seq Wind123" t31 t32 t33 true;
+  ck_seq_test "not a seq, dif kind" t31 t12 t33 false;
+  ck_seq_test "not a seq, wrong num" t11 t15 t13 false;
+
+  ck_tri_test "is triple dragon111" t41 t41 t41 true;
+  ck_tri_test "not a triple, dif kind" t41 t11 t41 false;
+  ck_tri_test "not a triple, dif num" t41 t42 t41 false;
+
+  all_pos_test "Only Sequence: Man 1245, Man3" 
+    pos_l1 t3 [[t2; t3; t4];[t3; t4; t5];[t1; t2; t3]];
+  all_pos_test "Only Triplet: Man 22, Man2" 
+    pos_l2 t2 [[t2; t2; t2]];
+  all_pos_test "Sequence and triplet: Man 1 22 345, Man2" 
+    pos_l3 t2 [[t2; t2; t2];[t1; t2; t3];[t2; t3; t4]];
+  all_pos_test "Different kinds: Man12 Sou12, Sou3" 
+    pos_l4 t13 [[t11; t12; t13]];
+  all_pos_test "all kinds, but only Sou 123 valid" 
+    pos_l5 t31 [[t31; t32; t33]];
+]
+
+let _ = print_endline ("finished evaluating tile test" )
+
+(* Player tests ******************)
+
+let discard_tile_test
+    (name : string)
+    (player : Player.t)
+    (tid : Tile.t option)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (discard_tile player tid))
+
+let tile1 = Tile.construct 1 Man 1 true
+let tile2 = Tile.construct 2 Sou 3 false
+let tile3 = Tile.construct 4 Man 2 true
+let tile4 = Tile.construct 5 Man 7 false
+let tile5 = Tile.construct 6 Wind 2 false
+let tile6 = Tile.construct 7 Dragon 2 false
+let tile7 = Tile.construct 8 Dragon 1 false
+
+let t_list1 = [tile2; tile4]
+let t_list2 = [tile1; tile2; tile1; tile2; tile4; tile5; tile6; tile7]
+(* Man127 Sou3 Wind2 Dragon2 Dragon1*)
+let dark1 = [tile1; tile2; tile3; tile4; tile5; tile6; tile7]
+
+(* id richii chii light dark discard *)
+let player1 = Player.init_player 1 false false [] dark1 t_list1
+
+(* let sorted_tiles = Player.d_list (Tile.sort t_list2) *)
+
+(* let player_handt = Player.display_I player1 *)
+(* let x = Player.d_list t_list1 *)
 
 let chii_legal_test
     (name : string)
@@ -327,34 +457,9 @@ let discard_tile_detail_test
           ~printer: pp_matrix else ()
     )
 
-let pos_l1 = [t1;t2;t4;t5]
-let pos_l2 = [t1;t2;t2]
-let pos_l3 = [t1;t2;t2;t3;t4;t5]
-let pos_l4 = [t11;t12;t1;t2]
-let pos_l5 = [t11;t12;t13;t14;t21;t22;t23;t41;t43;t32;t33]
-
-(* id richii chii light dark discard *)
-let player11 = Player.init_player 11 false false [] pos_l1 []
-let _ = chii_update_handtile 1 t3 player11
-let _ = draw_tile player11 t1
-
-let player12 = Player.init_player 12 false false [t1;t1;t1] pos_l2 []
-let _ = chii_update_handtile 1 t2 player12
-let _ = draw_tile player12 t31
-
-let player13 = Player.init_player 13 false false [] [t1;t2;t3;t4] []
-
-let tile_tests = [
-  all_pos_test "Only Sequence: Man 1245, Man3" 
-    pos_l1 t3 [[t2; t3; t4];[t3; t4; t5];[t1; t2; t3]];
-  all_pos_test "Only Triplet: Man 22, Man2" 
-    pos_l2 t2 [[t2; t2; t2]];
-  all_pos_test "Sequence and triplet: Man 1 22 345, Man2" 
-    pos_l3 t2 [[t2; t2; t2];[t1; t2; t3];[t2; t3; t4]];
-  all_pos_test "Different kinds: Man12 Sou12, Sou3" 
-    pos_l4 t13 [[t11; t12; t13]];
-  all_pos_test "all kinds, but only Sou 123 valid" 
-    pos_l5 t31 [[t31; t32; t33]];
+let player_tests = [
+  discard_tile_test "discard one existing tile" player1 (Some tile2) true;
+  discard_tile_test "discard one not existed tile" player1 None false;
 
   chii_legal_test "Man 12 45, Man3" pos_l1 t3 true;
   chii_legal_test "Man122, Man2" pos_l2 t2 true;
@@ -382,7 +487,7 @@ let tile_tests = [
     [[t1;t2;t3;t4];[]];
 ]
 
-let _ = print_endline ("finished evaluating chii_legal test" )
+let _ = print_endline ("finished evaluating player test" )
 
 (* 
 let print_the_pos= display_ll (all_pos pos_l1 t3)
@@ -393,11 +498,11 @@ let _ = print_int intx *)
 
 let suite =
   "test suite for Mahjong" >::: List.flatten [
-    player_tests;
     command_tests;
     riichi_tests;
     ron_tests;
     tile_tests;
+    player_tests;
   ]
 
 let _ = run_test_tt_main suite

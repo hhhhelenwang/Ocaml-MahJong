@@ -6,33 +6,23 @@ type handt = {
   mutable dark: Tile.t list;
 }
 
-(* let yaojiu =
-   [(Tile.sim_construct Man 1)] @ [(Tile.sim_construct Man 9)]@
-   [(Tile.sim_construct Sou 1)] @ [(Tile.sim_construct Sou 9)] @
-   [(Tile.sim_construct Pin 1)] @ [(Tile.sim_construct Pin 9)] @
-   [(Tile.sim_construct Dragon 1)] @ [(Tile.sim_construct Dragon 2)]@
-   [(Tile.sim_construct Dragon 3)] @ [(Tile.sim_construct Wind 1)]@
-   [(Tile.sim_construct Wind 2)] @ [(Tile.sim_construct Wind 3)]@
-   [(Tile.sim_construct Wind 4)] *)
-
 type player = {
 
   (** id of the player*)
   id : int;
 
-  (**State_r tells about state of current player.
-     If the player have already riichi,state_r is true, otherwise false *)
+  (** State_r tells about state of current player.
+      If the player have already riichi,state_r is true, otherwise false *)
   mutable state_r : bool;
 
-  (**State_c tells about state of current player.
-     If the player have done action chii, this state is true, otherwise false*)
+  (** State_c tells about state of current player.
+      If the player have done action chii, this state is true, otherwise false*)
   mutable state_c : bool;
 
-  (**the tile player currently have. Number varies from 13 to 14 *)
-  (**hsd *)
+  (** the tile player currently have. Number varies from 13 to 14 *)
   hand_tile : handt;
 
-  (**tiles that played by this player*)
+  (** tiles that played by this player*)
   mutable discard_pile : Tile.t list;
 }
 
@@ -244,7 +234,7 @@ let rec print_info info =
 
 (* check if [tile] is in list yaojiu. Not like List.mem bc need to use self-
    defined check_equal but not physical equality*)
-let tungyao_helper tile =
+let tanyao_helper tile =
   let yaojiu =
     (Tile.sim_construct Man 1) :: (Tile.sim_construct Man 9) ::
     (Tile.sim_construct Sou 1):: (Tile.sim_construct Sou 9) ::
@@ -258,24 +248,51 @@ let tungyao_helper tile =
   | Some _ -> true
 
 (** check if it is duanyaoji: cannot be number 1, number 9, wind or dragon *)
-let is_tungyao new_l =
-  not (List.exists tungyao_helper new_l) 
+let is_tanyao new_l =
+  not (List.exists tanyao_helper new_l) 
 
-(* 东南西北中发白 加 wanbinsuo 中的一种 *)
+(* a hand with tiles from only one of the three number tiles (Man Pin Sou),
+    and wind tiles and dragon tiles*)
 let is_hunyise new_l = 
   let man = List.length (Tile.filter_kind Tile.Man new_l) in 
   let sou = List.length (Tile.filter_kind Tile.Sou new_l) in 
   let bin = List.length (Tile.filter_kind Tile.Pin new_l) in 
   (man = 0 && sou = 0) || (man = 0 && bin = 0) || (sou = 0 && bin = 0) 
 
+(**hand tile with triple of dragon *)
+let is_dragons new_tri =
+  let info = ini_info new_tri [] in 
+  let rec dragon_help info = 
+    match info with 
+    | [] -> false 
+    | ( tile, int ) :: t -> begin 
+        if (Tile.ck_eq (Tile.sim_construct Dragon 1) tile && int >2)then true 
+        else if (Tile.ck_eq (Tile.sim_construct Dragon 2) tile && int >2) then true
+        else if (Tile.ck_eq (Tile.sim_construct Dragon 3) tile && int >2) then true
+        else dragon_help t
+      end
+  in
+  dragon_help info
+
+let is_pinfu new_seq pair=
+  match pair with 
+  | [] -> false
+  | tile :: t -> 
+    let k = ( Tile.ck_eq (Tile.sim_construct Dragon 1) tile ||
+              Tile.ck_eq (Tile.sim_construct Dragon 2) tile ||
+              Tile.ck_eq (Tile.sim_construct Dragon 3) tile) in 
+    not k && List.length new_seq = 12
+
+
 (**check if this combination of tile have at least one yaku *)
 let check_yaku comb = 
-  let new_tri =  List.concat comb.triplet  in
-  let new_seq =  List.concat comb.seq  in
+  let new_tri = List.concat comb.triplet in
+  let new_seq = List.concat comb.seq in
   let new_l = new_tri @ new_seq @ comb.pair in
-  comb.riichied || is_tungyao new_l || is_hunyise new_l
+  comb.riichied || is_tanyao new_l || is_hunyise new_l || 
+  is_dragons new_tri || is_pinfu new_seq comb.pair
 
-(**check if a combination of tiles can Ron  *)
+(** check if a combination of tiles can Ron  *)
 let rec check_triplet comb = 
   if List.length comb.info = 0 
   then begin 
@@ -329,6 +346,41 @@ and
       end
     else false
 
+
+type yaku = Riichi | Tanyao | Hunyise | Dragontriplet | Seven_Pairs | Pinfu 
+          | None
+
+let string_of_yaku yaku = 
+  match yaku with
+  | Riichi -> "Riichi"
+  | Tanyao -> "Tanyao"
+  | Hunyise -> "Hunyise"
+  | Dragontriplet -> "Dragon Triplet"
+  | Seven_Pairs -> "Seven Pairs"
+  | Pinfu -> "Pinfu"
+  | None -> ""
+
+
+let ron comb =
+  let new_tri = List.concat comb.triplet in
+  let new_seq = List.concat comb.seq in
+  let new_l = new_tri @ new_seq @ comb.pair in
+  if check_triplet comb then begin
+    if comb.riichied then (true, Riichi)
+    else if is_tanyao new_l then (true, Tanyao)
+    else if is_hunyise new_l then (true, Hunyise)
+    else if is_dragons new_tri then (true, Dragontriplet)
+    else if List.length comb.pair = 14 then (true, Seven_Pairs)
+    else if is_pinfu new_seq comb.pair then (true, Pinfu)
+    else (false, None)
+  end
+  else (false, None) 
+
+
+(* comb.riichied || is_tanyao new_l || is_hunyise new_l || 
+   is_dragons new_tri || is_pinfu new_seq comb.pair*)
+
+
 (**initialize a comb which work as information of hand tile*)
 let ini_comb lst bool = {
   pair = [];
@@ -338,6 +390,7 @@ let ini_comb lst bool = {
   riichied = bool;
 }
 
+(**  *)
 let riichi player =
   if player.state_r then failwith " player already riichi ed"
   else 
@@ -386,19 +439,3 @@ let check_riichi player =
     let handtile = combine player in
     let lst = generate_tiles in
     check_r_help handtile lst [] false
-
-(**case 1: 111 333 555 777 [normal]   3 3 3 3 
-   case 2: 223344 567 789          6 3 3
-   case 6: 234 556 677 789          3 6 3
-   case 7: 234 567 778899          3 3 6
-   case 3: 123 333 567 789 [normal]
-   case 4: 333344445555        12
-   case 5: 222333444 [normal]
-   case 8: 133 333
-   case 9: 56 666 7  x1 x2 x6
-   case 10: 123 455556 789
-   case 11: 123 234 x1x2x4
-   case 12: 123 234 234
-            12223344
-            11 222 333 4   > 123 123 234
-*)

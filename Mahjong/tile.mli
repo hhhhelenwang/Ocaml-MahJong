@@ -57,7 +57,7 @@ val ck_eq : t -> t -> bool
 val ck_seq: t -> t -> t-> bool
 
 (** check if three tile has same kind and number*)
-val ck_ke : t -> t -> t-> bool
+val ck_tri : t -> t -> t-> bool
 
 (* [filter_kind kind lst] gives all tiles with specific kind *)
 val filter_kind : kind -> t list -> t list

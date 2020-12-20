@@ -34,7 +34,8 @@ val discard_tile: t -> Tile.t option -> bool
   return an empty list if the player cannot riichi*)
 val check_riichi: t -> Tile.t list
 
-(**  [riichi t] changes the status from normal to riichi *)
+(**  [riichi t] changes the status from normal to riichi, given the player is 
+    legal to riichi *)
 val riichi: t -> unit
 
 (** [display_I t] displays a player's handtile *)
@@ -78,8 +79,20 @@ val print_info: (Tile.t * int) list -> unit
 (**  [check_triplet comb] checks if user is able to ron*)
 val check_triplet : comb -> bool
 
-(**  [chii_update_handtile int tile player] updates handtile and state_c of
+(** [chii_update_handtile int tile player] updates handtile and state_c of
 [player]. [int] is the n-th option [player] chose among all options, [tile] is 
 the tile [player] wants to chii *)
 val chii_update_handtile : int -> Tile.t -> t -> unit
+
+(** yaku supported *)
+type yaku = Riichi | Tanyao | Hunyise | Dragontriplet | Seven_Pairs | Pinfu 
+          | None
+
+(** [string_of_yaku yaku] give the string of a yaku *)
+val string_of_yaku : yaku -> string
+
+(** [ron comb] returns a tuple. First element indicates if the player can ron or
+  not, the second indicates one of the yakus that the helps user to 
+  successfully ron. *)
+val ron : comb -> (bool * yaku)
 

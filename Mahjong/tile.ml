@@ -133,7 +133,7 @@ let ck_eq t1 t2=
     AF: return true for three identical tiles, for example,
     Man 1 Man 1 Man 1
 *)
-let ck_ke t1 t2 t3= 
+let ck_tri t1 t2 t3= 
   ck_eq t1 t2 && ck_eq t2 t3
 
 (*end of helper function for Rong******************************************)
