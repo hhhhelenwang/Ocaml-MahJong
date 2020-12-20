@@ -20,16 +20,21 @@ open Command
       ck_seq, ck_tri, chii_legal, all_pos, string_tile (used in printer)
     B) Parts of the system tested manually and why:
       All display, display related functions, and helper functions are tested
-      by OUnit. This is because we think it is more efficient to see if 
+      manually. This is because we think it is more efficient to see if 
       display/print related functions are functioning correctly by looking at
-      them. An example of display function is dp, which print out the kind and 
+      them. An example of display function is [dp], which print out the kind and 
       number of a single tile. 
-    C) How OUnit test cases were developed (black box, galss box, randomized, etc):
+      All game flow related functions are tested manually as well. All commands
+      are covered. We believe playing the game in terminal is more efficient
+      than writing OUnit tests for them. An example of game flow related
+      function is [after_chii], which is the state of game after current player
+      at stae perfom action chii.
+    C) How OUnit test cases were developed (black box, galss box, ect.):
       Using test-driven development, most test cases are black box tests. 
-      However, to make sure the correctness of ron, riichi we also did glass box 
-      testing after black box testing on the ron and riichi test suits.
+      However, to make sure the correctness of ron, riichi we also did glass 
+      box testing after black box testing on the ron and riichi test suits.
     D) Why testing approach demonstrates the correctness of the system: 
-
+      The testing approach
 *)
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
@@ -61,7 +66,6 @@ let pp_list pp_elt lst =
         else loop (n + 1) (acc ^ (pp_elt h1) ^ "; ") t'
     in loop 0 "" lst
   in "[" ^ pp_elts lst ^ "]"
-
 
 (* Start of tests **********************************)
 

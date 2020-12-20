@@ -280,15 +280,18 @@ let is_dragons new_tri =
     match info with 
     | [] -> false 
     | ( tile, int ) :: t -> begin 
-        if (Tile.ck_eq (Tile.sim_construct Dragon 1) tile && int >2)then true 
-        else if (Tile.ck_eq (Tile.sim_construct Dragon 2) tile && int >2) then true
-        else if (Tile.ck_eq (Tile.sim_construct Dragon 3) tile && int >2) then true
+        if (Tile.ck_eq (Tile.sim_construct Dragon 1) tile && int > 2)
+          then true 
+        else if (Tile.ck_eq (Tile.sim_construct Dragon 2) tile && int > 2) 
+          then true
+        else if (Tile.ck_eq (Tile.sim_construct Dragon 3) tile && int > 2) 
+          then true
         else dragon_help t
       end
   in
   dragon_help info
 
-let is_pinfu new_seq pair=
+let is_pinfu new_seq pair =
   match pair with 
   | [] -> false
   | tile :: t -> 
@@ -296,7 +299,6 @@ let is_pinfu new_seq pair=
               Tile.ck_eq (Tile.sim_construct Dragon 2) tile ||
               Tile.ck_eq (Tile.sim_construct Dragon 3) tile) in 
     not k && List.length new_seq = 12
-
 
 (**check if this combination of tile have at least one yaku *)
 let check_yaku comb = 

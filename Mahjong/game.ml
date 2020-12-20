@@ -226,7 +226,7 @@ let rec after_chii current_player last_discarded hand_dark state =
   print_endline "Here are the options: ";
   print_endline (string_of_all_combos all_chii_combo);
   ANSITerminal.(print_string [yellow] 
-                  "Which combo you would like to Chii? E.g. Chii 1\n");
+                  "Which combo you would like to Chii? E.g. chii 1\n");
   print_endline ">>";
   chii_helper state last_discarded all_chii_combo current_player hand_dark
 
@@ -349,7 +349,7 @@ let after_check_richii current_player state =
   if to_get = [] then state
   else riichi_helper current_player to_get state
 
-let rong_message = 
+let ron_message = 
   "
  __ __  ____   __ ______   ___   ____   __ __  __ 
 |  |  ||    | /  ]      | /   \\ |    \\ |  |  ||  |
@@ -359,19 +359,19 @@ let rong_message =
  \\   /  |  \\     | |  |  |     ||  .  \\|     ||  |
   \_/  |____\\____| |__|   \\___/ |__|\\_||____/ |__|
 
-Rong! Congratulations, you win the game!
+Ron! Congratulations, you win the game!
 "
 
-(** [afte_check_rong this_plr last_plr tile state] is the state after we check
+(** [afte_check_ron this_plr last_plr tile state] is the state after we check
     if [this_plr] has won. Game ends if won. *)
-let after_check_rong this_plr tile state =
+let after_check_ron this_plr tile state =
   let hand = Player.hand_tile_dark this_plr 
              @ Player.hand_tile_light this_plr 
              @ [tile] in
   let riichi_state = Player.state_r this_plr in 
-  let comb_for_rong = Player.ini_comb hand riichi_state in
-  match fst (Player.ron comb_for_rong )with
-  | true -> ANSITerminal.(print_string [yellow] rong_message);
+  let comb_for_ron = Player.ini_comb hand riichi_state in
+  match fst (Player.ron comb_for_ron )with
+  | true -> ANSITerminal.(print_string [yellow] ron_message);
     { state with in_game = false }
   | false -> state
 
@@ -419,14 +419,14 @@ and check_for_tie state =
 and first_round_routine this_plr last_plr state =
   let state_after_draw = after_draw this_plr state in
   let drawn_tile = this_plr |> Player.hand_tile_dark |> List.hd in
-  rong_discard_riichi_routine this_plr drawn_tile state_after_draw 
+  ron_discard_riichi_routine this_plr drawn_tile state_after_draw 
 
 (** [chii_routine this_plr last_tile hand_dark state] is the state after this 
     turn if [this_plr] can perform chii action. In this case, the player cannot
-    draw and we skip drawing and checking for rong to discarding tile. If the
+    draw and we skip drawing and checking for ron to discarding tile. If the
     player choose not to chii, we jump to [not_chii_routine]. *)
 and chii_routine this_plr last_tile hand_dark state = 
-  match after_check_rong this_plr last_tile state with
+  match after_check_ron this_plr last_tile state with
   | state' when state'.in_game ->
     let light0 = Player.hand_tile_light this_plr in
     let state1 = after_chii this_plr last_tile hand_dark state' in
@@ -441,20 +441,20 @@ and chii_routine this_plr last_tile hand_dark state =
 
 (** [not_chii_routine this_plr last_plr last_tile state] is the state after 
     this turn if [this_plr] can not chii. This means they will draw, be checked
-    for rong, and be checked for riichi. *)
+    for ron, and be checked for riichi. *)
 and not_chii_routine this_plr last_tile state =
-  match after_check_rong this_plr last_tile state with
+  match after_check_ron this_plr last_tile state with
   | state' when state'.in_game -> begin
       let state1 = after_draw this_plr state' in
       let drawn_tile = this_plr |> Player.hand_tile_dark |> List.hd in
-      rong_discard_riichi_routine this_plr drawn_tile state1
+      ron_discard_riichi_routine this_plr drawn_tile state1
     end
   | state' -> state'
 
-(** [rong_routine this_plr tile state] is a subroutine to check for rong in
+(** [ron_routine this_plr tile state] is a subroutine to check for ron in
     between of a turn. *)
-and rong_discard_riichi_routine this_plr tile state = 
-  match after_check_rong this_plr tile state with
+and ron_discard_riichi_routine this_plr tile state = 
+  match after_check_ron this_plr tile state with
   | state' when state'.in_game -> begin
       let state1 = after_discard this_plr state' in
       match check_for_tie state1 with
