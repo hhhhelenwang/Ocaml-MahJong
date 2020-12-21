@@ -528,7 +528,7 @@ let player_tests = [
   chii_legal_test "Dragon123" [t21;t22] t23 false;
   chii_legal_test "Dragon111" [t21;t21] t21 true;
 
-  draw_tile_test "draw Man1" player12 [t31;t1];
+  draw_tile_test "draw Man1" player12 [t1;t31];
 
   chii_update_handtile_test "update chii_handtile" player11 
     [[t2;t3;t4];[t1;t1;t5]];
