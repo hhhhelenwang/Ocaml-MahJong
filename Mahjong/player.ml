@@ -47,7 +47,8 @@ let discard_pile t = t.discard_pile
 (** [draw_tile player tile] draws [tile] from wall tiles, put it in 
     [player]'s hand, and sort the new hand tiles. *)
 let draw_tile player tile =
-  player.hand_tile.dark <- (Tile.sort ([tile] @ player.hand_tile.dark))
+  (* player.hand_tile.dark <- (Tile.sort ([tile] @ player.hand_tile.dark)) *)
+  player.hand_tile.dark <- [tile] @ player.hand_tile.dark
 
 (* [remove_fst_occur lst tile acc] removes first occurence of [tile] from 
    [lst] *)
@@ -76,7 +77,7 @@ let discard_tile player tile_opt =
   | None -> false
   | Some tile -> begin 
       Tile.update_status tile;
-      player.hand_tile.dark <- remove_tile_lst [tile] handt;
+      player.hand_tile.dark <- Tile.sort (remove_tile_lst [tile] handt);
       player.discard_pile <- [tile] @ discardt;
       true
     end
@@ -206,8 +207,7 @@ let rec rem_info_c int h left_acc right_acc =
     end
 
 (* [rem_li_seq n seq lst left_list] removes the first sequence from a sorted 
-   lst.
-   Requires: Seq must be a sequence *)
+   lst. Requires: Seq must be a sequence *)
 let rec rem_li_seq n seq lst left_list= 
   if n = 0 then left_list @ lst
   else 
@@ -252,6 +252,20 @@ let rec print_info info =
   | (tile, int) :: t -> Tile.dp tile; print_endline (" " ^ string_of_int int);
     print_info t
 
+(* [fill tile num acc] returns [num] number of [tile] in a list*)
+let rec fill tile num acc = 
+  if num = 0 then acc 
+  else fill tile (num - 1) (tile :: acc)
+
+(* [flatten_info info] flatten info to a list of tiles,
+   For example: flatten [(Man1, 2)] [] = [Man1; Man1]*)
+let flatten_info info =
+  let rec helper info acc =  
+    match info with
+    | [] -> acc
+    | (tile, num) :: t -> helper t ((fill tile num []) @ acc)
+  in helper info []
+
 (* check if [tile] is in list yaojiu. Not like List.mem bc need to use self-
    defined check_equal but not physical equality*)
 let tanyao_helper tile =
@@ -282,18 +296,15 @@ let is_hunyise new_l =
   (man = 0 && sou = 0) || (man = 0 && bin = 0) || (sou = 0 && bin = 0) 
 
 (** [is_dragons new_tri] is true if user has hand tile with triple of dragon *)
-let is_dragons new_tri =
-  let info = ini_info new_tri [] in 
-  let rec dragon_help info = 
-    match info with 
-    | [] -> false 
-    | (tile, int) :: t -> begin 
-        (Tile.ck_eq (Tile.sim_construct Dragon 1) tile && int > 2)
-        || (Tile.ck_eq (Tile.sim_construct Dragon 2) tile && int > 2)
-        || (Tile.ck_eq (Tile.sim_construct Dragon 3) tile && int > 2)
-        || dragon_help t
-      end
-  in dragon_help info
+let rec is_dragons info = 
+  match info with 
+  | [] -> false 
+  | (tile, int) :: t -> begin 
+      (Tile.ck_eq (Tile.sim_construct Dragon 1) tile && int > 2)
+      || (Tile.ck_eq (Tile.sim_construct Dragon 2) tile && int > 2)
+      || (Tile.ck_eq (Tile.sim_construct Dragon 3) tile && int > 2)
+      || is_dragons t
+    end
 
 (** return true if the combination satisfy pinfu - 
     all sequence and a non-dragon pair - false otherwise. *)
@@ -308,21 +319,20 @@ let is_pinfu new_seq pair =
 
 (** [is_seven_pairs comb] if true if user satisfy seven_pairs, false otherwise
 *)
-let is_seven_pairs comb = 
-  (List.length comb.pair = 14) &&
-  (List.length comb.triplet + List.length comb.seq = 0)
+let is_seven_pairs comb_info = 
+  List.fold_left (fun sum item -> sum + snd item) 0 comb_info = 14
+  && List.fold_left (fun acc item -> 
+      acc && (snd item mod 2 = 0)) true comb_info
 
 (** [check_yaku comb] checks if this combination of tile satisfies at least one
     yaku *)
 let check_yaku comb = 
-  let new_tri = List.concat comb.triplet in
-  let new_seq = List.concat comb.seq in
-  let new_l = new_tri @ new_seq @ comb.pair in
+  let new_l = flatten_info comb.info in  
   comb.riichied 
   || is_tanyao new_l 
   || is_hunyise new_l 
-  || is_dragons new_tri 
-  || is_pinfu new_seq comb.pair 
+  || is_dragons comb.info
+  || is_seven_pairs comb.info
 
 (** The type [yaku] represents the types of yaku player can achieve *)
 type yaku = Riichi | Tanyao | Hunyise | Dragontriplet | Seven_Pairs | Pinfu 
@@ -359,7 +369,7 @@ let rec check_triplet comb =
   then
     List.length comb.pair = 2 
     && (List.length comb.triplet + List.length comb.seq = 4)
-    || (is_seven_pairs comb)
+    || List.length comb.pair = 14
   else check_triplet_2 comb
 
 and check_triplet_2 comb =
@@ -397,15 +407,14 @@ and check_seq comb =
       && check_triplet { comb with info = new_info; seq = new_s }
     else false
 
+(** [ron comb] returns a tuple. First element indicates if the player can ron or
+    not, the second indicates one of the yakus that the helps user to ron. *)
 let ron comb =
-  let new_tri = List.concat comb.triplet in
-  let new_seq = List.concat comb.seq in
-  let new_l = new_tri @ new_seq @ comb.pair in
+  let new_l = flatten_info comb.info in 
   if check_triplet comb && check_yaku comb then begin
     if comb.riichied then (true, Riichi)
-    else if is_dragons new_tri then (true, Dragontriplet)
-    else if List.length comb.pair = 14 then (true, Seven_Pairs)
-    else if is_pinfu new_seq comb.pair then (true, Pinfu)
+    else if is_dragons comb.info then (true, Dragontriplet)
+    else if is_seven_pairs comb.info then (true, Seven_Pairs)
     else if is_tanyao new_l then (true, Tanyao)
     else if is_hunyise new_l then (true, Hunyise)
     else (false, None)
@@ -440,7 +449,7 @@ let riichi player =
     player.state_r <- true;
   ()
 
-(** given the kind, generate 1-9 tile of this kind *)
+(** [generate_n kind n acc] given the kind, generate 1-9 tile of this kind *)
 let rec generate_n kind n acc = 
   if n > 0 then begin 
     let new_t= Tile.construct 1 kind n false in
@@ -448,7 +457,7 @@ let rec generate_n kind n acc =
   end
   else acc
 
-(** generate a list of all differnet tile *)
+(** [generate tiles] generates a list of all differnet tile *)
 let generate_tiles = 
   let rec generate lst acc = 
     match lst with
@@ -462,21 +471,23 @@ let generate_tiles =
       end
   in generate [Tile.Pin; Tile.Man; Tile.Sou; Tile.Wind; Tile.Dragon] []
 
-(** hand represent hand tile, list represent various tile type,
-    acc represent feasible riichi tile *)
+(** [check_r_help hand lst acc bol ] [hand] represent hand tile, [list] 
+    represent various tile type, [acc] represent feasible riichi tile 
+    helper function for check_riichi*)
 let rec check_r_help hand lst acc bol = 
   match lst with
   | [] -> acc
   | h ::t -> begin
       let n_hand = Tile.sort (h :: hand) in 
-      let n_comb= ini_comb n_hand bol in
+      let n_comb = ini_comb n_hand bol in
       if (check_triplet n_comb) then
         check_r_help hand t (h :: acc) bol
       else 
         check_r_help hand t acc bol
     end
 
-(** return a list of tile that the player needs to richii *)
+(** [check_riichi player] return a list of tile that the [player] needs to 
+    richii *)
 let check_riichi player =
   if (player.state_c || player.state_r) then []
   else

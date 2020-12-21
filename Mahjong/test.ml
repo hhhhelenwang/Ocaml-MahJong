@@ -216,17 +216,16 @@ let n_comb14 = Player.ini_comb ron_l14 false
 let n_comb15 = Player.ini_comb ron_l15 false
 let n_comb16 = Player.ini_comb ron_l16 true
 
-let n_comb20 = Player.ini_comb_yaku 
-    [t1;t1] [[t3;t3;t3]; [t18;t18;t18]] [[t4;t5;t6]; [t34;t35;t36]] 
-    true
-let n_comb21 = Player.ini_comb_yaku 
-    [t18;t18] [[t2;t2;t2]; [t3;t3;t3]; [t7;t7;t7]] [[t4;t5;t6]] false
-let n_comb22 = Player.ini_comb_yaku 
-    [t8;t8] [[t1;t1;t1]; [t3;t3;t3]; [t7;t7;t7]] [[t4;t5;t6]] false
-let n_comb23 = Player.ini_comb_yaku
-    [t1;t1] [] [[t34;t35;t36];[t4;t5;t6;];[t7;t8;t9]; [t15;t16;t17]] false
-let n_comb24 = Player.ini_comb_yaku 
-    [t8;t8] [[t11;t11;t11];[t3;t3;t3];[t21;t21;t21]] [[t4;t5;t6]]
+let n_comb20 = Player.ini_comb
+    [t1;t1;t3;t3;t3; t18;t18;t18;t4;t5;t6;t34;t35;t36] true
+let n_comb21 = Player.ini_comb 
+    [t18;t18;t2;t2;t2;t3;t3;t3;t7;t7;t7;t4;t5;t6] false
+let n_comb22 = Player.ini_comb
+    [t8;t8;t1;t1;t1; t3;t3;t3;t7;t7;t7;t4;t5;t6] false
+let n_comb23 = Player.ini_comb
+    [t1;t1;t34;t35;t36;t4;t5;t6;t7;t8;t9; t15;t16;t17] false
+let n_comb24 = Player.ini_comb
+    [t8;t8; t11;t11;t11; t3;t3;t3;t21;t21;t21;t4;t5;t6]
     false
 
 let ron_test
@@ -238,7 +237,7 @@ let ron_test
         ~printer: string_of_bool)
 
 let pp_bool_yaku tuple = 
-  "("^ (string_of_bool (fst tuple)) ^ ", " ^(string_of_yaku (snd tuple)) ^ ")"
+  "("^ (string_of_bool (fst tuple)) ^ ", " ^ (string_of_yaku (snd tuple)) ^ ")"
 
 let ron_output_test
     (name : string)
@@ -261,13 +260,11 @@ let ron_tests = [
   ron_test "Tanyao only Man222 333 456 777 Sou88" n_comb11 true;
   ron_test "hunyise only Man111 333 456 777 88" n_comb12 true;
   ron_test " not riichi, but has draon triplet" n_comb14 true;
-  ron_test " not riichi, but pinfu" n_comb15 true;
   ron_test " richiied normal" n_comb16 true; 
 
   ron_output_test "true, riichi" n_comb20 (true, Riichi);
   ron_output_test "true, Tanyao" n_comb21 (true, Tanyao);
   ron_output_test "true, Hunyise" n_comb22 (true, Hunyise);
-  ron_output_test "true, pinfu" n_comb23 (true, Pinfu);
   ron_output_test "true, draon triplet" n_comb24 (true, Dragontriplet);
   ron_output_test "false, None" n_comb9 (false, None);
 ]
@@ -542,8 +539,7 @@ let player_tests = [
   chii_update_state_c_test "update state_c" player12 true;
 
   discard_tile_test "discard existing tile Some t2" player13 (Some t2) true;
-  (* discard_tile_detail_test "discard existing tile" player13 (Some t2)
-     [[t1;t3;t4];[t2]]; *)
+
   discard_tile_test "discard existing tile None" player13 None false;
   discard_tile_detail_test "discard non-existing tile None" player13 None
     [[t1;t2;t3;t4];[]];
@@ -553,13 +549,6 @@ let player_tests = [
 ]
 
 let _ = print_endline ("finished evaluating player test" )
-
-(* 
-let print_the_pos= display_ll (all_pos pos_l1 t3)
-let print1 = display_ll (all_pos pos_l2 t2)
-
-let intx= List.length (all_pos pos_l1 t3)
-let _ = print_int intx *)
 
 let suite =
   "test suite for Mahjong" >::: List.flatten [

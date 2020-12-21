@@ -1,2 +1,2 @@
 (** [Jian; Bixin; Tianjing] *)
-let hours_worked = [25; 25; 25]
+let hours_worked = [34; 34; 34]
