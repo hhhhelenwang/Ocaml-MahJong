@@ -17,8 +17,6 @@ to play the game.
 
 Riichi Mahjong (Japanese: 麻雀, 麻将 or マージャン; mājan) is a traditional four-player board game in Asia. People play this grame with their friends or family members during holidays to entertain and connect.
 
-## Actions and Specification
-
 ### Quick Notes
 
 - **Tile**: Similar to cards in Poker. There are a total of 136 tiles.
