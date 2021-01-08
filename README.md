@@ -19,9 +19,7 @@ Riichi Mahjong (Japanese: 麻雀, 麻将 or マージャン; mājan) is a tradit
 
 ## Actions and Specification
 
-
-
-### Quick Note
+### Quick Notes
 
 - **Tile**: Similar to cards in Poker. There are a total of 136 tiles.
 
@@ -36,3 +34,8 @@ Riichi Mahjong (Japanese: 麻雀, 麻将 or マージャン; mājan) is a tradit
 - **Chii (吃 or チー)**: Players can make an open-sequential-tiles, a sequence (3 consecutive tiles in the same suit), by calling “chii” using a tile discarded by the left player, who is the prior player.  This means every player can claim the left player’s discarded tile to make a sequence.
 
 - **Riichi (立直 or リーチ)**: A player can declare Riichi if and only if the player needs exactly one more tile to have a winning pattern and has not Chii-ed in the game. After declaring Riichi, the player can only discard the tile they draw on that round. 
+
+## Team Members
+- Jian Wang [@hhhhelenwang](https://github.com/hhhhelenwang)
+- Bixin Zhang [@zbcszr](https://github.com/zbcszr)
+- Tianjing Zhang [@yuuuums](https://github.com/yuuuums)
